@@ -1,10 +1,15 @@
 # Base code for MQTT from tutorial: https://github.com/pholur/180D_sample
 # Adjustments for reading existing .wav file and publishing
 
+# POSSIBLE BROKERS
+# mqtt.eclipse.org
+# test.mosquitto.org
+# broker.emqx.io
+
 import time
 import random
 from paho.mqtt import client as mqtt_client
-broker = 'test.mosquitto.org'
+broker = 'mqtt.eclipse.org'
 port = 1883
 topic = "/isabel/michelle"
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
@@ -27,7 +32,7 @@ def publish(client):
      while True:
          time.sleep(1)
          # msg = f"messages: {msg_count}"
-         f = open("name.wav", "rb")
+         f = open("phrase4.wav", "rb")
          soundstr = f.read()
          f.close()
          msg = bytearray(soundstr)
@@ -36,10 +41,11 @@ def publish(client):
          # result: [0, 1]
          status = result[0]
          if status == 0:
-             print(f"Send `{msg}` to topic `{topic}`")
+             # print(f"Send `{msg}` to topic `{topic}`")
+             print(f"Sent message to topic `{topic}`")
          else:
              print(f"Failed to send message to topic {topic}")
-         msg_count += 1
+     # msg_count += 1
 
 def run():
     client = connect_mqtt()

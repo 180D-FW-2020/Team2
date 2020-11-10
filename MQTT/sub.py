@@ -1,11 +1,16 @@
 # Base code for MQTT from tutorial: https://github.com/pholur/180D_sample
 # Adjustments for subscribing and writing the .wav file
 
+# POSSIBLE BROKERS
+# mqtt.eclipse.org
+# test.mosquitto.org
+# broker.emqx.io
+
 import random
 from paho.mqtt import client as mqtt_client
 
 
-broker = 'test.mosquitto.org'
+broker = 'mqtt.eclipse.org'
 port = 1883
 topic = "/isabel/michelle"
 # generate client ID with pub prefix randomly
@@ -28,9 +33,10 @@ def connect_mqtt() -> mqtt_client:
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
         print("Write")
-        f = open('n.wav', 'wb')
+        f = open('phrase4_rec.wav', 'wb')
         f.write(msg.payload)
         f.close()
+        client.disconnect()
         # print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
 
     client.subscribe(topic)
