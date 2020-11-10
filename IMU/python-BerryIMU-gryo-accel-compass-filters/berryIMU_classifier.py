@@ -457,31 +457,20 @@ max_accx_diff = int(max_accx - min_accx)
 max_accy_diff = int(max_accy - min_accy)
 max_gyrox_diff = int(max_gyrox - min_gyrox)
 
-"""
-if int(max_accx_diff) in range(10,20) and max_accx_diff > max_accy_diff:
-    print('right push detected')
-elif (int(max_accy_diff) in range(10, 40)) and (max_accx_diff < max_accy_diff):
-    print('upwards lift detected')
-elif(max_gyrox_diff > 100 and max_accx_diff > 100 and max_accy_diff > 100):
-    print('left turn detected')
-"""
-
-# neg curve = right turn
-#plt.plot([range(0,39)], accx_list)
-
+#################### Main Classifer Logic ###############################
 if max_accx_diff > 100 and max_accy_diff > 100:
     if max_gyrox < 50: 
-        print("Right turn detected")
+        print("Right rotation detected")
     else:
-        print("Left turn detected")
+        print("Left rotation detected")
 elif max_accx_diff > max_accy_diff:
     if max_accx_diff in range(15,40):
-        print('right & left shake detected')
+        print('Horizontal shake detected')
     else:
-        print('Right push too soft')
+        print('Horizontal shake was too soft')
 elif max_accy_diff > max_accx_diff:
     if max_accy_diff in range(15,40):
-        print('up & down lift detected')
+        print('Vertical shake detected')
     else:
         print('Lift up higher')
 
