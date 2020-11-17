@@ -9,16 +9,10 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.properties import DictProperty
 from kivy.clock import Clock
-from run.activate import activate
+from activate import activate
+from helper import *
 
 Builder.load_file('./UI/screen.kv')
-
-#minutes
-stretch_reminder = .1
-breath_reminder = 1
-talk_reminder = 1
-
-congrats_message ="Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day."
 
 class StartScreen(Screen):
     def __init__(self, **kw):

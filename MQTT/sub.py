@@ -9,45 +9,64 @@
 import random
 from paho.mqtt import client as mqtt_client
 
-
 broker = 'mqtt.eclipse.org'
 port = 1883
-topic = "/isabel/michelle"
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 
+class client_mqtt:
+    def __init__(self, topic):
+        self.topic = topic
+        self.message = ''
 
-def connect_mqtt() -> mqtt_client:
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-        else:
-            print("Failed to connect, return code %d\n", rc)
+    def connect_mqtt(self) -> mqtt_client:
+        def on_connect(client, userdata, flags, rc):
+            if rc == 0:
+                print("Connected to MQTT Broker!")
+            else:
+                print("Failed to connect, return code %d\n", rc)
 
-    client = mqtt_client.Client(client_id)
-    client.on_connect = on_connect
-    client.connect(broker, port)
-    return client
+        client = mqtt_client.Client(client_id)
+        client.on_connect = on_connect
+        client.connect(broker, port)
+        return client
 
+    def subscribe_wav(self, client: mqtt_client):
+        def on_message(client, userdata, msg):
+            print("Write")
+            f = open('phrase4_rec.wav', 'wb')
+            f.write(msg.payload)
+            f.close()
+            client.disconnect()
 
-def subscribe(client: mqtt_client):
-    def on_message(client, userdata, msg):
-        print("Write")
-        f = open('phrase4_rec.wav', 'wb')
-        f.write(msg.payload)
-        f.close()
+        client.subscribe(self.topic)
+        client.on_message = on_message
+
+    def subscribe_msg(self, client: mqtt_client):
+        def on_message_wav(client, userdata, msg):
+            print("Write")
+            f = open('phrase4_rec.wav', 'wb')
+            f.write(msg.payload)
+            f.close()
+            client.disconnect()
+
+        def on_message(client, userdata, msg):
+            self.message = msg.payload.decode()
+            print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+
+        client.subscribe(self.topic)
+        client.on_message = on_message
+
+    def disconect_mqtt(self, client):
         client.disconnect()
-        # print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-
-    client.subscribe(topic)
-    client.on_message = on_message
 
 
-def run():
-    client = connect_mqtt()
-    subscribe(client)
-    client.loop_forever()
-
-
-if __name__ == '__main__':
-    run()
+#sample implementation
+"""
+    client_instance = client_mqtt('/isabel/michelle')
+    caliente = client_instance.connect_mqtt()
+    client_instance.subscribe_msg(caliente)
+    caliente.loop_start()
+    #do stuff
+    client_instance.disconnect_mqtt(caliente)
+"""
