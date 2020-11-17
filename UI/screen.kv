@@ -1,0 +1,41 @@
+<Root>:
+    StartScreen:
+        name: 'start'
+    WaitScreen:
+        name: 'wait'
+<StartScreen>:
+    BoxLayout:
+        orientation:'vertical'
+        Label:
+            text: "Select what you want to focus on today!"
+            font_size: 15
+            size_hint: (1, .3)
+        GridLayout:
+            cols: 2
+            size_hint: (1, .7)
+            Label:
+                text: "I want to work on stretching more"
+            CheckBox:
+                on_active:root.ping('stretch', self.active)
+            Label:
+                text: "I want to work on guided breathing"
+            CheckBox:
+                on_active:root.ping('breath', self.active)
+            Label:
+                text: "I want to talk to my friends"
+            CheckBox:
+                on_active:root.ping('talk', self.active)
+            Button:
+                text: "Exit"
+                background_color: .7, .7, 6, 1
+                on_release:root.quit()
+            Button:
+                text: "Submit"
+                background_color: .7, .7, 1, 1
+                on_release: root.parent.current='wait'
+<WaitScreen>:
+    Label:
+        id: lbl1
+        text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
+        halign: 'center'
+        font_size: 15
