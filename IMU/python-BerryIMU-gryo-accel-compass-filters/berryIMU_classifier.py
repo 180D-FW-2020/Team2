@@ -26,6 +26,9 @@ import os
 import csv
 import signal
 
+sys.path.insert(1, '../../MQTT')
+
+from pub import PUB
 
 RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
@@ -84,12 +87,22 @@ KFangleY = 0.0
 
 def voice_handler(signum, frame):
     print('Signal handler called with signal', signum)
-    print('*Voice activation here*')
+    print('*Reminder activation here*')
+    #send gesture key over broker
+    pub=PUB("/isabel/michelle","Reminder X")
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_text(client)
     sys.exit(0)
 
 def reminder_handler(signum, frame):
     print('Signal handler called with signal', signum)
-    print('*Activate reminder task*')
+    print('*Voice activation here*')
+    #send gesture key over broker
+    pub=PUB("/isabel/michelle","Audio message")
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_audio(client)
     sys.exit(0)
 
 
@@ -224,7 +237,6 @@ MAXSAMPLES=60
 while True:
 
     for i in range(MAXSAMPLES):
-
         #Read the accelerometer,gyroscope and magnetometer values
         ACCx = IMU.readACCx()
         ACCy = IMU.readACCy()
