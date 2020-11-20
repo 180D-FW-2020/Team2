@@ -29,6 +29,7 @@ import signal
 sys.path.insert(1, '../../MQTT')
 
 from pub import PUB
+from os import path
 
 RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
@@ -85,30 +86,68 @@ KFangleX = 0.0
 KFangleY = 0.0
 
 
+def calibrate_init():
+    calib_store = []
+    calib_data = ""
+    with open('calibration.csv', newline='') as csvfile:
+        calib_reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in calib_reader:
+            calib_store.append(row)
+    calib_data = str(calib_store[1]) #first row: fields, second row: data
+    calib_data = calib_data.replace("'", '').replace("[", '').replace("]", '')
+    calib_store = calib_data.split(",")
+    print("data:" + calib_store[0])
+
+    magXmin = calib_store[0]
+    magYmin = calib_store[1]
+    magZmin = calib_store[2]
+    magXmax = calib_store[3]
+    magYmax = calib_store[4]
+    magZmax = calib_store[5]
+
+
+def save_data():
+    filename = "shake.csv"
+    samplenum = range(1,MAXSAMPLES)
+    acc_rows = [samplenum, accx_list, accy_list]
+    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
+    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
+
+    acc_rows = zip(*acc_rows)
+    gyro_rows = zip(*gyro_rows)
+    all_rows = zip(*all_rows)
+
+    with open(filename, 'w') as csvfile:
+        csvwriter=csv.writer(csvfile)
+        csvwriter.writerow(acc_fields)
+        csvwriter.writerows(acc_rows)
+
+
 def voice_handler(signum, frame):
     print('Signal handler called with signal', signum)
     print('*Reminder activation here*')
     #send gesture key over broker
-    pub=PUB("/isabel/michelle","Reminder X")
+    pub=PUB("/team2/imu","Reminder X")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     sys.exit(0)
 
+
 def reminder_handler(signum, frame):
     print('Signal handler called with signal', signum)
     print('*Voice activation here*')
     #send gesture key over broker
-    pub=PUB("/isabel/michelle","Audio message")
+    pub=PUB("/team2/imu","Audio message")
     client = pub.connect_mqtt()
     client.loop_start()
-    pub.publish_audio(client)
+    pub.publish_text(client)
     sys.exit(0)
 
-
-#set up signal handler for SIGUSR1 (10)
+#set up signal handler for SIGUSR1 (10) and SIGUSR2 (12)
 signal.signal(signal.SIGUSR1, voice_handler)
 signal.signal(signal.SIGUSR2, reminder_handler)
+
 
 def kalmanFilterY ( accAngle, gyroRate, DT):
     y=0.0
@@ -221,6 +260,9 @@ if(IMU.BerryIMUversion == 99):
     print(" No BerryIMU found... exiting ")
     sys.exit()
 IMU.initIMU()       #Initialise the accelerometer, gyroscope and compass
+
+if(path.exists("calibration.csv")):
+    calibrate_init()
 
 accx_list = []
 accy_list = []
@@ -485,7 +527,7 @@ while True:
         else:
             print('Horizontal shake was too soft')
     elif max_accy_diff > max_accx_diff:
-        if max_accy_diff in range(15,40):
+        if max_accy_diff in range(15,60):
             classifier_action="VS"
         else:
             print('Lift up higher')
@@ -506,21 +548,5 @@ while True:
         #send signal with kill command for current process
         os.kill(os.getpid(), signal.SIGUSR2)
 
-
-def save_data():
-    filename = "shake.csv"
-    samplenum = range(1,MAXSAMPLES)
-    acc_rows = [samplenum, accx_list, accy_list]
-    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
-    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
-
-    acc_rows = zip(*acc_rows)
-    gyro_rows = zip(*gyro_rows)
-    all_rows = zip(*all_rows)
-
-    with open(filename, 'w') as csvfile:
-        csvwriter=csv.writer(csvfile)
-        csvwriter.writerow(acc_fields)
-        csvwriter.writerows(acc_rows)
 
 
