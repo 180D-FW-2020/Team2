@@ -34,7 +34,7 @@ class PUB:
 
     def publish_text(self, client):
          msg_count = 0
-         while True:
+         for i in range(1, 3):
              time.sleep(1)
              result = client.publish(self.topic, self.msg)
              # result: [0, 1]
@@ -48,14 +48,14 @@ class PUB:
 
     def publish_audio(self, client):
          msg_count = 0
-         while True:
+         for i in range(1, 4):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
-             f = open("phrase4.wav", "rb")
+             f = open("../../MQTT/test.wav", "rb")
              soundstr = f.read()
              f.close()
              msg = bytearray(soundstr)
-             result = client.publish(topic, msg)
+             result = client.publish(self.topic, msg)
              #result = client.publish(self.topic, self.msg)
              # result: [0, 1]
              status = result[0]
