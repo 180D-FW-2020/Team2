@@ -1,20 +1,14 @@
-import random
 import time
-
+import pyaudio
 import speech_recognition as sr
-import sounddevice as sd 
-
+from os import path
 from scipy.io.wavfile import write
 
-import pyaudio
-import wave
 
-from pydub import AudioSegment
-from pydub.playback import play
+# SAVING .WAV FILE GLOBAL VARIABLES
+msg_limit=10 #in seconds - length of audio message
+listen_limit=3 # in seconds - if no audio is detected, stop recording
 
-fs = 44100
-seconds = 3
-chunk = 1024
 
 def recognize_speech_from_mic(recognizer, microphone):
     """Transcribe speech from recorded from `microphone`.
@@ -63,19 +57,49 @@ def recognize_speech_from_mic(recognizer, microphone):
 
     return response
 
+def record_msg(recognizer, microphone, audio_file):
+    with microphone as source:
+        print("Send over an audio message! (Max: 10 seconds)")
+        try:
+            start_time = time.time()
+            audio = recognizer.listen(source, listen_limit, msg_limit)
+        except sr.WaitTimeoutError:
+            print("No audio detected...Try again...")
 
-if __name__ == "__main__":
-    # set the list of words, maxnumber of guesses, and prompt limit
+    print("Recording finished!")
 
-    # create recognizer and mic instances
+    # write audio to a WAV file
+    with open(audio_file, "wb") as f:
+        f.write(audio.get_wav_data())
+
+def transcribe(recognizer, microphone, audio_file):
+        AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), audio_file)
+        with sr.AudioFile(AUDIO_FILE) as source:
+            audio = recognizer.record(source)
+
+        text_name="transcript.txt"
+        with open(text_name, "w") as f:
+            try:
+                print('Saving message transcription...')
+                f.write(recognizer.recognize_google(audio))
+                f.close()
+            except sr.UnknownValueError:
+                print("Google Speech Recognition could not understand audio")
+            except sr.RequestError as e:
+                print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+def main_msg():
+    # recognize start recording
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
 
     PROMPT_LIMIT=1
 
+    # once gesture is acknowledged
+    # start to listen for the voice command before starting recording
     for j in range(PROMPT_LIMIT):
         print('Speak!')
-        time.sleep(2)
+        time.sleep(0.5)
         guess = recognize_speech_from_mic(recognizer, microphone)
         if guess["transcription"]:
             break
@@ -87,17 +111,17 @@ if __name__ == "__main__":
             print("ERROR: {}".format(guess["error"]))
             break
 
-        # show the user the transcription
+    # debug statement
     print("You said: {}".format(guess["transcription"]))
 
-    if str(guess["transcription"]).find("message"):
-        print("What message do you want to send?") # can comment this out later
-        prompt = AudioSegment.from_wav("prompt.wav") # plays audio that says "what message do you want to send"
-        play(prompt)
-        #record_audio()
-        message = recognize_speech_from_mic(recognizer, microphone) # user speaks into mic
-        print("Your message: {}".format(message["transcription"])) # playback what user said
-    """else: 
-        print("no message to send")
-        """
+    # start recording voice command
+    if str(guess["transcription"]).find("start recording") != -1:
+        time.sleep(2)
+        print('Recording...')
 
+        #save audio message as .wav file
+        audio_file="message.wav"
+        record_msg(recognizer, microphone, audio_file)
+
+        # transcribe the audio message + save into a file
+        transcribe(recognizer, microphone, audio_file)
