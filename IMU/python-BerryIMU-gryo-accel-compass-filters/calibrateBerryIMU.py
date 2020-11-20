@@ -24,6 +24,10 @@ import math
 import IMU
 import datetime
 
+import csv
+
+fields = ['magXmin', 'magYmin', 'magZmin', 'magXmax', 'magYmax', 'magZmax']
+filename = "calibration.csv"
 
 def handle_ctrl_c(signal, frame):
     print(" ")
@@ -33,6 +37,14 @@ def handle_ctrl_c(signal, frame):
     print("magXmax = %i"%  (magXmax))
     print("magYmax = %i"%  (magYmax))
     print("magZmax = %i"%  (magZmax))
+
+    rows = [[magXmin, magYmin, magZmin, magXmax, magYmax, magZmax]]
+
+    with open(filename, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)
+        csvwriter.writerows(rows)
+
     sys.exit(130) # 130 is standard exit code for ctrl-c
 
 
@@ -54,7 +66,6 @@ magZmin = 32767
 magXmax = -32767
 magYmax = -32767
 magZmax = -32767
-
 
 
 while True:
@@ -79,7 +90,6 @@ while True:
         magZmin = MAGz
 
     print((" magXmin  %i  magYmin  %i  magZmin  %i  ## magXmax  %i  magYmax  %i  magZmax %i  " %(magXmin,magYmin,magZmin,magXmax,magYmax,magZmax)))
-
 
 
     #slow program down a bit, makes the output more readable
