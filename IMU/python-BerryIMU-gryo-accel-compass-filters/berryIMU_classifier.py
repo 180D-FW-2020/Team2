@@ -24,8 +24,11 @@ import IMU
 import datetime
 import os
 import csv
-#import matplotlib.pyplot as plt
+import signal
 
+sys.path.insert(1, '../../MQTT')
+
+from pub import PUB
 
 RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
@@ -82,6 +85,30 @@ KFangleX = 0.0
 KFangleY = 0.0
 
 
+def voice_handler(signum, frame):
+    print('Signal handler called with signal', signum)
+    print('*Reminder activation here*')
+    #send gesture key over broker
+    pub=PUB("/isabel/michelle","Reminder X")
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_text(client)
+    sys.exit(0)
+
+def reminder_handler(signum, frame):
+    print('Signal handler called with signal', signum)
+    print('*Voice activation here*')
+    #send gesture key over broker
+    pub=PUB("/isabel/michelle","Audio message")
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_audio(client)
+    sys.exit(0)
+
+
+#set up signal handler for SIGUSR1 (10)
+signal.signal(signal.SIGUSR1, voice_handler)
+signal.signal(signal.SIGUSR2, reminder_handler)
 
 def kalmanFilterY ( accAngle, gyroRate, DT):
     y=0.0
@@ -205,274 +232,295 @@ acc_fields = ['Sample #', 'Acc_x', 'Acc_y']
 gyro_fields = ['Sample #', 'Gyro_x', 'Gyro_y', 'Gyro_z']
 all_fields = ['Sample #', 'Acc_x', 'Acc_y', 'Gyro_x', 'Gyro_y', 'Gyro_z']
 
-MAXSAMPLES=70
-
-for i in range(MAXSAMPLES):
-
-    #Read the accelerometer,gyroscope and magnetometer values
-    ACCx = IMU.readACCx()
-    ACCy = IMU.readACCy()
-    ACCz = IMU.readACCz()
-    GYRx = IMU.readGYRx()
-    GYRy = IMU.readGYRy()
-    GYRz = IMU.readGYRz()
-    MAGx = IMU.readMAGx()
-    MAGy = IMU.readMAGy()
-    MAGz = IMU.readMAGz()
-
-
-    #Apply compass calibration
-    MAGx -= (magXmin + magXmax) /2
-    MAGy -= (magYmin + magYmax) /2
-    MAGz -= (magZmin + magZmax) /2
-
-
-    ##Calculate loop Period(LP). How long between Gyro Reads
-    b = datetime.datetime.now() - a
-    a = datetime.datetime.now()
-    LP = b.microseconds/(1000000*1.0)
-    outputString = "Loop Time %5.2f " % ( LP )
-
-
-
-    ###############################################
-    #### Apply low pass filter ####
-    ###############################################
-    MAGx =  MAGx  * MAG_LPF_FACTOR + oldXMagRawValue*(1 - MAG_LPF_FACTOR);
-    MAGy =  MAGy  * MAG_LPF_FACTOR + oldYMagRawValue*(1 - MAG_LPF_FACTOR);
-    MAGz =  MAGz  * MAG_LPF_FACTOR + oldZMagRawValue*(1 - MAG_LPF_FACTOR);
-    ACCx =  ACCx  * ACC_LPF_FACTOR + oldXAccRawValue*(1 - ACC_LPF_FACTOR);
-    ACCy =  ACCy  * ACC_LPF_FACTOR + oldYAccRawValue*(1 - ACC_LPF_FACTOR);
-    ACCz =  ACCz  * ACC_LPF_FACTOR + oldZAccRawValue*(1 - ACC_LPF_FACTOR);
-
-    oldXMagRawValue = MAGx
-    oldYMagRawValue = MAGy
-    oldZMagRawValue = MAGz
-    oldXAccRawValue = ACCx
-    oldYAccRawValue = ACCy
-    oldZAccRawValue = ACCz
-
-    #########################################
-    #### Median filter for accelerometer ####
-    #########################################
-    # cycle the table
-    for x in range (ACC_MEDIANTABLESIZE-1,0,-1 ):
-        acc_medianTable1X[x] = acc_medianTable1X[x-1]
-        acc_medianTable1Y[x] = acc_medianTable1Y[x-1]
-        acc_medianTable1Z[x] = acc_medianTable1Z[x-1]
-
-    # Insert the lates values
-    acc_medianTable1X[0] = ACCx
-    acc_medianTable1Y[0] = ACCy
-    acc_medianTable1Z[0] = ACCz
-
-    # Copy the tables
-    acc_medianTable2X = acc_medianTable1X[:]
-    acc_medianTable2Y = acc_medianTable1Y[:]
-    acc_medianTable2Z = acc_medianTable1Z[:]
-
-    # Sort table 2
-    acc_medianTable2X.sort()
-    acc_medianTable2Y.sort()
-    acc_medianTable2Z.sort()
-
-    # The middle value is the value we are interested in
-    ACCx = acc_medianTable2X[int(ACC_MEDIANTABLESIZE/2)];
-    ACCy = acc_medianTable2Y[int(ACC_MEDIANTABLESIZE/2)];
-    ACCz = acc_medianTable2Z[int(ACC_MEDIANTABLESIZE/2)];
-
-
-
-    #########################################
-    #### Median filter for magnetometer ####
-    #########################################
-    # cycle the table
-    for x in range (MAG_MEDIANTABLESIZE-1,0,-1 ):
-        mag_medianTable1X[x] = mag_medianTable1X[x-1]
-        mag_medianTable1Y[x] = mag_medianTable1Y[x-1]
-        mag_medianTable1Z[x] = mag_medianTable1Z[x-1]
+MAXSAMPLES=60
+
+while True:
+
+    for i in range(MAXSAMPLES):
+        #Read the accelerometer,gyroscope and magnetometer values
+        ACCx = IMU.readACCx()
+        ACCy = IMU.readACCy()
+        ACCz = IMU.readACCz()
+        GYRx = IMU.readGYRx()
+        GYRy = IMU.readGYRy()
+        GYRz = IMU.readGYRz()
+        MAGx = IMU.readMAGx()
+        MAGy = IMU.readMAGy()
+        MAGz = IMU.readMAGz()
+
+
+        #Apply compass calibration
+        MAGx -= (magXmin + magXmax) /2
+        MAGy -= (magYmin + magYmax) /2
+        MAGz -= (magZmin + magZmax) /2
+
+
+        ##Calculate loop Period(LP). How long between Gyro Reads
+        b = datetime.datetime.now() - a
+        a = datetime.datetime.now()
+        LP = b.microseconds/(1000000*1.0)
+        outputString = "Loop Time %5.2f " % ( LP )
+
+
+
+        ###############################################
+        #### Apply low pass filter ####
+        ###############################################
+        MAGx =  MAGx  * MAG_LPF_FACTOR + oldXMagRawValue*(1 - MAG_LPF_FACTOR);
+        MAGy =  MAGy  * MAG_LPF_FACTOR + oldYMagRawValue*(1 - MAG_LPF_FACTOR);
+        MAGz =  MAGz  * MAG_LPF_FACTOR + oldZMagRawValue*(1 - MAG_LPF_FACTOR);
+        ACCx =  ACCx  * ACC_LPF_FACTOR + oldXAccRawValue*(1 - ACC_LPF_FACTOR);
+        ACCy =  ACCy  * ACC_LPF_FACTOR + oldYAccRawValue*(1 - ACC_LPF_FACTOR);
+        ACCz =  ACCz  * ACC_LPF_FACTOR + oldZAccRawValue*(1 - ACC_LPF_FACTOR);
+
+        oldXMagRawValue = MAGx
+        oldYMagRawValue = MAGy
+        oldZMagRawValue = MAGz
+        oldXAccRawValue = ACCx
+        oldYAccRawValue = ACCy
+        oldZAccRawValue = ACCz
+
+        #########################################
+        #### Median filter for accelerometer ####
+        #########################################
+        # cycle the table
+        for x in range (ACC_MEDIANTABLESIZE-1,0,-1 ):
+            acc_medianTable1X[x] = acc_medianTable1X[x-1]
+            acc_medianTable1Y[x] = acc_medianTable1Y[x-1]
+            acc_medianTable1Z[x] = acc_medianTable1Z[x-1]
+
+        # Insert the lates values
+        acc_medianTable1X[0] = ACCx
+        acc_medianTable1Y[0] = ACCy
+        acc_medianTable1Z[0] = ACCz
+
+        # Copy the tables
+        acc_medianTable2X = acc_medianTable1X[:]
+        acc_medianTable2Y = acc_medianTable1Y[:]
+        acc_medianTable2Z = acc_medianTable1Z[:]
+
+        # Sort table 2
+        acc_medianTable2X.sort()
+        acc_medianTable2Y.sort()
+        acc_medianTable2Z.sort()
+
+        # The middle value is the value we are interested in
+        ACCx = acc_medianTable2X[int(ACC_MEDIANTABLESIZE/2)];
+        ACCy = acc_medianTable2Y[int(ACC_MEDIANTABLESIZE/2)];
+        ACCz = acc_medianTable2Z[int(ACC_MEDIANTABLESIZE/2)];
+
+
+
+        #########################################
+        #### Median filter for magnetometer ####
+        #########################################
+        # cycle the table
+        for x in range (MAG_MEDIANTABLESIZE-1,0,-1 ):
+            mag_medianTable1X[x] = mag_medianTable1X[x-1]
+            mag_medianTable1Y[x] = mag_medianTable1Y[x-1]
+            mag_medianTable1Z[x] = mag_medianTable1Z[x-1]
 
-    # Insert the latest values
-    mag_medianTable1X[0] = MAGx
-    mag_medianTable1Y[0] = MAGy
-    mag_medianTable1Z[0] = MAGz
+        # Insert the latest values
+        mag_medianTable1X[0] = MAGx
+        mag_medianTable1Y[0] = MAGy
+        mag_medianTable1Z[0] = MAGz
 
-    # Copy the tables
-    mag_medianTable2X = mag_medianTable1X[:]
-    mag_medianTable2Y = mag_medianTable1Y[:]
-    mag_medianTable2Z = mag_medianTable1Z[:]
+        # Copy the tables
+        mag_medianTable2X = mag_medianTable1X[:]
+        mag_medianTable2Y = mag_medianTable1Y[:]
+        mag_medianTable2Z = mag_medianTable1Z[:]
 
-    # Sort table 2
-    mag_medianTable2X.sort()
-    mag_medianTable2Y.sort()
-    mag_medianTable2Z.sort()
+        # Sort table 2
+        mag_medianTable2X.sort()
+        mag_medianTable2Y.sort()
+        mag_medianTable2Z.sort()
 
-    # The middle value is the value we are interested in
-    MAGx = mag_medianTable2X[int(MAG_MEDIANTABLESIZE/2)];
-    MAGy = mag_medianTable2Y[int(MAG_MEDIANTABLESIZE/2)];
-    MAGz = mag_medianTable2Z[int(MAG_MEDIANTABLESIZE/2)];
+        # The middle value is the value we are interested in
+        MAGx = mag_medianTable2X[int(MAG_MEDIANTABLESIZE/2)];
+        MAGy = mag_medianTable2Y[int(MAG_MEDIANTABLESIZE/2)];
+        MAGz = mag_medianTable2Z[int(MAG_MEDIANTABLESIZE/2)];
 
 
 
-    #Convert Gyro raw to degrees per second
-    rate_gyr_x =  GYRx * G_GAIN
-    rate_gyr_y =  GYRy * G_GAIN
-    rate_gyr_z =  GYRz * G_GAIN
+        #Convert Gyro raw to degrees per second
+        rate_gyr_x =  GYRx * G_GAIN
+        rate_gyr_y =  GYRy * G_GAIN
+        rate_gyr_z =  GYRz * G_GAIN
 
 
-    #Calculate the angles from the gyro.
-    gyroXangle+=rate_gyr_x*LP
-    gyroYangle+=rate_gyr_y*LP
-    gyroZangle+=rate_gyr_z*LP
+        #Calculate the angles from the gyro.
+        gyroXangle+=rate_gyr_x*LP
+        gyroYangle+=rate_gyr_y*LP
+        gyroZangle+=rate_gyr_z*LP
 
-    #Convert Accelerometer values to degrees
-    AccXangle =  (math.atan2(ACCy,ACCz)*RAD_TO_DEG)
-    AccYangle =  (math.atan2(ACCz,ACCx)+M_PI)*RAD_TO_DEG
+        #Convert Accelerometer values to degrees
+        AccXangle =  (math.atan2(ACCy,ACCz)*RAD_TO_DEG)
+        AccYangle =  (math.atan2(ACCz,ACCx)+M_PI)*RAD_TO_DEG
 
 
-    #Change the rotation value of the accelerometer to -/+ 180 and
-    #move the Y axis '0' point to up.  This makes it easier to read.
-    if AccYangle > 90:
-        AccYangle -= 270.0
-    else:
-        AccYangle += 90.0
+        #Change the rotation value of the accelerometer to -/+ 180 and
+        #move the Y axis '0' point to up.  This makes it easier to read.
+        if AccYangle > 90:
+            AccYangle -= 270.0
+        else:
+            AccYangle += 90.0
 
 
 
-    #Complementary filter used to combine the accelerometer and gyro values.
-    CFangleX=AA*(CFangleX+rate_gyr_x*LP) +(1 - AA) * AccXangle
-    CFangleY=AA*(CFangleY+rate_gyr_y*LP) +(1 - AA) * AccYangle
+        #Complementary filter used to combine the accelerometer and gyro values.
+        CFangleX=AA*(CFangleX+rate_gyr_x*LP) +(1 - AA) * AccXangle
+        CFangleY=AA*(CFangleY+rate_gyr_y*LP) +(1 - AA) * AccYangle
 
-    #Kalman filter used to combine the accelerometer and gyro values.
-    kalmanY = kalmanFilterY(AccYangle, rate_gyr_y,LP)
-    kalmanX = kalmanFilterX(AccXangle, rate_gyr_x,LP)
+        #Kalman filter used to combine the accelerometer and gyro values.
+        kalmanY = kalmanFilterY(AccYangle, rate_gyr_y,LP)
+        kalmanX = kalmanFilterX(AccXangle, rate_gyr_x,LP)
 
-    #Calculate heading
-    heading = 180 * math.atan2(MAGy,MAGx)/M_PI
+        #Calculate heading
+        heading = 180 * math.atan2(MAGy,MAGx)/M_PI
 
-    #Only have our heading between 0 and 360
-    if heading < 0:
-        heading += 360
+        #Only have our heading between 0 and 360
+        if heading < 0:
+            heading += 360
 
-    ####################################################################
-    ###################Tilt compensated heading#########################
-    ####################################################################
-    #Normalize accelerometer raw values.
-    accXnorm = ACCx/math.sqrt(ACCx * ACCx + ACCy * ACCy + ACCz * ACCz)
-    accYnorm = ACCy/math.sqrt(ACCx * ACCx + ACCy * ACCy + ACCz * ACCz)
+        ####################################################################
+        ###################Tilt compensated heading#########################
+        ####################################################################
+        #Normalize accelerometer raw values.
+        accXnorm = ACCx/math.sqrt(ACCx * ACCx + ACCy * ACCy + ACCz * ACCz)
+        accYnorm = ACCy/math.sqrt(ACCx * ACCx + ACCy * ACCy + ACCz * ACCz)
 
 
-    #Calculate pitch and roll
-    pitch = math.asin(accXnorm)
-    roll = -math.asin(accYnorm/math.cos(pitch))
+        #Calculate pitch and roll
+        pitch = math.asin(accXnorm)
+        roll = -math.asin(accYnorm/math.cos(pitch))
 
 
-    #Calculate the new tilt compensated values
-    #The compass and accelerometer are orientated differently on the the BerryIMUv1, v2 and v3.
-    #This needs to be taken into consideration when performing the calculations
+        #Calculate the new tilt compensated values
+        #The compass and accelerometer are orientated differently on the the BerryIMUv1, v2 and v3.
+        #This needs to be taken into consideration when performing the calculations
 
-    #X compensation
-    if(IMU.BerryIMUversion == 1 or IMU.BerryIMUversion == 3):            #LSM9DS0 and (LSM6DSL & LIS2MDL)
-        magXcomp = MAGx*math.cos(pitch)+MAGz*math.sin(pitch)
-    else:                                                                #LSM9DS1
-        magXcomp = MAGx*math.cos(pitch)-MAGz*math.sin(pitch)
+        #X compensation
+        if(IMU.BerryIMUversion == 1 or IMU.BerryIMUversion == 3):            #LSM9DS0 and (LSM6DSL & LIS2MDL)
+            magXcomp = MAGx*math.cos(pitch)+MAGz*math.sin(pitch)
+        else:                                                                #LSM9DS1
+            magXcomp = MAGx*math.cos(pitch)-MAGz*math.sin(pitch)
 
-    #Y compensation
-    if(IMU.BerryIMUversion == 1 or IMU.BerryIMUversion == 3):            #LSM9DS0 and (LSM6DSL & LIS2MDL)
-        magYcomp = MAGx*math.sin(roll)*math.sin(pitch)+MAGy*math.cos(roll)-MAGz*math.sin(roll)*math.cos(pitch)
-    else:                                                                #LSM9DS1
-        magYcomp = MAGx*math.sin(roll)*math.sin(pitch)+MAGy*math.cos(roll)+MAGz*math.sin(roll)*math.cos(pitch)
+        #Y compensation
+        if(IMU.BerryIMUversion == 1 or IMU.BerryIMUversion == 3):            #LSM9DS0 and (LSM6DSL & LIS2MDL)
+            magYcomp = MAGx*math.sin(roll)*math.sin(pitch)+MAGy*math.cos(roll)-MAGz*math.sin(roll)*math.cos(pitch)
+        else:                                                                #LSM9DS1
+            magYcomp = MAGx*math.sin(roll)*math.sin(pitch)+MAGy*math.cos(roll)+MAGz*math.sin(roll)*math.cos(pitch)
 
 
 
 
 
-    #Calculate tilt compensated heading
-    tiltCompensatedHeading = 180 * math.atan2(magYcomp,magXcomp)/M_PI
+        #Calculate tilt compensated heading
+        tiltCompensatedHeading = 180 * math.atan2(magYcomp,magXcomp)/M_PI
 
-    if tiltCompensatedHeading < 0:
-        tiltCompensatedHeading += 360
+        if tiltCompensatedHeading < 0:
+            tiltCompensatedHeading += 360
 
 
-    ##################### END Tilt Compensation ########################
+        ##################### END Tilt Compensation ########################
 
 
-    if 1:                       #Change to '0' to stop showing the angles from the accelerometer
-        outputString += "#  ACCX Angle %5.2f ACCY Angle %5.2f  #  " % (AccXangle, AccYangle)
+        if 1:                       #Change to '0' to stop showing the angles from the accelerometer
+            outputString += "#  ACCX Angle %5.2f ACCY Angle %5.2f  #  " % (AccXangle, AccYangle)
 
-    if 1:                       #Change to '0' to stop  showing the angles from the gyro
-        outputString +="\t# GRYX Angle %5.2f  GYRY Angle %5.2f  GYRZ Angle %5.2f # " % (gyroXangle,gyroYangle,gyroZangle)
+        if 1:                       #Change to '0' to stop  showing the angles from the gyro
+            outputString +="\t# GRYX Angle %5.2f  GYRY Angle %5.2f  GYRZ Angle %5.2f # " % (gyroXangle,gyroYangle,gyroZangle)
 
-    if 1:                       #Change to '0' to stop  showing the angles from the complementary filter
-        outputString +="\t#  CFangleX Angle %5.2f   CFangleY Angle %5.2f  #" % (CFangleX,CFangleY)
+        if 1:                       #Change to '0' to stop  showing the angles from the complementary filter
+            outputString +="\t#  CFangleX Angle %5.2f   CFangleY Angle %5.2f  #" % (CFangleX,CFangleY)
 
-    if 1:                       #Change to '0' to stop  showing the heading
-        outputString +="\t# HEADING %5.2f  tiltCompensatedHeading %5.2f #" % (heading,tiltCompensatedHeading)
+        if 1:                       #Change to '0' to stop  showing the heading
+            outputString +="\t# HEADING %5.2f  tiltCompensatedHeading %5.2f #" % (heading,tiltCompensatedHeading)
 
-    if 1:                       #Change to '0' to stop  showing the angles from the Kalman filter
-        outputString +="# kalmanX %5.2f   kalmanY %5.2f #" % (kalmanX,kalmanY)
+        if 1:                       #Change to '0' to stop  showing the angles from the Kalman filter
+            outputString +="# kalmanX %5.2f   kalmanY %5.2f #" % (kalmanX,kalmanY)
 
 
-    print(outputString)
+        #print(outputString)
 
-    accx_list.append(AccXangle)
-    accy_list.append(AccYangle)
-    gyrox_list.append(gyroXangle)
-    gyroy_list.append(gyroYangle)
-    gyroz_list.append(gyroZangle)
+        accx_list.append(AccXangle)
+        accy_list.append(AccYangle)
+        gyrox_list.append(gyroXangle)
+        gyroy_list.append(gyroYangle)
+        gyroz_list.append(gyroZangle)
 
-    #slow program down a bit, makes the output more readable
-    time.sleep(0.03)
+        #slow program down a bit, makes the output more readable
+        time.sleep(0.03)
 
-filename = "shake.csv"
-samplenum = range(1,MAXSAMPLES)
-acc_rows = [samplenum, accx_list, accy_list]
-gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
-all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
+    max_accx = max(accx_list[5:len(accx_list)])
+    min_accx = min(accx_list[5:len(accx_list)])
 
-acc_rows = zip(*acc_rows)
-gyro_rows = zip(*gyro_rows)
-all_rows = zip(*all_rows)
+    max_accy = max(accy_list[5:len(accy_list)])
+    min_accy = min(accy_list[5:len(accy_list)])
 
-with open(filename, 'w') as csvfile:
-    csvwriter=csv.writer(csvfile)
-    csvwriter.writerow(acc_fields)
-    csvwriter.writerows(acc_rows)
+    max_gyrox = max(gyrox_list[5:len(gyrox_list)])
+    min_gyrox = min(gyrox_list[5:len(gyrox_list)])
 
+    print('max acc_x difference: %d', max_accx - min_accx)
+    print('max acc_y difference: %d', max_accy - min_accy)
+    print('max gyro_x difference: %d', max_gyrox - min_gyrox)
 
-max_accx = max(accx_list[5:len(accx_list)])
-min_accx = min(accx_list[5:len(accx_list)])
+    max_accx_diff = int(max_accx - min_accx)
+    max_accy_diff = int(max_accy - min_accy)
+    max_gyrox_diff = int(max_gyrox - min_gyrox)
 
-max_accy = max(accy_list[5:len(accy_list)])
-min_accy = min(accy_list[5:len(accy_list)])
 
-max_gyrox = max(gyrox_list[5:len(gyrox_list)])
-min_gyrox = min(gyrox_list[5:len(gyrox_list)])
+    #################### Main Classifer Logic ###############################
 
-print('max acc_x difference: %d', max_accx - min_accx)
-print('max acc_y difference: %d', max_accy - min_accy)
-print('max gyro_x difference: %d', max_gyrox - min_gyrox)
+    classifier_action="none"
 
-max_accx_diff = int(max_accx - min_accx)
-max_accy_diff = int(max_accy - min_accy)
-max_gyrox_diff = int(max_gyrox - min_gyrox)
+    if max_accx_diff > 100 and max_accy_diff > 100:
+        if max_gyrox < 50: 
+            classifier_action="RR"
+        else:
+            classifier_action="LR"
+    elif max_accx_diff > max_accy_diff:
+        if max_accx_diff in range(15,40):
+            classifier_action="HS"
+        else:
+            print('Horizontal shake was too soft')
+    elif max_accy_diff > max_accx_diff:
+        if max_accy_diff in range(15,40):
+            classifier_action="VS"
+        else:
+            print('Lift up higher')
 
-#################### Main Classifer Logic ###############################
-if max_accx_diff > 100 and max_accy_diff > 100:
-    if max_gyrox < 50: 
-        print("Right rotation detected")
-    else:
-        print("Left rotation detected")
-elif max_accx_diff > max_accy_diff:
-    if max_accx_diff in range(15,40):
-        print('Horizontal shake detected')
-    else:
-        print('Horizontal shake was too soft')
-elif max_accy_diff > max_accx_diff:
-    if max_accy_diff in range(15,40):
-        print('Vertical shake detected')
-    else:
-        print('Lift up higher')
+    print("Classifier action:", classifier_action)
 
+    accx_list.clear()
+    accy_list.clear()
+    gyrox_list.clear()
+    gyroy_list.clear()
+    gyroz_list.clear()
+
+    if classifier_action is "RR":
+        #send signal with kill command for current process
+        os.kill(os.getpid(), signal.SIGUSR1)
+
+    if classifier_action is "HS":
+        #send signal with kill command for current process
+        os.kill(os.getpid(), signal.SIGUSR2)
+
+
+def save_data():
+    filename = "shake.csv"
+    samplenum = range(1,MAXSAMPLES)
+    acc_rows = [samplenum, accx_list, accy_list]
+    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
+    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
+
+    acc_rows = zip(*acc_rows)
+    gyro_rows = zip(*gyro_rows)
+    all_rows = zip(*all_rows)
+
+    with open(filename, 'w') as csvfile:
+        csvwriter=csv.writer(csvfile)
+        csvwriter.writerow(acc_fields)
+        csvwriter.writerows(acc_rows)
 
 
