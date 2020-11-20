@@ -43,13 +43,6 @@ class client_mqtt:
         client.on_message = on_message
 
     def subscribe_msg(self, client: mqtt_client):
-        def on_message_wav(client, userdata, msg):
-            print("Write")
-            f = open('phrase4_rec.wav', 'wb')
-            f.write(msg.payload)
-            f.close()
-            client.disconnect()
-
         def on_message(client, userdata, msg):
             self.message = msg.payload.decode()
             print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
@@ -68,5 +61,6 @@ class client_mqtt:
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
     #do stuff
+    #use loop_forever if ur not doing stuff
     client_instance.disconnect_mqtt(caliente)
 """
