@@ -5,20 +5,20 @@ Michelle Lam, Michelle Tan, Jackie Lam, & Isabel Ketner
 WAP is a device that aims to improve one's physical and mental health via personalized wellness exercises the user can be reminded to complete throughout the day.
 
 ## structure
-main.py  //runs application on laptop \
-helper.py //helper functions + constants for main.py \
-rpi-main.py //driving function on raspi \
-imu //rpi \
+**main.py**  runs application on laptop \
+**helper.py** helper functions + constants for main.py \
+**rpi-main.py** driving function on raspi \
+**imu** rpi \
 +-- python-BerryIMU-gryo-accel-compass-filters \
 +-- +-- berryIMU_classifier.py \
-mqtt //rpi + laptop \
+**mqtt** rpi + laptop \
 +-- pub.py \
 +--sub.py \
-matrix //rpi \
+**matrix** rpi \
 +--matrix_functions.py \
-speech //laptop \
+**speech** laptop \
 +-- audio_msg.py \
-ui //laptop \
+**ui** laptop \
 +-- screen.kv
 
 ## setup
