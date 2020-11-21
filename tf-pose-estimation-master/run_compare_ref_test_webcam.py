@@ -19,7 +19,7 @@ formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-TIMER = int(3)
+TIMER = int(10)
 
 #Initialize camera
 cap = cv2.VideoCapture(0)
@@ -38,7 +38,7 @@ def get_tuple_array(humans):
     keypoints_list = human_string.split('BodyPart:')[1:]
     
     #'0-(0.52, 0.18) score=0.85 '
-    print("List length", len(keypoints_list))
+    #print("List length", len(keypoints_list))
     for joint in keypoints_list:
         #['0-(0.52,', '0.18)', 'score=0.85', ''] we need to get rid of last one
         if len(joint.split(' ')) == '3':
@@ -94,111 +94,168 @@ parser = argparse.ArgumentParser(description='tf-pose-estimation run')
 parser.add_argument('--pose', type=str, default='warrior')
 args = parser.parse_args()
 pose = args.pose
+pose_list = pose.split(',')
+#pass in as --pose=squat,warrior,tree
 
-#Get joints of skeleton from reference image
-#pose = 'squat'
-ref_image = cv2.imread('./images/references/' + pose + '_reference.jpg')
-e = TfPoseEstimator(get_graph_path('mobilenet_thin'), target_size=(w_cam, h_cam))
-humans_ref = e.inference(ref_image, resize_to_default=1, upsample_size=resize_out_ratio)
-ref_joint_array = get_tuple_array(humans_ref)
 
-#Save skeleton image with black background
-black_background = np.zeros(ref_image.shape)
-ref_skeleton_img = TfPoseEstimator.draw_humans(black_background, humans_ref, imgcopy=False)
-filename_to_write = pose + '_reference_skeleton.jpg'
-cv2.imwrite(filename_to_write, ref_skeleton_img)
+pose_mask_list = []
+overlay_list = []
+ref_joint_list_arrays = []
 
-#Create reference skeleton overlay using the black background
-overlay = cv2.imread(pose + '_reference_skeleton.jpg')
-overlayMask = cv2.cvtColor( overlay, cv2.COLOR_BGR2GRAY )
-res, overlayMask = cv2.threshold( overlayMask, 10, 1, cv2.THRESH_BINARY_INV)
+#circle
+center_coord = (150,150)
+radius = 100
+color_bgr = (184, 143, 11)
+thickness = -1 #fill circle
 
-#Expand the mask from 1-channel to 3-channel
-h,w = overlayMask.shape
-overlayMask = np.repeat( overlayMask, 3).reshape( (h,w,3) )
 
-timer_start = False
-
-while True:
+#Create the joint overlay for each verification pose
+for pose in pose_list:
+    #Get joints of skeleton from reference image
+    ref_image = cv2.imread('./images/references/' + pose + '_reference.jpg')
+    e = TfPoseEstimator(get_graph_path('mobilenet_thin'), target_size=(w_cam, h_cam))
+    humans_ref = e.inference(ref_image, resize_to_default=1, upsample_size=resize_out_ratio)
+    ref_joint_array = get_tuple_array(humans_ref)
     
-    ret, test_img = cap.read()
-    test_img = cv2.flip(test_img,1)
+    #Save skeleton image with black background
+    black_background = np.zeros(ref_image.shape)
+    ref_skeleton_img = TfPoseEstimator.draw_humans(black_background, humans_ref, imgcopy=False)
+    filename_to_write = pose + '_reference_skeleton.jpg'
+    cv2.imwrite(filename_to_write, ref_skeleton_img)
     
-    humans_test = e.inference(test_img, resize_to_default=(w > 0 and h > 0), upsample_size=resize_out_ratio)
-    test_joint_array = []
-    if len(humans_test) is not 0:
-        test_joint_array = get_tuple_array(humans_test)
-        test_img = TfPoseEstimator.draw_humans(test_img, humans_test, imgcopy=False)
+    #Create reference skeleton overlay using the black background
+    overlay = cv2.imread(pose + '_reference_skeleton.jpg')
+    overlayMask = cv2.cvtColor( overlay, cv2.COLOR_BGR2GRAY )
+    res, overlayMask = cv2.threshold( overlayMask, 10, 1, cv2.THRESH_BINARY_INV)
     
-    combined_image = test_img
-    combined_image *= overlayMask
-    combined_image += overlay
+    #Expand the mask from 1-channel to 3-channel
+    h,w = overlayMask.shape
+    overlayMask = np.repeat( overlayMask, 3).reshape( (h,w,3) )
+    pose_mask_list.append(overlayMask)
+    overlay_list.append(overlay)
+    ref_joint_list_arrays.append(ref_joint_array)
 
-    k = cv2.waitKey(10)
-    # Press q to break
-    if k == ord('q'):
-        break
+#Go through all the poses
+for i in range(len(pose_list)):
     
-    accuracy = compare_img_ret_accuracy(test_joint_array, ref_joint_array)
-#str_accuracy = "{:.2f}".format(accuracy)
-    str_accuracy = int(accuracy*100)
-    status_arr = ["Get into position!", "Now hold for 3 secs!", "Great job!"]
-    status = status_arr[0]
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    acc_coord_from_top_left = (0,700) #bottom left corner
-    #BGR
-    yellow_color = (0, 255, 255)
-    red_color = (0,0,255)
-    green_color = (0,255,0)
-    white_color = (255,255,255)
-    color = yellow_color
-    thickness = 4
-    font_scale = 3
+    pose = pose_list[i]
+    overlay = overlay_list[i]
+    overlayMask = pose_mask_list[i]
+    ref_joint_array = ref_joint_list_arrays[i]
+    timer_start = False
 
-    timer_coord = (200,250)
+    #Wait 10 seconds before checking if pose is correct
+    prev = time.time()
+        
+    while TIMER >= 0:
+        curr = time.time()
+        
+        ret, test_img = cap.read()
+        test_img = cv2.flip(test_img,1)
 
-    if accuracy >= 0.6:
-        color = green_color
-        status = status_arr[1]
-        cv2.putText(combined_image, "GOOD: " + str(str_accuracy) + "%", acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
-        #Start timer when it is false
-        if timer_start is False:
-            timer_start = True
-            prev = time.time()
-            cur = time.time()
-        #Timer is already running
-        else:
-            cur = time.time()
-        #If one second has elapsed
-        if cur-prev >= 1:
-            prev = cur
+        test_img *=overlayMask
+        test_img+=overlay
+        
+        #Draw timer
+        cv2.circle(test_img, center_coord, radius, color_bgr, thickness)
+    
+        font = cv2.FONT_HERSHEY_TRIPLEX
+        cv2.putText(test_img, str(TIMER),
+                    (100,200), font,
+                    5, (255, 255, 255),
+                    10, cv2.LINE_AA)
+        
+        cv2.imshow('Hi', test_img)
+        if curr-prev>=1:
+            prev = curr
             TIMER = TIMER-1
-        #If timer is up, break
-        if TIMER <=0:
-            status = status_arr[2]
-            #Great job for 4 sec
-            timeout = time.time() + 3   # 3 sec from now
-            while timeout >= time.time():
-                cv2.putText(combined_image, status, (0, 150), font, 2, yellow_color, thickness, cv2.LINE_AA)
-                cv2.imshow('Hi', combined_image)
+
+        k = cv2.waitKey(5)
+        if k == 27:
             break
+            
 
-    else:
-        color = red_color
+    #Start the check
+    while True:
+        
+        ret, test_img = cap.read()
+        test_img = cv2.flip(test_img,1)
+        
+        humans_test = e.inference(test_img, resize_to_default=(w > 0 and h > 0), upsample_size=resize_out_ratio)
+        test_joint_array = []
+        if len(humans_test) is not 0:
+            test_joint_array = get_tuple_array(humans_test)
+            test_img = TfPoseEstimator.draw_humans(test_img, humans_test, imgcopy=False)
+        
+        combined_image = test_img
+        combined_image *= overlayMask
+        combined_image += overlay
+
+        k = cv2.waitKey(10)
+        # Press q to break
+        if k == ord('q'):
+            break
+        
+        accuracy = compare_img_ret_accuracy(test_joint_array, ref_joint_array)
+    #str_accuracy = "{:.2f}".format(accuracy)
+        str_accuracy = int(accuracy*100)
+        status_arr = ["Get into position!", "Now hold for 3 secs!", "Great job!"]
         status = status_arr[0]
-        cv2.putText(combined_image, "BAD: " + str(str_accuracy), acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
-        #reset timer back to 3 seconds
-        TIMER = 3
-        timer_start = False
-    #Pose string
-    cv2.putText(combined_image, pose.upper(), (0, 70), font, font_scale, yellow_color, thickness, cv2.LINE_AA, False) #top left corner
-    #Timer string
-    cv2.putText(combined_image, str(TIMER), timer_coord, font, font_scale, white_color, thickness, cv2.LINE_AA)
-    #Status string
-    cv2.putText(combined_image, status, (0, 150), font, 2, yellow_color, thickness, cv2.LINE_AA)
-    cv2.imshow('Hi', combined_image)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        acc_coord_from_top_left = (0,700) #bottom left corner
+        #BGR
+        yellow_color = (0, 255, 255)
+        red_color = (0,0,255)
+        green_color = (0,255,0)
+        white_color = (255,255,255)
+        color = yellow_color
+        thickness = 4
+        font_scale = 3
 
+        timer_coord = (200,250)
 
+        if accuracy >= 0.6:
+            color = green_color
+            status = status_arr[1]
+            cv2.putText(combined_image, "GOOD: " + str(str_accuracy) + "%", acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
+            #Start timer when it is false
+            if timer_start is False:
+                timer_start = True
+                prev = time.time()
+                cur = time.time()
+            #Timer is already running
+            else:
+                cur = time.time()
+            #If one second has elapsed
+            if cur-prev >= 1:
+                prev = cur
+                TIMER = TIMER-1
+            #If timer is up, break
+            if TIMER <=0:
+                status = status_arr[2]
+                #Great job for 4 sec
+                timeout = time.time() + 3   # 3 sec from now
+                black_background = np.zeros(ref_image.shape)
+                
+                cv2.putText(black_background, status, (0, 150), font, 2, yellow_color, thickness, cv2.LINE_AA)
+                cv2.imshow('Hi', black_background)
+                
+                break
+
+        else:
+            color = red_color
+            status = status_arr[0]
+            cv2.putText(combined_image, "BAD: " + str(str_accuracy), acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
+            #reset timer back to 3 seconds
+            TIMER = 3
+            timer_start = False
+        #Pose string
+        cv2.putText(combined_image, pose.upper(), (0, 70), font, font_scale, yellow_color, thickness, cv2.LINE_AA, False) #top left corner
+        #Timer string
+        cv2.putText(combined_image, str(TIMER), timer_coord, font, font_scale, white_color, thickness, cv2.LINE_AA)
+        #Status string
+        cv2.putText(combined_image, status, (0, 150), font, 2, yellow_color, thickness, cv2.LINE_AA)
+        cv2.imshow('Hi', combined_image)
 
 # Release the camera and destroy all windows
 cap.release()
