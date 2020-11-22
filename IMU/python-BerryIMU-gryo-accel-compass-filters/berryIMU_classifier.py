@@ -123,30 +123,26 @@ def save_data():
         csvwriter.writerows(acc_rows)
 
 
-def voice_handler(signum, frame):
-    print('Signal handler called with signal', signum)
-    print('*Reminder activation here*')
+def reminder_handler(signum, frame):
+    print('reminder:' + classifier_action)
     #send gesture key over broker
-    pub=PUB("/team2/imu","Reminder X")
+    pub=PUB("/team2/imu", 'Reminder:' + classifier_action)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     sys.exit(0)
 
 
-def reminder_handler(signum, frame):
-    print('Signal handler called with signal', signum)
+def audio_handler(signum, frame):
     print('*Voice activation here*')
-    #send gesture key over broker
     pub=PUB("/team2/imu","Audio message")
     client = pub.connect_mqtt()
     client.loop_start()
-    pub.publish_text(client)
+    pub.publish_audio(client)
     sys.exit(0)
 
-#set up signal handler for SIGUSR1 (10) and SIGUSR2 (12)
-signal.signal(signal.SIGUSR1, voice_handler)
-signal.signal(signal.SIGUSR2, reminder_handler)
+#set up signal handler for SIGUSR1 (10)
+signal.signal(signal.SIGTERM, reminder_handler)
 
 
 def kalmanFilterY ( accAngle, gyroRate, DT):
@@ -514,6 +510,8 @@ while True:
 
     #################### Main Classifer Logic ###############################
 
+    global classifier_action
+
     classifier_action="none"
 
     if max_accx_diff > 100 and max_accy_diff > 100:
@@ -540,13 +538,9 @@ while True:
     gyroy_list.clear()
     gyroz_list.clear()
 
-    if classifier_action is "RR":
+    if classifier_action is not "none":
         #send signal with kill command for current process
-        os.kill(os.getpid(), signal.SIGUSR1)
-
-    if classifier_action is "HS":
-        #send signal with kill command for current process
-        os.kill(os.getpid(), signal.SIGUSR2)
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 
