@@ -85,26 +85,60 @@ KFangleX = 0.0
 KFangleY = 0.0
 
 
-def voice_handler(signum, frame):
-    print('Signal handler called with signal', signum)
-    print('*Reminder activation here*')
+def calibrate_init():
+    calib_store = []
+    calib_data = ""
+    with open('calibration.csv', newline='') as csvfile:
+        calib_reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in calib_reader:
+            calib_store.append(row)
+    calib_data = str(calib_store[1]) #first row: fields, second row: data
+    calib_data = calib_data.replace("'", '').replace("[", '').replace("]", '')
+    calib_store = calib_data.split(",")
+    print("data:" + calib_store[0])
+
+    magXmin = calib_store[0]
+    magYmin = calib_store[1]
+    magZmin = calib_store[2]
+    magXmax = calib_store[3]
+    magYmax = calib_store[4]
+    magZmax = calib_store[5]
+
+
+def save_data():
+    filename = "shake.csv"
+    samplenum = range(1,MAXSAMPLES)
+    acc_rows = [samplenum, accx_list, accy_list]
+    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
+    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
+
+    acc_rows = zip(*acc_rows)
+    gyro_rows = zip(*gyro_rows)
+    all_rows = zip(*all_rows)
+
+    with open(filename, 'w') as csvfile:
+        csvwriter=csv.writer(csvfile)
+        csvwriter.writerow(acc_fields)
+        csvwriter.writerows(acc_rows)
+
+
+def reminder_handler(signum, frame):
+    print('reminder:' + classifier_action)
     #send gesture key over broker
-    pub=PUB("/isabel/michelle","Reminder X")
+    pub=PUB("/team2/imu", 'Reminder:' + classifier_action)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     sys.exit(0)
 
-def reminder_handler(signum, frame):
-    print('Signal handler called with signal', signum)
+
+def audio_handler(signum, frame):
     print('*Voice activation here*')
-    #send gesture key over broker
-    pub=PUB("/isabel/michelle","Audio message")
+    pub=PUB("/team2/imu","Audio message")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_audio(client)
     sys.exit(0)
-
 
 #set up signal handler for SIGUSR1 (10)
 signal.signal(signal.SIGTERM, voice_handler)
@@ -221,6 +255,9 @@ if(IMU.BerryIMUversion == 99):
     print(" No BerryIMU found... exiting ")
     sys.exit()
 IMU.initIMU()       #Initialise the accelerometer, gyroscope and compass
+
+if(path.exists("calibration.csv")):
+    calibrate_init()
 
 accx_list = []
 accy_list = []
@@ -472,6 +509,8 @@ while True:
 
     #################### Main Classifer Logic ###############################
 
+    global classifier_action
+
     classifier_action="none"
 
     if max_accx_diff > 100 and max_accy_diff > 100:
@@ -485,7 +524,7 @@ while True:
         else:
             print('Horizontal shake was too soft')
     elif max_accy_diff > max_accx_diff:
-        if max_accy_diff in range(15,40):
+        if max_accy_diff in range(15,60):
             classifier_action="VS"
         else:
             print('Lift up higher')
