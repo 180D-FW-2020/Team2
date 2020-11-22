@@ -1,4 +1,4 @@
-import smbus
+import smbus2 as smbus
 bus = smbus.SMBus(1)
 from LSM9DS0 import *
 from LSM9DS1 import *
@@ -20,7 +20,7 @@ def detectIMU():
     #BerryIMUv1 uses the LSM9DS0
     #BerryIMUv2 uses the LSM9DS1
     #BerryIMUv3 uses the LSM6DSL and LIS3MDL
- 
+
     global BerryIMUversion
 
 
@@ -103,7 +103,7 @@ def readACCx():
 
 
 
- 
+
 
 
 def readACCy():
@@ -287,5 +287,3 @@ def initIMU():
         writeByte(LIS3MDL_ADDRESS,LIS3MDL_CTRL_REG1, 0b11011100)         # Temp sesnor enabled, High performance, ODR 80 Hz, FAST ODR disabled and Selft test disabled.
         writeByte(LIS3MDL_ADDRESS,LIS3MDL_CTRL_REG2, 0b00100000)         # +/- 8 gauss
         writeByte(LIS3MDL_ADDRESS,LIS3MDL_CTRL_REG3, 0b00000000)         # Continuous-conversion mode
-
-
