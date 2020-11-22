@@ -20,16 +20,15 @@
 import sys
 import time
 import math
-import IMU
+import IMU.python_BerryIMU_gryo_accel_compass_filters.IMU as IMU
 import datetime
 import os
 import csv
 import signal
 
-sys.path.insert(1, '../../MQTT')
+#sys.path.insert(1, '../../MQTT')
 
-from pub import PUB
-from os import path
+from MQTT.pub import PUB
 
 RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
@@ -142,8 +141,8 @@ def audio_handler(signum, frame):
     sys.exit(0)
 
 #set up signal handler for SIGUSR1 (10)
+signal.signal(signal.SIGTERM, voice_handler)
 signal.signal(signal.SIGTERM, reminder_handler)
-
 
 def kalmanFilterY ( accAngle, gyroRate, DT):
     y=0.0
@@ -515,7 +514,7 @@ while True:
     classifier_action="none"
 
     if max_accx_diff > 100 and max_accy_diff > 100:
-        if max_gyrox < 50: 
+        if max_gyrox < 50:
             classifier_action="RR"
         else:
             classifier_action="LR"
@@ -538,9 +537,27 @@ while True:
     gyroy_list.clear()
     gyroz_list.clear()
 
-    if classifier_action is not "none":
+    if classifier_action is "RR":
+        #send signal with kill command for current process
+        os.kill(os.getpid(), signal.SIGTERM)
+
+    if classifier_action is "HS":
         #send signal with kill command for current process
         os.kill(os.getpid(), signal.SIGTERM)
 
 
+def save_data():
+    filename = "shake.csv"
+    samplenum = range(1,MAXSAMPLES)
+    acc_rows = [samplenum, accx_list, accy_list]
+    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
+    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
 
+    acc_rows = zip(*acc_rows)
+    gyro_rows = zip(*gyro_rows)
+    all_rows = zip(*all_rows)
+
+    with open(filename, 'w') as csvfile:
+        csvwriter=csv.writer(csvfile)
+        csvwriter.writerow(acc_fields)
+        csvwriter.writerows(acc_rows)

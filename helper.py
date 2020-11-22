@@ -21,7 +21,7 @@ def activate(activity):
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
-    while(client_instance.message == ''): #while(client_instance.message != 'activation msg') ??
+    while(client_instance.message == ''):
         pass
     caliente.disconnect()
 
