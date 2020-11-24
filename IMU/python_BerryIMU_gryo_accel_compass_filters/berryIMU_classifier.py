@@ -129,7 +129,7 @@ def reminder_handler(signum, frame):
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
-    sys.exit(0)
+    #sys.exit(0)
 
 
 def audio_handler(signum, frame):
@@ -138,7 +138,7 @@ def audio_handler(signum, frame):
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_audio(client)
-    sys.exit(0)
+    #sys.exit(0)
 
 #set up signal handler for SIGUSR1 (10)
 signal.signal(signal.SIGTERM, audio_handler)
