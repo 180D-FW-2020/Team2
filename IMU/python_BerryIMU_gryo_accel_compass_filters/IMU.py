@@ -1,9 +1,9 @@
 import smbus2 as smbus
 bus = smbus.SMBus(1)
-from LSM9DS0 import *
-from LSM9DS1 import *
-from LSM6DSL import *
-from LIS3MDL import *
+from IMU.python_BerryIMU_gryo_accel_compass_filters.LSM9DS0 import *
+from IMU.python_BerryIMU_gryo_accel_compass_filters.LSM9DS1 import *
+from IMU.python_BerryIMU_gryo_accel_compass_filters.LSM6DSL import *
+from IMU.python_BerryIMU_gryo_accel_compass_filters.LIS3MDL import *
 import time
 
 
