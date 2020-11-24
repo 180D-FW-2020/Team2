@@ -5,7 +5,7 @@ import time
 # SET THE COUNTDOWN TIMER 
 # for simplicity we set it to 3 
 # We can also take this as input 
-TIMER = int(20) 
+TIMER = int(7)
    
 # Open the camera 
 cap = cv2.VideoCapture(0) 
