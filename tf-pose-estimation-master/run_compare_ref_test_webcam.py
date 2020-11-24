@@ -29,6 +29,8 @@ w_cam = 432
 h_cam = 368
 resize_out_ratio = 4
 
+offset_xy = 200
+
 #Return (index, coordinate_string, score)
 def get_tuple_array(humans):
     ret_array = []
@@ -108,6 +110,8 @@ radius = 100
 color_bgr = (184, 143, 11)
 thickness = -1 #fill circle
 
+black_frame = cv2.imread('frame.jpg')
+
 
 #Create the joint overlay for each verification pose
 for pose in pose_list:
@@ -146,7 +150,7 @@ for i in range(len(pose_list)):
 
     #Wait 10 seconds before checking if pose is correct
     prev = time.time()
-        
+    TIMER = int(10)
     while TIMER >= 0:
         curr = time.time()
         
@@ -212,7 +216,19 @@ for i in range(len(pose_list)):
         thickness = 4
         font_scale = 3
 
-        timer_coord = (200,250)
+        #Coord in (x,y) [left to right is x axis] [up and down is y axis]. Set the coordinates of the timer, status, and pose texts
+        textsize_pose = cv2.getTextSize(pose.upper(), font, font_scale, thickness)[0]
+        textsize_status = cv2.getTextSize(status, font, font_scale, thickness)[0]
+        textsize_timer = cv2.getTextSize(str(TIMER), font, font_scale, thickness)[0]
+        
+        mid_x = int((black_frame.shape[1] - textsize_pose[0]) / 2)
+        pose_coord = (mid_x, 70 +offset_xy)
+        
+        mid_x = int((black_frame.shape[1] - textsize_timer[0]) / 2)
+        timer_coord = (mid_x,250+offset_xy)
+        
+        mid_x = int((black_frame.shape[1] - textsize_status[0]) / 2)
+        status_coord = (mid_x, 150 +offset_xy)
 
         if accuracy >= 0.6:
             color = green_color
@@ -249,13 +265,16 @@ for i in range(len(pose_list)):
             #reset timer back to 3 seconds
             TIMER = 3
             timer_start = False
+        black_frame = cv2.imread('frame.jpg')
         #Pose string
-        cv2.putText(combined_image, pose.upper(), (0, 70), font, font_scale, yellow_color, thickness, cv2.LINE_AA, False) #top left corner
+        cv2.putText(black_frame, pose.upper(), pose_coord, font, font_scale, yellow_color, thickness, cv2.LINE_AA, False) #top left corner
         #Timer string
-        cv2.putText(combined_image, str(TIMER), timer_coord, font, font_scale, white_color, thickness, cv2.LINE_AA)
+        cv2.putText(black_frame, str(TIMER), timer_coord, font, font_scale, white_color, thickness, cv2.LINE_AA)
         #Status string
-        cv2.putText(combined_image, status, (0, 150), font, 2, yellow_color, thickness, cv2.LINE_AA)
-        cv2.imshow('Hi', combined_image)
+        cv2.putText(black_frame, status, status_coord, font, font_scale, yellow_color, thickness, cv2.LINE_AA)
+
+        final = cv2.hconcat([combined_image, black_frame])
+        cv2.imshow('Hi', final)
 
 # Release the camera and destroy all windows
 cap.release()
