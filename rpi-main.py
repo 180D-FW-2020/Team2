@@ -1,6 +1,7 @@
 import threading
 from MQTT.sub import client_mqtt
 from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import imu_run
+from Matrix.matrix_functions import *
 
 def listen():
     print("listening on topic for reminders!")
@@ -11,8 +12,10 @@ def listen():
     while True:
         if(client_instance.message == 'reminder'):
             print('calling reminder led matrix')
+            run_reminder()
         if(client_instance.message == 'breathe'):
             print('calling breath led program')
+            run_breathe()
 
 
 def imu():

@@ -1,12 +1,15 @@
 from MQTT.sub import client_mqtt
+from MQTT.pub import PUB
 
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
-    #TODO: use MQTT to let RPi know to light em tf up
     print("send message to LED Matrix")
+    pub = PUB('/team2/reminders', 'reminder')
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_text(client)
 
-    #listen on MQTT broker to see if any gestures are being detected at the current moment
     print("waiting for IMU activation for " + activity)
     client_instance = client_mqtt('/team2/imu')
     caliente = client_instance.connect_mqtt()
@@ -19,9 +22,14 @@ def activate(activity):
     if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
+
     if activity == 'breath':
-        #TODO: call breathing function
         print("calling " + activity + " exercise")
+        pub = PUB('/team2/reminders', 'breathe')
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_text(client)
+        
     if activity == 'talk':
         #TODO: call talking to friends function
         print("calling " + activity + " exercise")
