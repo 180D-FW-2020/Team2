@@ -1,14 +1,5 @@
 from MQTT.sub import client_mqtt
 
-### CONSTANTS ###
-
-#minutes
-stretch_reminder = .5
-breath_reminder = .5
-talk_reminder = 1
-
-congrats_message ="Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day."
-
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
@@ -25,7 +16,7 @@ def activate(activity):
         pass
     caliente.disconnect()
 
-    if activity == 'strech':
+    if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
     if activity == 'breath':
@@ -35,6 +26,6 @@ def activate(activity):
         #TODO: call talking to friends function
         print("calling " + activity + " exercise")
 
-def congrats (activity):
+def congrats(activity):
     #TODO: let users in network know you finished activity
     print("letting friends know you finished an activity")
