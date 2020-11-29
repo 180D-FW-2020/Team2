@@ -122,27 +122,24 @@ def save_data():
         csvwriter.writerows(acc_rows)
 
 
-def reminder_handler(signum, frame):
+def reminder_handler():
     print('reminder:' + classifier_action)
     #send gesture key over broker
     pub=PUB("/team2/imu", 'Reminder:' + classifier_action)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
-    #sys.exit(0)
+    client.disconnect()
 
 
-def audio_handler(signum, frame):
+def audio_handler():
     print('*Voice activation here*')
     pub=PUB("/team2/imu","Audio message")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_audio(client)
-    #sys.exit(0)
+    client.disconnect()
 
-#set up signal handler for SIGUSR1 (10)
-signal.signal(signal.SIGTERM, audio_handler)
-signal.signal(signal.SIGTERM, reminder_handler)
 
 def kalmanFilterY ( accAngle, gyroRate, DT):
     y=0.0
@@ -538,12 +535,10 @@ def imu_run():
         gyroz_list.clear()
 
         if classifier_action is "RR":
-            #send signal with kill command for current process
-            os.kill(os.getpid(), signal.SIGTERM)
+            reminder_handler()
 
         if classifier_action is "HS":
-            #send signal with kill command for current process
-            os.kill(os.getpid(), signal.SIGTERM)
+            audio_handler()
 
 
 def save_data():

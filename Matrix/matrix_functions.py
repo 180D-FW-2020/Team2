@@ -83,10 +83,18 @@ class matrix:
         self.device.cleanup()
 
 
-def run():
+def run_breathe():
     try:
         device = matrix(args.cascaded, args.block_orientation, args.rotate, args.reverse_order)
         device.breathe()
+        device.erase()
+    except KeyboardInterrupt:
+        pass
+
+def run_reminder():
+    try:
+        device = matrix(args.cascaded, args.block_orientation, args.rotate, args.reverse_order)
+        device.notif()
         device.erase()
     except KeyboardInterrupt:
         pass
