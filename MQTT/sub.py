@@ -53,6 +53,9 @@ class client_mqtt:
     def disconect_mqtt(self, client):
         client.disconnect()
 
+    def set_message(self, msg):
+        self.message = msg
+
 
 #sample implementation
 """

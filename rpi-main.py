@@ -16,6 +16,7 @@ def listen():
         if(client_instance.message == 'breathe'):
             print('calling breath led program')
             run_breathe()
+        client_instance.set_message('')
 
 
 def imu():
