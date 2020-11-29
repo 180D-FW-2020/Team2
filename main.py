@@ -43,8 +43,8 @@ class WaitScreen(Screen):
         activate(activity)
         self.ids.lbl1.text = congrats_message
         congrats(activity)
-        Clock.schedule_once(partial(self.message, k), largs[0] - .5)
-        Clock.schedule_once(self.stretch_callback, largs[0])
+        Clock.schedule_once(partial(self.message, activity), largs[0] - .5)
+        Clock.schedule_once(partial(self.activity_callback, activity), largs[0])
 
     def on_pre_enter(self, *args):
         a = App.get_running_app()

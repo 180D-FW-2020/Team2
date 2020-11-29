@@ -51,7 +51,7 @@ class PUB:
          for i in range(1, 4):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
-             f = open("../../MQTT/test.wav", "rb")
+             f = open("./MQTT/test.wav", "rb")
              soundstr = f.read()
              f.close()
              msg = bytearray(soundstr)

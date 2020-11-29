@@ -1,4 +1,4 @@
-import threading
+from multiprocessing import Process
 from MQTT.sub import client_mqtt
 from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import imu_run
 from Matrix.matrix_functions import *
@@ -24,11 +24,11 @@ def imu():
     imu_run()
 
 def main():
-    print("dispatch thread to start listening for reminders")
-    t1 = threading.Thread(target=listen)
-
-    t1.start()
-    imu()
+    print('starting processes')
+    p1 = Process(target = listen)
+    p2 = Process(target = imu)
+    p1.start()
+    p2.start()
 
 if __name__ == "__main__":
     main()

@@ -9,6 +9,7 @@ def activate(activity):
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
+    client.disconnect()
 
     print("waiting for IMU activation for " + activity)
     client_instance = client_mqtt('/team2/imu')
@@ -29,7 +30,8 @@ def activate(activity):
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
-        
+        client.disconnect()
+
     if activity == 'talk':
         #TODO: call talking to friends function
         print("calling " + activity + " exercise")
