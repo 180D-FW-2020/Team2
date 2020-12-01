@@ -9,8 +9,12 @@ from scipy.io.wavfile import write
 # Prompt limit for voice command
 PROMPT_LIMIT=1
 # SAVING .WAV FILE GLOBAL VARIABLES
-sent_audiodir = "./Speech/SentAudio"
-sent_txtdir = "./Speech/SentTxt"
+# sent_audiodir = "./SentAudio"
+# sent_txtdir = "./SentTxt"'
+sys.path.insert(0, "./Speech/")
+print(sys.path)
+sent_audiodir = path.join(sys.path, "/SentAudio")
+sent_txtdir = path.join(sys.path, "/SentTxt")
 txt_suffix = "txt"
 audio_suffix = "wav"
 msg_limit=10 #in seconds - length of audio message
@@ -21,6 +25,7 @@ class speech:
         # Filename is the audio filename WITHOUT the file extension
         base_audioname = filename
         # Check if directory exists, if not create it, if does continue
+        print(sent_audiodir)
         pathlib.Path(sent_audiodir).mkdir(parents=True, exist_ok=True)
         audio_path = path.join(sent_audiodir, base_audioname + "." + audio_suffix)
 
@@ -98,8 +103,8 @@ class speech:
             f.write(audio.get_wav_data())
 
     def transcribe(self):
-            # AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), self.audio_file)
-            with sr.AudioFile(self.audio_file) as source:
+            AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), self.audio_file)
+            with sr.AudioFile(AUDIO_FILE) as source:
                 audio = self.recognizer.record(source)
 
             with open(self.txt_file, "w") as f:

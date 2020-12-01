@@ -51,7 +51,6 @@ class PUB:
          for i in range(1, 4):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
-             # TODO: FIX HOW IT ACCESSES THE AUDIO PATH ACCESS
              f = open(audio_path, "rb")
              soundstr = f.read()
              f.close()
