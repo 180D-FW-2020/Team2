@@ -46,12 +46,13 @@ class PUB:
                  print(f"Failed to send message to topic {self.topic}")
          # msg_count += 1
 
-    def publish_audio(self, client):
+    def publish_audio(self, client, audio_path):
          msg_count = 0
          for i in range(1, 4):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
-             f = open("./MQTT/test.wav", "rb")
+             # TODO: FIX HOW IT ACCESSES THE AUDIO PATH ACCESS
+             f = open(audio_path, "rb")
              soundstr = f.read()
              f.close()
              msg = bytearray(soundstr)
