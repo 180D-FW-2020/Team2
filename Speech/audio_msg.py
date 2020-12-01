@@ -1,127 +1,146 @@
 import time
 import pyaudio
 import speech_recognition as sr
+import pathlib
 from os import path
 from scipy.io.wavfile import write
 
-
+# Prompt limit for voice command
+PROMPT_LIMIT=1
 # SAVING .WAV FILE GLOBAL VARIABLES
+sent_audiodir = "./SentAudio"
+sent_txtdir = "./SentTxt"
+txt_suffix = "txt"
+audio_suffix = "wav"
 msg_limit=10 #in seconds - length of audio message
 listen_limit=3 # in seconds - if no audio is detected, stop recording
 
+class speech:
+    def __init__(self, filename):
+        # Filename is the audio filename WITHOUT the file extension
+        base_audioname = filename
+        # Check if directory exists, if not create it, if does continue
+        pathlib.Path(sent_audiodir).mkdir(parents=True, exist_ok=True)
+        audio_path = path.join(sent_audiodir, base_audioname + "." + audio_suffix)
 
-def recognize_speech_from_mic(recognizer, microphone):
-    """Transcribe speech from recorded from `microphone`.
+        pathlib.Path(sent_txtdir).mkdir(parents=True, exist_ok=True)
+        txt_path = path.join(sent_txtdir, base_audioname + "_transcript" "." + txt_suffix)
 
-    Returns a dictionary with three keys:
-    "success": a boolean indicating whether or not the API request was
-               successful
-    "error":   `None` if no error occured, otherwise a string containing
-               an error message if the API could not be reached or
-               speech was unrecognizable
-    "transcription": `None` if speech could not be transcribed,
-               otherwise a string containing the transcribed text
-    """
-    # check that recognizer and microphone arguments are appropriate type
-    if not isinstance(recognizer, sr.Recognizer):
-        raise TypeError("`recognizer` must be `Recognizer` instance")
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+        self.audio_file = audio_path
+        self.txt_file = txt_path
 
-    if not isinstance(microphone, sr.Microphone):
-        raise TypeError("`microphone` must be `Microphone` instance")
+    def get_audiopath(self):
+        return self.audio_file
 
-    # adjust the recognizer sensitivity to ambient noise and record audio
-    # from the microphone
-    with microphone as source:
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
+    def recognize_speech_from_mic(self):
+        """Transcribe speech from recorded from `microphone`.
 
-    # set up the response object
-    response = {
-        "success": True,
-        "error": None,
-        "transcription": None
-    }
+        Returns a dictionary with three keys:
+        "success": a boolean indicating whether or not the API request was
+                   successful
+        "error":   `None` if no error occured, otherwise a string containing
+                   an error message if the API could not be reached or
+                   speech was unrecognizable
+        "transcription": `None` if speech could not be transcribed,
+                   otherwise a string containing the transcribed text
+        """
+        # check that recognizer and microphone arguments are appropriate type
+        if not isinstance(self.recognizer, sr.Recognizer):
+            raise TypeError("`recognizer` must be `Recognizer` instance")
 
-    # try recognizing the speech in the recording
-    # if a RequestError or UnknownValueError exception is caught,
-    #     update the response object accordingly
-    try:
-        response["transcription"] = recognizer.recognize_google(audio)
-    except sr.RequestError:
-        # API was unreachable or unresponsive
-        response["success"] = False
-        response["error"] = "API unavailable"
-    except sr.UnknownValueError:
-        # speech was unintelligible
-        response["error"] = "Unable to recognize speech"
+        if not isinstance(self.microphone, sr.Microphone):
+            raise TypeError("`microphone` must be `Microphone` instance")
 
-    return response
+        # adjust the recognizer sensitivity to ambient noise and record audio
+        # from the microphone
+        with self.microphone as source:
+            self.recognizer.adjust_for_ambient_noise(source)
+            audio = self.recognizer.listen(source)
 
-def record_msg(recognizer, microphone, audio_file):
-    with microphone as source:
-        print("Send over an audio message! (Max: 10 seconds)")
+        # set up the response object
+        response = {
+            "success": True,
+            "error": None,
+            "transcription": None
+        }
+
+        # try recognizing the speech in the recording
+        # if a RequestError or UnknownValueError exception is caught,
+        #     update the response object accordingly
         try:
-            start_time = time.time()
-            audio = recognizer.listen(source, listen_limit, msg_limit)
-        except sr.WaitTimeoutError:
-            print("No audio detected...Try again...")
+            response["transcription"] = self.recognizer.recognize_google(audio)
+        except sr.RequestError:
+            # API was unreachable or unresponsive
+            response["success"] = False
+            response["error"] = "API unavailable"
+        except sr.UnknownValueError:
+            # speech was unintelligible
+            response["error"] = "Unable to recognize speech"
 
-    print("Recording finished!")
+        return response
 
-    # write audio to a WAV file
-    with open(audio_file, "wb") as f:
-        f.write(audio.get_wav_data())
-
-def transcribe(recognizer, microphone, audio_file):
-        AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), audio_file)
-        with sr.AudioFile(AUDIO_FILE) as source:
-            audio = recognizer.record(source)
-
-        text_name="transcript.txt"
-        with open(text_name, "w") as f:
+    def record_msg(self):
+        with self.microphone as source:
+            print("Send over an audio message! (Max: 10 seconds)")
             try:
-                print('Saving message transcription...')
-                f.write(recognizer.recognize_google(audio))
-                f.close()
-            except sr.UnknownValueError:
-                print("Google Speech Recognition could not understand audio")
-            except sr.RequestError as e:
-                print("Could not request results from Google Speech Recognition service; {0}".format(e))
+                start_time = time.time()
+                audio = self.recognizer.listen(source, listen_limit, msg_limit)
+            except sr.WaitTimeoutError:
+                print("No audio detected...Try again...")
 
-def main_msg():
-    # recognize start recording
-    recognizer = sr.Recognizer()
-    microphone = sr.Microphone()
+        print("Recording finished!")
 
-    PROMPT_LIMIT=1
+        # write audio to a WAV file
+        with open(self.audio_file, "wb") as f:
+            f.write(audio.get_wav_data())
 
-    # once gesture is acknowledged
-    # start to listen for the voice command before starting recording
-    for j in range(PROMPT_LIMIT):
-        print('Speak!')
-        time.sleep(0.5)
-        guess = recognize_speech_from_mic(recognizer, microphone)
-        if guess["transcription"]:
-            break
-        if not guess["success"]:
-            break
-        print("I didn't catch that. What did you say?\n")
+    def transcribe(self):
+            AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), self.audio_file)
+            with sr.AudioFile(AUDIO_FILE) as source:
+                audio = self.recognizer.record(source)
 
-        if guess["error"]:
-            print("ERROR: {}".format(guess["error"]))
-            break
+            with open(self.txt_file, "w") as f:
+                try:
+                    print('Saving message transcription...')
+                    f.write(self.recognizer.recognize_google(audio))
+                    f.close()
+                except sr.UnknownValueError:
+                    print("Google Speech Recognition could not understand audio")
+                except sr.RequestError as e:
+                    print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
-    # debug statement
-    print("You said: {}".format(guess["transcription"]))
+    def msg_flow(self):
+        # Listen for voice command before starting recording
+        for j in range(PROMPT_LIMIT):
+            print('Speak!')
+            time.sleep(0.5)
+            guess = speech_instance.recognize_speech_from_mic()
+            if guess["transcription"]:
+                break
+            if not guess["success"]:
+                break
+            print("I didn't catch that. What did you say?\n")
 
-    # start recording voice command
-    if str(guess["transcription"]).find("start recording") != -1:
-        time.sleep(2)
-        print('Recording...')
+            if guess["error"]:
+                print("ERROR: {}".format(guess["error"]))
+                break
 
-        #save audio message as .wav file
-        audio_file="message.wav"
-        record_msg(recognizer, microphone, audio_file)
+        # Debug statement
+        print("You said: {}".format(guess["transcription"]))
 
-        # transcribe the audio message + save into a file
-        transcribe(recognizer, microphone, audio_file)
+        # "Start recording" voice command recognized!
+        if str(guess["transcription"]).find("start recording") != -1:
+            time.sleep(2)
+            print('Recording...')
+
+            #save audio message as .wav file
+            speech_instance.record_msg()
+
+            # transcribe the audio message + save into a file
+            speech_instance.transcribe()
+
+if __name__ == "__main__":
+    speech_instance = speech("message")
+    speech_instance.msg_flow()
