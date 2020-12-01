@@ -1,5 +1,6 @@
 from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
+from Speech.audio_msg import speech
 
 ### HELPER FUNCTIONS ###
 
@@ -33,8 +34,18 @@ def activate(activity):
         client.disconnect()
 
     if activity == 'talk':
-        #TODO: call talking to friends function
         print("calling " + activity + " exercise")
+        audio_filename = "Message"
+        speech_instance = speech(audio_filename)
+        speech_instance.msg_flow()
+        # Send recorded message to specific person
+        audio_path = speech_instance.get_audiopath()
+        pub = PUB('/team2/reminders', 'talk')
+        client = pub.connect_mqtt()
+        client.loop_start()
+        print("Sending " + audio_path + "...")
+        pub.publish_audio(client, audio_path)
+        client.disconnect()
 
 def congrats(activity):
     #TODO: let users in network know you finished activity

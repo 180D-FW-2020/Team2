@@ -1,3 +1,4 @@
+import sys
 import time
 import pyaudio
 import speech_recognition as sr
@@ -8,8 +9,8 @@ from scipy.io.wavfile import write
 # Prompt limit for voice command
 PROMPT_LIMIT=1
 # SAVING .WAV FILE GLOBAL VARIABLES
-sent_audiodir = "./SentAudio"
-sent_txtdir = "./SentTxt"
+sent_audiodir = "./Speech/SentAudio"
+sent_txtdir = "./Speech/SentTxt"
 txt_suffix = "txt"
 audio_suffix = "wav"
 msg_limit=10 #in seconds - length of audio message
@@ -97,8 +98,8 @@ class speech:
             f.write(audio.get_wav_data())
 
     def transcribe(self):
-            AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), self.audio_file)
-            with sr.AudioFile(AUDIO_FILE) as source:
+            # AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), self.audio_file)
+            with sr.AudioFile(self.audio_file) as source:
                 audio = self.recognizer.record(source)
 
             with open(self.txt_file, "w") as f:
@@ -116,7 +117,7 @@ class speech:
         for j in range(PROMPT_LIMIT):
             print('Speak!')
             time.sleep(0.5)
-            guess = speech_instance.recognize_speech_from_mic()
+            guess = self.recognize_speech_from_mic()
             if guess["transcription"]:
                 break
             if not guess["success"]:
@@ -136,10 +137,10 @@ class speech:
             print('Recording...')
 
             #save audio message as .wav file
-            speech_instance.record_msg()
+            self.record_msg()
 
             # transcribe the audio message + save into a file
-            speech_instance.transcribe()
+            self.transcribe()
 
 if __name__ == "__main__":
     speech_instance = speech("message")
