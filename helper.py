@@ -35,16 +35,11 @@ def activate(activity):
 
     if activity == 'talk':
         print("calling " + activity + " exercise")
-        # sys.path.insert(0, "./Speech/")
-        #TODO: Do we want specific file names? Also sent audio files are saved in "./Speech/SentAudio"
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
         speech_instance.msg_flow()
         # Send recorded message to specific person
-        # TODO: right now it's a generic MQTT topic
-        # TODO: fix the audio path (remove the "." before SentDir)
         audio_path = speech_instance.get_audiopath()
-        # audio_path = path.join(sys.path, audio_path)
         pub = PUB('/team2/reminders', 'talk')
         client = pub.connect_mqtt()
         client.loop_start()
