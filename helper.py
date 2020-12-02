@@ -37,5 +37,10 @@ def activate(activity):
         print("calling " + activity + " exercise")
 
 def congrats(activity):
-    #TODO: let users in network know you finished activity
+    pub = PUB('/team2/reminders', "####: congrats")
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_text(client)
+    client.disconnect()
+    # let users in network know you finished activity on Matrix and Display
     print("letting friends know you finished an activity")
