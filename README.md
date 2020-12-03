@@ -28,4 +28,4 @@ within your conda environment, run \
 `python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew` \
 `python -m pip install kivy.deps.gstreamer` \
 `python –m pip install kivy`\
-`conda install -c conda-forge paho-mqtt`
+`conda install -c conda-forge paho-mqtt` 
