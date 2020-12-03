@@ -4,6 +4,11 @@ Michelle Lam, Michelle Tan, Jackie Lam, & Isabel Ketner
 ## overview
 WAP is a device that aims to improve one's physical and mental health via personalized wellness exercises the user can be reminded to complete throughout the day.
 
+## how to run
+change the name in ID.txt to be `firstnamelastname` \
+on your laptop, enter the command `python main.py` \
+on your rpi, enter the command `python rpi-main.py`
+
 ## structure
 **main.py**  runs application on laptop \
 **helper.py** helper functions + constants for main.py \
@@ -28,4 +33,4 @@ within your conda environment, run \
 `python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew` \
 `python -m pip install kivy.deps.gstreamer` \
 `python –m pip install kivy`\
-`conda install -c conda-forge paho-mqtt` 
+`conda install -c conda-forge paho-mqtt`
