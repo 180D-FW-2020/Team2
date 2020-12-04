@@ -8,21 +8,24 @@
         orientation:'vertical'
         Label:
             text: "Select what you want to focus on today!"
-            font_size: 15
+            font_size: 20
             size_hint: (1, .3)
         GridLayout:
             cols: 2
             size_hint: (1, .7)
             Label:
                 text: "I want to work on stretching more"
+                font_size: 18
             CheckBox:
                 on_active:root.ping('stretch', self.active)
             Label:
                 text: "I want to work on guided breathing"
+                font_size: 18
             CheckBox:
                 on_active:root.ping('breath', self.active)
             Label:
                 text: "I want to talk to my friends"
+                font_size: 18
             CheckBox:
                 on_active:root.ping('talk', self.active)
             Button:
@@ -38,4 +41,4 @@
         id: lbl1
         text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
         halign: 'center'
-        font_size: 15
+        font_size: 20
