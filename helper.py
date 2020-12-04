@@ -32,7 +32,7 @@ def activate(activity):
         #TODO: call stretching function
         print("calling " + activity + " exercise")
         os.chdir('tf-pose-estimation-master')
-        cmd = 'python run_compare_ref_test_webcam.py --pose=tree'
+        cmd = 'python run_compare_ref_test_webcam.py --pose=squat,warrior,tree'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         out, err = p.communicate()
         os.chdir('..')
