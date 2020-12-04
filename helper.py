@@ -53,7 +53,7 @@ def activate(activity):
         client.disconnect()
 
 def congrats(activity):
-    pub = PUB('/team2/reminders', "congrats")
+    pub = PUB('/network/congrats', user_id + ":" + activity)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
