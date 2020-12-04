@@ -52,6 +52,8 @@ def activate(activity):
         pub.publish_audio(client, audio_path)
         client.disconnect()
 
+    "FINISHED ACTIVITY"
+
 def congrats(activity):
     pub = PUB('/network/congrats', user_id + ":" + activity)
     client = pub.connect_mqtt()
