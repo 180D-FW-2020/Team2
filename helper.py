@@ -1,6 +1,8 @@
 from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
 from Speech.audio_msg import speech
+import subprocess
+import os
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -29,6 +31,11 @@ def activate(activity):
     if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
+        pub = PUB(topic, 'breathe')
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_text(client)
+        client.disconnect()
 
     if activity == 'breath':
         print("calling " + activity + " exercise")
