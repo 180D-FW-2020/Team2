@@ -31,11 +31,11 @@ def activate(activity):
     if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
-        pub = PUB(topic, 'breathe')
-        client = pub.connect_mqtt()
-        client.loop_start()
-        pub.publish_text(client)
-        client.disconnect()
+        os.chdir('tf-pose-estimation-master')
+        cmd = 'python run_compare_ref_test_webcam.py --pose=squat,warrior,tree'
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        os.chdir('..')
 
     if activity == 'breath':
         print("calling " + activity + " exercise")
