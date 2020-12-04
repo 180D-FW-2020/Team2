@@ -47,18 +47,17 @@ def activate(activity):
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
-        pub = PUB(topic, 'txt')
+        pub = PUB(topic, 'audio')
         # Send audio message with the transcription
         client = pub.connect_mqtt()
         client.loop_start()
 
-        # pub.set_msg = "audio"
-        # pub.publish_text(client)
-        # pub.publish_file(client, audio_path)
-
-        pub.set_msg = 'txt'
         pub.publish_text(client)
-        pub.publish_file(client, txt_path)
+        pub.publish_file(client, audio_path)
+
+        pub.set_msg('transcript')
+        pub.publish_text(client)
+        # pub.publish_file(client, txt_path)
 
         client.disconnect()
 
