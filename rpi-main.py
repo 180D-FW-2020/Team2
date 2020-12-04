@@ -3,9 +3,15 @@ from MQTT.sub import client_mqtt
 from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import imu_run
 from Matrix.matrix_functions import *
 
+f = open('ID.txt', 'r')
+user_id = f.readline().replace('\n', '')
+f.close()
+
 def listen():
+    topic = '/' + user_id + '/reminders'
+
     print("listening on topic for reminders!")
-    client_instance = client_mqtt('/team2/reminders')
+    client_instance = client_mqtt(topic)
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
