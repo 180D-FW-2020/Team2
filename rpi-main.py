@@ -16,6 +16,10 @@ def listen():
         if(client_instance.message == 'breathe'):
             print('calling breath led program')
             run_breathe()
+        if(client_instance.message == 'congrats'):
+            print('calling congrats led program')
+            run_congrats()
+
         client_instance.set_message('')
 
 

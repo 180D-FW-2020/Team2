@@ -37,7 +37,7 @@ def activate(activity):
         print("calling " + activity + " exercise")
 
 def congrats(activity):
-    pub = PUB('/team2/reminders', "####: congrats")
+    pub = PUB('/team2/reminders', "congrats")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
