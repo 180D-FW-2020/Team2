@@ -2,18 +2,23 @@ from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
 from Speech.audio_msg import speech
 
+f = open('ID.txt', 'r')
+user_id = f.readline().replace('\n', '')
+f.close()
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
     print("send message to LED Matrix")
-    pub = PUB('/team2/reminders', 'reminder')
+    topic = '/' + user_id + '/reminders'
+    pub = PUB(topic, 'reminder')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
 
     print("waiting for IMU activation for " + activity)
-    client_instance = client_mqtt('/team2/imu')
+    imu_topic = '/' + user_id + '/imu'
+    client_instance = client_mqtt(imu_topic)
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
@@ -27,7 +32,7 @@ def activate(activity):
 
     if activity == 'breath':
         print("calling " + activity + " exercise")
-        pub = PUB('/team2/reminders', 'breathe')
+        pub = PUB(topic, 'breathe')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
@@ -40,7 +45,7 @@ def activate(activity):
         speech_instance.msg_flow()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
-        pub = PUB('/team2/reminders', 'talk')
+        pub = PUB(topic, 'talk')
         client = pub.connect_mqtt()
         client.loop_start()
         print("Sending " + audio_path + "...")
