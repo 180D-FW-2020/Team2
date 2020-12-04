@@ -12,6 +12,7 @@ from kivy.clock import Clock
 from helper import *
 from functools import partial
 
+
 Builder.load_file('./UI/screen.kv')
 
 congrats_message ="Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day."
@@ -65,4 +66,5 @@ class WAP(App):
     def build(self):
         return Root()
 
-WAP().run()
+if __name__ == '__main__':
+    WAP().run()

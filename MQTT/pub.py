@@ -20,6 +20,9 @@ class PUB:
         self.topic = topic
         self.msg = msg
 
+    def set_msg(self, msg):
+        self.msg = msg
+
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
             if rc == 0:
@@ -41,20 +44,20 @@ class PUB:
              status = result[0]
              if status == 0:
                  # print(f"Send `{msg}` to topic `{topic}`")
-                 print(f"Sent message to topic `{self.topic}`")
+                 print(f"Sent message to topic `{self.topic}` and message `{self.msg}`")
              else:
                  print(f"Failed to send message to topic {self.topic}")
          # msg_count += 1
 
-    def publish_audio(self, client):
+    def publish_file(self, client, file_path):
          msg_count = 0
          for i in range(1, 4):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
-             f = open("./MQTT/test.wav", "rb")
-             soundstr = f.read()
+             f = open(file_path, "rb")
+             filestr = f.read()
              f.close()
-             msg = bytearray(soundstr)
+             msg = bytearray(filestr)
              result = client.publish(self.topic, msg)
              #result = client.publish(self.topic, self.msg)
              # result: [0, 1]
