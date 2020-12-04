@@ -85,6 +85,12 @@ KFangleX = 0.0
 KFangleY = 0.0
 
 
+f = open('ID.txt', 'r')
+user_id = f.readline().replace('\n', '')
+f.close()
+
+imu_topic = '/' + user_id + '/imu'
+
 def calibrate_init():
     calib_store = []
     calib_data = ""
@@ -125,7 +131,7 @@ def save_data():
 def reminder_handler():
     print('reminder:' + classifier_action)
     #send gesture key over broker
-    pub=PUB("/team2/imu", 'Reminder:' + classifier_action)
+    pub=PUB(imu_topic, 'Reminder:' + classifier_action)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
@@ -134,7 +140,7 @@ def reminder_handler():
 
 def audio_handler():
     print('*Voice activation here*')
-    pub=PUB("/team2/imu","Audio message")
+    pub=PUB(imu_topic,"Audio message")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_audio(client)
