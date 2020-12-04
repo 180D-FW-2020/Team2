@@ -40,11 +40,13 @@ def activate(activity):
         speech_instance.msg_flow()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
-        pub = PUB('/team2/reminders', 'talk')
+        txt_path = speech_instance.get_txtpath()
+        pub = PUB('/team2/messages', 'talk')
+        # Send audio message with the transcription
         client = pub.connect_mqtt()
         client.loop_start()
-        print("Sending " + audio_path + "...")
-        pub.publish_audio(client, audio_path)
+        pub.publish_file(client, audio_path)
+        pub.publish_file(client, txt_path)
         client.disconnect()
 
 def congrats(activity):
