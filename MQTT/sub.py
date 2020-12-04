@@ -31,10 +31,10 @@ class client_mqtt:
         client.connect(broker, port)
         return client
 
-    def subscribe_wav(self, client: mqtt_client):
+    def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             print("Write")
-            f = open('phrase4_rec.wav', 'wb')
+            f = open(filename, 'wb')
             f.write(msg.payload)
             f.close()
             client.disconnect()

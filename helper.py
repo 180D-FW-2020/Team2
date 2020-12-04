@@ -39,6 +39,7 @@ def activate(activity):
         client.disconnect()
 
     if activity == 'talk':
+        topic = '/' + user_id + '/messages'
         print("calling " + activity + " exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
@@ -46,12 +47,19 @@ def activate(activity):
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
-        pub = PUB(topic, 'talk')
+        pub = PUB(topic, 'txt')
         # Send audio message with the transcription
         client = pub.connect_mqtt()
         client.loop_start()
-        pub.publish_file(client, audio_path)
+
+        # pub.set_msg = "audio"
+        # pub.publish_text(client)
+        # pub.publish_file(client, audio_path)
+
+        pub.set_msg = 'txt'
+        pub.publish_text(client)
         pub.publish_file(client, txt_path)
+
         client.disconnect()
 
 def congrats(activity):
