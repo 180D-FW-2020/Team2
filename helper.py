@@ -7,6 +7,7 @@ import os
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
+
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
@@ -29,7 +30,6 @@ def activate(activity):
     caliente.disconnect()
 
     if activity == 'stretch':
-        #TODO: call stretching function
         print("calling " + activity + " exercise")
         os.chdir('tf-pose-estimation-master')
         cmd = 'python run_compare_ref_test_webcam.py --pose=squat,warrior,tree'
