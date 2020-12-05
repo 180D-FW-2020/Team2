@@ -1,6 +1,8 @@
 from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
 from Speech.audio_msg import speech
+import subprocess
+import os
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -29,6 +31,11 @@ def activate(activity):
     if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
+        os.chdir('tf-pose-estimation-master')
+        cmd = 'python run_compare_ref_test_webcam.py --pose=squat,warrior,tree'
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        os.chdir('..')
 
     if activity == 'breath':
         print("calling " + activity + " exercise")
