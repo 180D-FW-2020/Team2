@@ -8,39 +8,35 @@ user_id = f.readline().replace('\n', '')
 f.close()
 
 def listen():
-    my_topic = '/' + user_id + '/reminders'
-    net_topic = '/network/congrats'
-    n_user = ''
-    print("listening on topic for reminders!")
-    print("listening on network for finished tasks!")
+    #my_topic = '/team2' + user_id + '/reminders'
+    my_topic = '/team2/network'
+    get_user = ''
+    print("listening for reminders!")
+    print("listening for finished tasks!")
 
     # MQTT setup for laptop - RPI communication
-    m_client_instance = client_mqtt(my_topic)
-    m_caliente = m_client_instance.connect_mqtt()
-    m_client_instance.subscribe_msg(m_caliente)
-    m_caliente.loop_start()
+    client_instance = client_mqtt(my_topic)
+    caliente = client_instance.connect_mqtt()
+    client_instance.subscribe_msg(caliente)
+    caliente.loop_start()
 
-    # MQTT setup for network communication
-    n_client_instance = client_mqtt(net_topic)
-    n_caliente = n_client_instance.connect_mqtt()
-    n_client_instance.subscribe_msg(n_caliente)
-    n_caliente.loop_start()
-    
     while True:
-        if(m_client_instance.message == 'reminder'):
-            print('calling reminder led matrix')
-            run_reminder()
-        if(m_client_instance.message == 'breathe'):
-            print('calling breath led program')
-            run_breathe()
-        if(n_client_instance.message != ''):
-            print('message on network:' + n_client_instance.message)
-            n_user = n_client_instance.message.split(':')[0]
-            if(n_user != user_id):
+        if(client_instance.message != ''):
+            print('message on network:' + client_instance.message)
+            get_user = client_instance.message.split(':')[0]
+            task = client_instance.message.split(':')[1]
+            if(get_user == user_id):
+                if(task == 'reminder'):
+                    print('calling reminder led matrix')
+                    run_reminder()
+                if(task == 'breathe'):
+                    print('calling breath led program')
+                    run_breathe()
+            else:
                 print('calling congrats led program')
                 run_congrats()
-        m_client_instance.set_message('')
-        n_client_instance.set_message('')
+
+            client_instance.set_message('')
 
 def imu():
     print("starting IMU here!")
