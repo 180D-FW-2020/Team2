@@ -25,7 +25,7 @@ def listen():
     n_caliente = n_client_instance.connect_mqtt()
     n_client_instance.subscribe_msg(n_caliente)
     n_caliente.loop_start()
-
+    
     while True:
         if(m_client_instance.message == 'reminder'):
             print('calling reminder led matrix')
