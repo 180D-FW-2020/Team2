@@ -25,7 +25,7 @@ class speech:
         audio_path = path.join(sent_audiodir, base_audioname + "." + audio_suffix)
 
         pathlib.Path(sent_txtdir).mkdir(parents=True, exist_ok=True)
-        txt_path = path.join(sent_txtdir, base_audioname + "_transcript" "." + txt_suffix)
+        txt_path = path.join(sent_txtdir, base_audioname + "_transcript" + "." + txt_suffix)
 
         self.recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
@@ -34,6 +34,9 @@ class speech:
 
     def get_audiopath(self):
         return self.audio_file
+
+    def get_txtpath(self):
+        return self.txt_file
 
     def recognize_speech_from_mic(self):
         """Transcribe speech from recorded from `microphone`.
