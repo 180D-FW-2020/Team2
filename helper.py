@@ -1,6 +1,8 @@
 from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
 from Speech.audio_msg import speech
+import subprocess
+import os
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -29,6 +31,11 @@ def activate(activity):
     if activity == 'stretch':
         #TODO: call stretching function
         print("calling " + activity + " exercise")
+        os.chdir('tf-pose-estimation-master')
+        cmd = 'python run_compare_ref_test_webcam.py --pose=squat,warrior,tree'
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        os.chdir('..')
 
     if activity == 'breath':
         print("calling " + activity + " exercise")
@@ -39,26 +46,33 @@ def activate(activity):
         client.disconnect()
 
     if activity == 'talk':
+        topic = '/' + user_id + '/messages'
         print("calling " + activity + " exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
         speech_instance.msg_flow()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
-        pub = PUB(topic, 'talk')
+        txt_path = speech_instance.get_txtpath()
+        pub = PUB(topic, 'audio')
+        # Send audio message with the transcription
         client = pub.connect_mqtt()
         client.loop_start()
-        print("Sending " + audio_path + "...")
-        pub.publish_audio(client, audio_path)
+
+        pub.publish_text(client)
+        pub.publish_file(client, audio_path)
+
+        pub.set_msg('transcript')
+        pub.publish_text(client)
+        # pub.publish_file(client, txt_path)
+
         client.disconnect()
 
-    "FINISHED ACTIVITY"
-
 def congrats(activity):
+    #TODO: let users in network know you finished activity
+    print("letting friends know you finished an activity")
     pub = PUB('/network/congrats', user_id + ":" + activity)
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
-    # let users in network know you finished activity on Matrix and Display
-    print("letting friends know you finished an activity")
