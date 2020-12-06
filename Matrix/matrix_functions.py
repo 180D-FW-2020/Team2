@@ -79,6 +79,27 @@ class matrix:
         self.device.contrast(0x80)
         time.sleep(0.3)
 
+    def congrats(self):
+        self.device.clear()
+        # pair this with notification visual with a sound being played ?
+        msg = "Congrats"
+        print(msg)
+
+        time.sleep(1)
+        with canvas(self.device) as draw:
+            text(draw, (0, 0), chr(1), fill="white")
+
+        time.sleep(0.3)
+        for _ in range(5):
+            self.device.contrast(0x00)
+            time.sleep(0.3)
+            self.device.contrast(0x80)
+            time.sleep(0.3)
+
+        self.device.contrast(0x80)
+        time.sleep(0.3)
+
+
     def erase(self):
         self.device.cleanup()
 
@@ -99,5 +120,13 @@ def run_reminder():
     except KeyboardInterrupt:
         pass
 
+def run_congrats():
+    try:
+        device = matrix(args.cascaded, args.block_orientation, args.rotate, args.reverse_order)
+        device.congrats()
+        device.erase()
+    except KeyboardInterrupt:
+        pass
+
 if __name__ == '__main__':
-    run()
+    run_congrats()
