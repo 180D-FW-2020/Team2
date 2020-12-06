@@ -28,7 +28,9 @@ def activate(activity):
     while(client_instance.message == ''):
         pass
     caliente.disconnect()
+    print("activation received!")
 
+def exercise(activity):
     if activity == 'stretch':
         print("calling " + activity + " exercise")
         os.chdir('tf-pose-estimation-master')
@@ -38,6 +40,7 @@ def activate(activity):
         os.chdir('..')
 
     if activity == 'breath':
+        topic = '/' + user_id + '/reminders'
         print("calling " + activity + " exercise")
         pub = PUB(topic, 'breathe')
         client = pub.connect_mqtt()
