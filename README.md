@@ -41,4 +41,3 @@ if tensorflow issues persist, run the command `pip install tensorflow-estimator=
 
 ## raspberry pi setup
 [todo]
->>>>>>> a1dc8e50225a86d9da2246bd68a295df7278cb1d
