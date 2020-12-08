@@ -8,22 +8,35 @@ user_id = f.readline().replace('\n', '')
 f.close()
 
 def listen():
-    topic = '/' + user_id + '/reminders'
+    #my_topic = '/team2' + user_id + '/reminders'
+    my_topic = '/team2/network'
+    get_user = ''
+    print("listening for reminders!")
+    print("listening for finished tasks!")
 
-    print("listening on topic for reminders!")
-    client_instance = client_mqtt(topic)
+    # MQTT setup for laptop - RPI communication
+    client_instance = client_mqtt(my_topic)
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
-    while True:
-        if(client_instance.message == 'reminder'):
-            print('calling reminder led matrix')
-            run_reminder()
-        if(client_instance.message == 'breathe'):
-            print('calling breath led program')
-            run_breathe()
-        client_instance.set_message('')
 
+    while True:
+        if(client_instance.message != ''):
+            print('message on network:' + client_instance.message)
+            get_user = client_instance.message.split(':')[0]
+            task = client_instance.message.split(':')[1]
+            if(get_user == user_id):
+                if(task == 'reminder'):
+                    print('calling reminder led matrix')
+                    run_reminder()
+                if(task == 'breathe'):
+                    print('calling breath led program')
+                    run_breathe()
+            else:
+                print('calling congrats led program')
+                run_congrats()
+
+            client_instance.set_message('')
 
 def imu():
     print("starting IMU here!")

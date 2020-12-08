@@ -12,8 +12,9 @@ f.close()
 
 def activate(activity):
     print("send message to LED Matrix")
-    topic = '/' + user_id + '/reminders'
-    pub = PUB(topic, 'reminder')
+    topic = "/team2/network"
+    #topic = '/' + user_id + '/reminders'
+    pub = PUB(topic, user_id + ':reminder')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
@@ -43,7 +44,7 @@ def exercise(activity):
     if activity == 'breath':
         topic = '/' + user_id + '/reminders'
         print("calling " + activity + " exercise")
-        pub = PUB(topic, 'breathe')
+        pub = PUB(topic, user_id + ':breathe')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
@@ -75,3 +76,8 @@ def exercise(activity):
 def congrats(activity):
     #TODO: let users in network know you finished activity
     print("letting friends know you finished an activity")
+    pub = PUB('/team2/network', user_id + ":" + activity)
+    client = pub.connect_mqtt()
+    client.loop_start()
+    pub.publish_text(client)
+    client.disconnect()
