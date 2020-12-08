@@ -26,7 +26,7 @@ on your rpi, enter the command `python rpi-main.py`
 **ui** laptop \
 +-- screen.kv
 
-## setup
+## setup for Windows
 within your conda environment, run \
 `conda install -c conda-forge wheel` \
 `conda install -c anaconda pip` \
@@ -34,3 +34,7 @@ within your conda environment, run \
 `python -m pip install kivy.deps.gstreamer` \
 `python –m pip install kivy`\
 `conda install -c conda-forge paho-mqtt`
+
+## setup for Mac
+within your conda environment, run \
+`conda install kivy -c conda-forge`
