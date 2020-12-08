@@ -9,7 +9,7 @@ change the name in ID.txt to be `firstnamelastname` \
 on your laptop, enter the command `python main.py` \
 on your rpi, enter the command `python rpi-main.py`
 
-## laptop setup for Windows
+## laptop setup
 `conda create --name WAP` \
 `conda activate WAP` \
 `conda install python==3.7.6` \
@@ -32,9 +32,6 @@ on your rpi, enter the command `python rpi-main.py`
 `conda install -c conda-forge speechrecognition` \
 `pip install google-cloud-speech` \
 `pip install playsound`
-
-## laptop setup for Mac
-`conda install kivy -c conda-forge`
 
 ### tips n tricks
 if tensorflow issues persist, run the command `pip install tensorflow-estimator==2.1.*` in your conda environment
