@@ -29,6 +29,7 @@ def activate(activity):
         pass
     caliente.disconnect()
     print("activation received!")
+    return
 
 def exercise(activity):
     if activity == 'stretch':

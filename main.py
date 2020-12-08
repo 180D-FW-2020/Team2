@@ -15,6 +15,7 @@ from functools import partial
 
 Builder.load_file('./UI/screen.kv')
 
+exercise_message="Exercise activated! Time to complete your task."
 congrats_message ="Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day."
 
 class StartScreen(Screen):
@@ -42,6 +43,7 @@ class WaitScreen(Screen):
     def activity_callback(self, activity, *largs):
         print("entered callback for " + activity)
         activate(activity)
+        self.ids.lbl1.text = exercise_message
         exercise(activity)
         self.ids.lbl1.text = congrats_message
         congrats(activity)
