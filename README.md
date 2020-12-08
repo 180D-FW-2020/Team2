@@ -30,10 +30,10 @@ on your rpi, enter the command `python rpi-main.py`
 `conda install -c conda-forge paho-mqtt`\
 `conda install -c anaconda pyaudio` \
 `conda install -c conda-forge speechrecognition` \
-`pip install google-cloud-speech`
+`pip install google-cloud-speech` \
+`pip install playsound`
 
-### a note on windows OS
-in /tf-pose-estimation-master/tf_pose/estimator.py, replace `from tensorflow.python.compiler.tensorrt import trt_convert as trt` with `from tensorflow.python.compiler.tensorrt import trt_convert_windows as trt ` \
+### tips n tricks
 if tensorflow issues persist, run the command `pip install tensorflow-estimator==2.1.*` in your conda environment
 
 ## raspberry pi setup
