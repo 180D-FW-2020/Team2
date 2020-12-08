@@ -8,11 +8,18 @@
 
 import random
 from paho.mqtt import client as mqtt_client
+import os
+import sys
 
-broker = 'broker.emqx.io'
+broker = 'test.mosquitto.org'
 port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
+id_path = os.path.join(os.getcwd(), 'ID.txt')
+
+f = open(id_path, 'r')
+user_id = f.readline().replace('\n', '')
+f.close()
 
 class client_mqtt:
     def __init__(self, topic):
@@ -44,7 +51,13 @@ class client_mqtt:
     def subscribe_msg(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             self.message = msg.payload.decode()
-            print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+            get_user = self.message.split(':')[0]
+            task = self.message.split(':')[1]
+            if(get_user == user_id):
+                print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+            else:
+                if(task == 'stretch' or task == 'breathe' or task == 'talk'):
+                    print(get_user + " completed " + task + ". Send a congrats message!")
 
         client.subscribe(self.topic)
         client.on_message = on_message

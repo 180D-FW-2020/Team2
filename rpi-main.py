@@ -22,7 +22,7 @@ def listen():
 
     while True:
         if(client_instance.message != ''):
-            print('message on network:' + client_instance.message)
+            #print('message on network:' + client_instance.message)
             get_user = client_instance.message.split(':')[0]
             task = client_instance.message.split(':')[1]
             if(get_user == user_id):

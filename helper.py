@@ -60,16 +60,18 @@ def exercise(activity):
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
-        pub = PUB(topic, 'audio')
         # Send audio message with the transcription
+        pub = PUB(topic, 'audio')
         client = pub.connect_mqtt()
         client.loop_start()
-
         pub.publish_text(client)
         pub.publish_file(client, audio_path)
+        client.disconnect()
 
-        pub.set_msg('transcript')
-        pub.publish_text(client)
+        # pub = PUB(topic, 'transcript')
+        # client = pub.connect_mqtt()
+        # client.loop_start()
+        # pub.publish_text(client)
         # pub.publish_file(client, txt_path)
 
         client.disconnect()
