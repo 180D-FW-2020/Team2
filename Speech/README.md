@@ -1,2 +1,2 @@
 Install the audio packages below:
-   pip3 install playsound pyaudio pydub ffmpeg-python
+   pip3 install playsound pyaudio pydub ffmpeg-python speechrecognition
