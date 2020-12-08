@@ -3,6 +3,7 @@ from MQTT.pub import PUB
 from Speech.audio_msg import speech
 import subprocess
 import os
+import time
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -41,8 +42,8 @@ def exercise(activity):
         out, err = p.communicate()
         os.chdir('..')
 
-    if activity == 'breath':
-        topic = '/' + user_id + '/reminders'
+    if activity == 'breathe':
+        topic = '/team2/network'
         print("calling " + activity + " exercise")
         pub = PUB(topic, user_id + ':breathe')
         client = pub.connect_mqtt()
@@ -74,9 +75,11 @@ def exercise(activity):
         client.disconnect()
 
 def congrats(activity):
+    if activity == 'breathe':
+        time.sleep(15)
     #TODO: let users in network know you finished activity
     print("letting friends know you finished an activity")
-    pub = PUB('/team2/network', user_id + ":" + activity)
+    pub = PUB('/team2/network', user_id + ":" + 'finish')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)

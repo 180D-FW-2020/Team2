@@ -33,8 +33,9 @@ def listen():
                     print('calling breath led program')
                     run_breathe()
             else:
-                print('calling congrats led program')
-                run_congrats()
+                if (task == 'finish'):
+                    print('calling congrats led program')
+                    run_congrats()
 
             client_instance.set_message('')
 
