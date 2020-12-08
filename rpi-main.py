@@ -22,7 +22,7 @@ def listen():
 
     while True:
         if(client_instance.message != ''):
-            print('message on network:' + client_instance.message)
+            #print('message on network:' + client_instance.message)
             get_user = client_instance.message.split(':')[0]
             task = client_instance.message.split(':')[1]
             if(get_user == user_id):
@@ -33,8 +33,9 @@ def listen():
                     print('calling breath led program')
                     run_breathe()
             else:
-                print('calling congrats led program')
-                run_congrats()
+                if(task == 'stretch' or task == 'breathe' or task == 'talk'):
+                    print('calling congrats led program')
+                    run_congrats()
 
             client_instance.set_message('')
 
