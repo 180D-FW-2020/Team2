@@ -33,7 +33,8 @@ on your rpi, enter the command `python rpi-main.py`
 `pip install google-cloud-speech`
 
 ### a note on windows OS
-in /tf-pose-estimation-master/tf_pose/estimator.py, replace `from tensorflow.python.compiler.tensorrt import trt_convert as trt` with `from tensorflow.python.compiler.tensorrt import trt_convert_windows as trt `
+in /tf-pose-estimation-master/tf_pose/estimator.py, replace `from tensorflow.python.compiler.tensorrt import trt_convert as trt` with `from tensorflow.python.compiler.tensorrt import trt_convert_windows as trt ` \
+if tensorflow issues persist, run the command `pip install tensorflow-estimator==2.1.*` in your conda environment
 
 ## raspberry pi setup
 [todo]
