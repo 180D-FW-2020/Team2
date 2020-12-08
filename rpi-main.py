@@ -33,7 +33,7 @@ def listen():
                     print('calling breath led program')
                     run_breathe()
             else:
-                if(task == 'stretch' or task == 'breathe' or task == 'talk'):
+                if (task == 'finish'):
                     print('calling congrats led program')
                     run_congrats()
 
