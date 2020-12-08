@@ -11,8 +11,10 @@ import time
 from tf_pose import common
 from tf_pose.common import CocoPart
 from tf_pose.tensblur.smoother import Smoother
-from tensorflow.python.compiler.tensorrt import trt_convert as trt
-
+try:
+    from tensorflow.python.compiler.tensorrt import trt_convert as trt
+except:
+    from tensorflow.python.compiler.tensorrt import trt_convert_windows as trt
 try:
     from tf_pose.pafprocess import pafprocess
 except ModuleNotFoundError as e:

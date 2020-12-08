@@ -3,10 +3,12 @@ from MQTT.pub import PUB
 from Speech.audio_msg import speech
 import subprocess
 import os
+import time
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
+
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
@@ -28,9 +30,11 @@ def activate(activity):
     while(client_instance.message == ''):
         pass
     caliente.disconnect()
+    print("activation received!")
+    return
 
+def exercise(activity):
     if activity == 'stretch':
-        #TODO: call stretching function
         print("calling " + activity + " exercise")
         os.chdir('tf-pose-estimation-master')
         cmd = 'python run_compare_ref_test_webcam.py --pose=tree,squat,warrior'
@@ -38,7 +42,8 @@ def activate(activity):
         out, err = p.communicate()
         os.chdir('..')
 
-    if activity == 'breath':
+    if activity == 'breathe':
+        topic = '/team2/network'
         print("calling " + activity + " exercise")
         pub = PUB(topic, user_id + ':breathe')
         client = pub.connect_mqtt()
@@ -72,9 +77,11 @@ def activate(activity):
         client.disconnect()
 
 def congrats(activity):
+    if activity == 'breathe':
+        time.sleep(15)
     #TODO: let users in network know you finished activity
     print("letting friends know you finished an activity")
-    pub = PUB('/team2/network', user_id + ":" + activity)
+    pub = PUB('/team2/network', user_id + ":" + 'finish')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)

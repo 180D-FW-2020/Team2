@@ -9,28 +9,32 @@ change the name in ID.txt to be `firstnamelastname` \
 on your laptop, enter the command `python main.py` \
 on your rpi, enter the command `python rpi-main.py`
 
-## structure
-**main.py**  runs application on laptop \
-**helper.py** helper functions + constants for main.py \
-**rpi-main.py** driving function on raspi \
-**imu** rpi \
-+-- python-BerryIMU-gryo-accel-compass-filters \
-+-- +-- berryIMU_classifier.py \
-**mqtt** rpi + laptop \
-+-- pub.py \
-+--sub.py \
-**matrix** rpi \
-+--matrix_functions.py \
-**speech** laptop \
-+-- audio_msg.py \
-**ui** laptop \
-+-- screen.kv
+## laptop setup
+`conda create --name WAP` \
+`conda activate WAP` \
+`conda install python==3.7.6` \
+`conda install -c anaconda git` \
+`conda install tensorflow` \
+`git clone https://github.com/180D-FW-2020/Team2.git` \
+`cd tf-pose-estimation-master` \
+`pip install -r requirements.txt` \
+`conda install swig` \
+`cd tf_pose/pafprocess` \
+`swig -python -c++ pafprocess.i && python setup.py build_ext --inplace` \
+`pip install opencv-python` \
+`pip install git+https://github.com/adrianc-a/tf-slim.git@remove_contrib` \
+`cd ../../models/graph/cmu` \
+`download.sh` \
+`cd ../../../..` \
+`conda install -c conda-forge kivy` \
+`conda install -c conda-forge paho-mqtt`\
+`conda install -c anaconda pyaudio` \
+`conda install -c conda-forge speechrecognition` \
+`pip install google-cloud-speech` \
+`pip install playsound`
 
-## setup
-within your conda environment, run \
-`conda install -c conda-forge wheel` \
-`conda install -c anaconda pip` \
-`python -m pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew` \
-`python -m pip install kivy.deps.gstreamer` \
-`python –m pip install kivy`\
-`conda install -c conda-forge paho-mqtt`
+### tips n tricks
+if tensorflow issues persist, run the command `pip install tensorflow-estimator==2.1.*` in your conda environment
+
+## raspberry pi setup
+[todo]
