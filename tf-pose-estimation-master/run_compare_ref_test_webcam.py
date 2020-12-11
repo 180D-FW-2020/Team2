@@ -27,6 +27,13 @@ TIMER = int(10)
 #Initialize camera
 cap = cv2.VideoCapture(0)
 
+#Colors BGR
+yellow_color = (0, 255, 255)
+red_color = (0,0,255)
+green_color = (0,255,0)
+white_color = (255,255,255)
+black_color = (0,0,0)
+
 #Settings
 w_cam = 432
 h_cam = 368
@@ -123,6 +130,22 @@ circle_thickness = -1 #fill circle
 black_frame = cv2.imread('frame.jpg')
 green_frame = cv2.imread('green.png')
 
+#Top bar
+green_frame = cv2.imread('green.png')
+height, width, channels = green_frame.shape
+green_frame = green_frame[0:100, 0:int(width/2)]
+
+#Pose
+blue_frame = green_frame.copy()
+blue_frame[np.where((blue_frame == [75,176,0]).all(axis = 2))] = [176, 123, 0]
+
+#Status
+orange_frame = green_frame.copy()
+orange_frame[np.where((orange_frame == [75,176,0]).all(axis = 2))] = [0, 179, 255]
+
+status_arr = ["NOW POSE", "HOLD FOR 3 SEC", "GREAT JOB"]
+status = status_arr[0]
+
 #Create the joint overlay for each verification pose
 for pose in pose_list:
     #Get joints of skeleton from reference image
@@ -176,14 +199,19 @@ for i in range(len(pose_list)):
 
         #Draw timer
         cv2.circle(test_img, center_coord, radius, color_bgr, circle_thickness)
+        cv2.putText(test_img, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
 
-        font = cv2.FONT_HERSHEY_TRIPLEX
-        cv2.putText(test_img, str(TIMER),
-                    (100,200), font,
-                    5, (255, 255, 255),
-                    10, cv2.LINE_AA)
+        #Top bar
+        blue_frame_copy = blue_frame.copy()
+        cv2.putText(blue_frame_copy, pose.upper(), (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
 
-        cv2.imshow('Hi', test_img)
+        orange_frame_copy = orange_frame.copy()
+        cv2.putText(orange_frame_copy, status, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
+
+        top_concat = cv2.hconcat([blue_frame_copy, orange_frame_copy])
+        final_frame = cv2.vconcat([top_concat, test_img])
+
+        cv2.imshow('Hi', final_frame)
         if curr-prev>=1:
             prev = curr
             TIMER = TIMER-1
@@ -217,18 +245,10 @@ for i in range(len(pose_list)):
             break
 
         accuracy = compare_img_ret_accuracy(test_joint_array, ref_joint_array)
-    #str_accuracy = "{:.2f}".format(accuracy)
         str_accuracy = int(accuracy*100)
-        status_arr = ["Get into position!", "Now hold for 3 secs!", "Great job!"]
-        status = status_arr[0]
         font = cv2.FONT_HERSHEY_SIMPLEX
         acc_coord_from_top_left = (0,700) #bottom left corner
-        #BGR
-        yellow_color = (0, 255, 255)
-        red_color = (0,0,255)
-        green_color = (0,255,0)
-        white_color = (255,255,255)
-        black_color = (0,0,0)
+
         color = yellow_color
         thickness = 4
         font_scale = 3
@@ -271,18 +291,20 @@ for i in range(len(pose_list)):
             #If timer is up, break
             if TIMER <=0:
                 status = status_arr[2]
-                font_scale=5
+                font_scale=2
                 thickness = 5
                 #Play great job sound
                 T = Thread(target=play_audio_file, args = [2])
                 T.start()
 
-                textsize_great_job = cv2.getTextSize(status, font, font_scale, thickness)[0]
-                gj_mid_x = int((green_frame.shape[1] - textsize_great_job[0]) / 2)
-                gj_mid_y = int((green_frame.shape[0] - textsize_great_job[1]) / 2)
+                green_frame_copy = green_frame.copy()
+                cv2.putText(green_frame_copy, status, (50, 70), font, font_scale, (255,255,255), thickness, cv2.LINE_AA)
+                top_concat = cv2.hconcat([blue_frame_copy, green_frame_copy])
 
-                cv2.putText(green_frame, status, (gj_mid_x, gj_mid_y), font, font_scale, black_color, thickness, cv2.LINE_AA)
-                final = cv2.hconcat([combined_image, green_frame])
+                cv2.circle(combined_image, center_coord, radius, color_bgr, circle_thickness)
+                cv2.putText(combined_image, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
+
+                final = cv2.vconcat([top_concat, combined_image])
                 cv2.imshow('Hi', final)
                 cv2.waitKey(2000)
 
@@ -295,17 +317,24 @@ for i in range(len(pose_list)):
             #reset timer back to 3 seconds
             TIMER = 3
             timer_start = False
-        black_frame = cv2.imread('frame.jpg')
-        #Pose string
-        cv2.putText(black_frame, pose.upper(), pose_coord, font, font_scale, yellow_color, thickness, cv2.LINE_AA, False) #top left corner
-        #Timer string
-        cv2.putText(black_frame, str(TIMER), timer_coord, font, font_scale, white_color, thickness, cv2.LINE_AA)
-        #Status string
-        cv2.putText(black_frame, status, status_coord, font, font_scale, yellow_color, thickness, cv2.LINE_AA)
+        
+        blue_frame_copy = blue_frame.copy()
+        cv2.putText(blue_frame_copy, pose.upper(), (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
 
-        final = cv2.hconcat([combined_image, black_frame])
+        orange_frame_copy = orange_frame.copy()
+        cv2.putText(orange_frame_copy, status, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
+        top_concat = cv2.hconcat([blue_frame_copy, orange_frame_copy])
+
+        #Timer
+        cv2.circle(combined_image, center_coord, radius, color_bgr, circle_thickness)
+        cv2.putText(combined_image, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
+
+        final = cv2.vconcat([top_concat, combined_image])
         cv2.imshow('Hi', final)
 
 # Release the camera and destroy all windows
 cap.release()
 cv2.destroyAllWindows()
+
+
+
