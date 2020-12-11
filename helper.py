@@ -52,7 +52,6 @@ def exercise(activity):
         client.disconnect()
 
     if activity == 'talk':
-        topic = '/' + user_id + '/messages'
         print("calling " + activity + " exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
@@ -61,7 +60,7 @@ def exercise(activity):
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
         # Send audio message with the transcription
-        pub = PUB(topic, 'audio')
+        pub = PUB(topic, user_id + ':' + 'talk')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
