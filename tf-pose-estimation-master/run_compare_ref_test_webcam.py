@@ -56,13 +56,6 @@ radius = 100
 color_bgr = (184, 143, 11)
 circle_thickness = -1 #fill circle
 
-#Top bar
-top_bar_height = 100 #in pixels
-top_bar_width = int(cap_width/2)
-green_frame = retColorImage(top_bar_width, top_bar_height, green_color)
-blue_frame = retColorImage(top_bar_width, top_bar_height, blue_color)
-orange_frame = retColorImage(top_bar_width, top_bar_height, orange_color)
-
 status_arr = ["NOW POSE", "HOLD FOR 3 SEC", "GREAT JOB"]
 status = status_arr[0]
 
@@ -152,6 +145,13 @@ def retFinalImage(webcam_frame, timer_str, timer_color, frame1, text1, frame2, t
     final = cv2.vconcat([top_concat, webcam_frame])
 
     return final
+
+#Top bar
+top_bar_height = 100 #in pixels
+top_bar_width = int(cap_width/2)
+green_frame = retColorImage(top_bar_width, top_bar_height, green_color)
+blue_frame = retColorImage(top_bar_width, top_bar_height, blue_color)
+orange_frame = retColorImage(top_bar_width, top_bar_height, orange_color)
 
 #Parse input arguments to get pose list
 parser = argparse.ArgumentParser(description='tf-pose-estimation run')
