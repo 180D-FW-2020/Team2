@@ -26,13 +26,17 @@ TIMER = int(10)
 
 #Initialize camera
 cap = cv2.VideoCapture(0)
+cap_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+cap_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 #Colors BGR
 yellow_color = (0, 255, 255)
 red_color = (0,0,255)
-green_color = (0,255,0)
+green_color = (17, 87, 5)
 white_color = (255,255,255)
 black_color = (0,0,0)
+blue_color = (176, 123, 0)
+orange_color = (0, 179, 255)
 
 #Settings
 w_cam = 432
@@ -40,6 +44,27 @@ h_cam = 368
 resize_out_ratio = 4
 
 offset_xy = 200
+
+#Will be filled 
+pose_mask_list = []
+overlay_list = []
+ref_joint_list_arrays = []
+
+#Circle for timer
+center_coord = (150,150)
+radius = 100
+color_bgr = (184, 143, 11)
+circle_thickness = -1 #fill circle
+
+#Top bar
+top_bar_height = 100 #in pixels
+top_bar_width = int(cap_width/2)
+green_frame = retColorImage(top_bar_width, top_bar_height, green_color)
+blue_frame = retColorImage(top_bar_width, top_bar_height, blue_color)
+orange_frame = retColorImage(top_bar_width, top_bar_height, orange_color)
+
+status_arr = ["NOW POSE", "HOLD FOR 3 SEC", "GREAT JOB"]
+status = status_arr[0]
 
 #Sounds
 sounds = ['intro_pose.wav', 'hold.wav', 'great_job.wav']
@@ -106,45 +131,35 @@ def compare_img_ret_accuracy(test_joint_array, ref_joint_array):
 #    print(accuracy_arr)
     return accuracy
 
-def print_good_job():
-    pass
+def retColorImage(width, height, color):
+    blank_image = np.zeros((height,width,3), np.uint8)
+    blank_image[0:height,0:width] = color
+    return blank_image
 
+#Pass in the 2 halves and the text to go on it
+def retFinalImage(webcam_frame, timer_str, timer_color, frame1, text1, frame2, text2):
+    #Pose and status
+    frame1_copy = frame1.copy()
+    cv2.putText(frame1_copy, text1, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
+
+    frame2_copy = frame2.copy()
+    cv2.putText(frame2_copy, text2, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
+    top_concat = cv2.hconcat([frame1_copy, frame2_copy])
+
+    cv2.circle(webcam_frame, center_coord, radius, timer_color, circle_thickness)
+    cv2.putText(webcam_frame, timer_str,(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
+
+    final = cv2.vconcat([top_concat, webcam_frame])
+
+    return final
+
+#Parse input arguments to get pose list
 parser = argparse.ArgumentParser(description='tf-pose-estimation run')
 parser.add_argument('--pose', type=str, default='tree')
 args = parser.parse_args()
 pose = args.pose
 pose_list = pose.split(',')
 #pass in as --pose=squat,warrior,tree
-
-
-pose_mask_list = []
-overlay_list = []
-ref_joint_list_arrays = []
-
-#circle
-center_coord = (150,150)
-radius = 100
-color_bgr = (184, 143, 11)
-circle_thickness = -1 #fill circle
-
-black_frame = cv2.imread('frame.jpg')
-green_frame = cv2.imread('green.png')
-
-#Top bar
-green_frame = cv2.imread('green.png')
-height, width, channels = green_frame.shape
-green_frame = green_frame[0:100, 0:int(width/2)]
-
-#Pose
-blue_frame = green_frame.copy()
-blue_frame[np.where((blue_frame == [75,176,0]).all(axis = 2))] = [176, 123, 0]
-
-#Status
-orange_frame = green_frame.copy()
-orange_frame[np.where((orange_frame == [75,176,0]).all(axis = 2))] = [0, 179, 255]
-
-status_arr = ["NOW POSE", "HOLD FOR 3 SEC", "GREAT JOB"]
-status = status_arr[0]
 
 #Create the joint overlay for each verification pose
 for pose in pose_list:
@@ -197,19 +212,7 @@ for i in range(len(pose_list)):
         test_img *=overlayMask
         test_img+=overlay
 
-        #Draw timer
-        cv2.circle(test_img, center_coord, radius, color_bgr, circle_thickness)
-        cv2.putText(test_img, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
-
-        #Top bar
-        blue_frame_copy = blue_frame.copy()
-        cv2.putText(blue_frame_copy, pose.upper(), (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
-
-        orange_frame_copy = orange_frame.copy()
-        cv2.putText(orange_frame_copy, status, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
-
-        top_concat = cv2.hconcat([blue_frame_copy, orange_frame_copy])
-        final_frame = cv2.vconcat([top_concat, test_img])
+        final_frame = retFinalImage(test_img, str(TIMER), color_bgr, blue_frame, pose.upper(), orange_frame, status)
 
         cv2.imshow('Hi', final_frame)
         if curr-prev>=1:
@@ -217,7 +220,7 @@ for i in range(len(pose_list)):
             TIMER = TIMER-1
 
         k = cv2.waitKey(5)
-        if k == 27:
+        if k == ord('q'):
             break
 
     #Reset timer back to 3 for holding
@@ -249,29 +252,13 @@ for i in range(len(pose_list)):
         font = cv2.FONT_HERSHEY_SIMPLEX
         acc_coord_from_top_left = (0,700) #bottom left corner
 
-        color = yellow_color
-        thickness = 4
+        thickness = 5
         font_scale = 3
-
-        #Coord in (x,y) [left to right is x axis] [up and down is y axis]. Set the coordinates of the timer, status, and pose texts
-        textsize_pose = cv2.getTextSize(pose.upper(), font, font_scale, thickness)[0]
-        textsize_status = cv2.getTextSize(status, font, font_scale, thickness)[0]
-        textsize_timer = cv2.getTextSize(str(TIMER), font, font_scale, thickness)[0]
-
-        mid_x = int((black_frame.shape[1] - textsize_pose[0]) / 2)
-        pose_coord = (mid_x, 70 +offset_xy)
-
-        mid_x = int((black_frame.shape[1] - textsize_timer[0]) / 2)
-        timer_coord = (mid_x,250+offset_xy)
-
-        mid_x = int((black_frame.shape[1] - textsize_status[0]) / 2)
-        status_coord = (mid_x, 150 +offset_xy)
 
         if accuracy >= 0.6:
             #Hold position
-            color = green_color
             status = status_arr[1]
-            cv2.putText(combined_image, "GOOD: " + str(str_accuracy) + "%", acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
+            cv2.putText(combined_image, "GOOD: " + str(str_accuracy) + "%", acc_coord_from_top_left, font, font_scale, green_color, thickness, cv2.LINE_AA)
 
             #Start timer when it is false and play "Now hold" sound
             if timer_start is False:
@@ -297,44 +284,23 @@ for i in range(len(pose_list)):
                 T = Thread(target=play_audio_file, args = [2])
                 T.start()
 
-                green_frame_copy = green_frame.copy()
-                cv2.putText(green_frame_copy, status, (50, 70), font, font_scale, (255,255,255), thickness, cv2.LINE_AA)
-                top_concat = cv2.hconcat([blue_frame_copy, green_frame_copy])
-
-                cv2.circle(combined_image, center_coord, radius, color_bgr, circle_thickness)
-                cv2.putText(combined_image, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
-
-                final = cv2.vconcat([top_concat, combined_image])
-                cv2.imshow('Hi', final)
+                final_frame = retFinalImage(combined_image, str(TIMER), green_color, blue_frame, pose.upper(), green_frame, status)
+                cv2.imshow('Hi', final_frame)
                 cv2.waitKey(2000)
 
+                status = status_arr[0]
                 break
 
         else:
-            color = red_color
             status = status_arr[0]
-            cv2.putText(combined_image, "BAD: " + str(str_accuracy), acc_coord_from_top_left, font, font_scale, color, thickness, cv2.LINE_AA)
+            cv2.putText(combined_image, "BAD: " + str(str_accuracy), acc_coord_from_top_left, font, font_scale, red_color, thickness, cv2.LINE_AA)
             #reset timer back to 3 seconds
             TIMER = 3
             timer_start = False
         
-        blue_frame_copy = blue_frame.copy()
-        cv2.putText(blue_frame_copy, pose.upper(), (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
-
-        orange_frame_copy = orange_frame.copy()
-        cv2.putText(orange_frame_copy, status, (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 5, cv2.LINE_AA)
-        top_concat = cv2.hconcat([blue_frame_copy, orange_frame_copy])
-
-        #Timer
-        cv2.circle(combined_image, center_coord, radius, color_bgr, circle_thickness)
-        cv2.putText(combined_image, str(TIMER),(100,200), cv2.FONT_HERSHEY_TRIPLEX, 5, (255, 255, 255), 10, cv2.LINE_AA)
-
-        final = cv2.vconcat([top_concat, combined_image])
-        cv2.imshow('Hi', final)
+        final_frame = retFinalImage(combined_image, str(TIMER), green_color, blue_frame, pose.upper(), orange_frame, status)
+        cv2.imshow('Hi', final_frame)
 
 # Release the camera and destroy all windows
 cap.release()
 cv2.destroyAllWindows()
-
-
-
