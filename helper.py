@@ -25,7 +25,7 @@ def activate(activity):
     imu_topic = '/' + user_id + '/imu'
     client_instance = client_mqtt(imu_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
+    client_instance.subscribe_msg(caliente, "msg.txt")
     caliente.loop_start()
     while(client_instance.message == ''):
         pass
@@ -52,6 +52,7 @@ def exercise(activity):
         client.disconnect()
 
     if activity == 'talk':
+        topic = "/team2/network"
         print("calling " + activity + " exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
@@ -59,20 +60,12 @@ def exercise(activity):
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
-        # Send audio message with the transcription
-        pub = PUB(topic, user_id + ':' + 'talk')
+        # Send transcription over - no audio message -
+        pub = PUB(topic, user_id + ':talk')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
-        pub.publish_file(client, audio_path)
-        client.disconnect()
-
-        # pub = PUB(topic, 'transcript')
-        # client = pub.connect_mqtt()
-        # client.loop_start()
-        # pub.publish_text(client)
-        # pub.publish_file(client, txt_path)
-
+        pub.publish_file(client, txt_path)
         client.disconnect()
 
 def congrats(activity):

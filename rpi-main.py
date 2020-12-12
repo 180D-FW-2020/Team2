@@ -35,6 +35,7 @@ def listen():
                 if(task == "talk"):
                     print('calling breath led program')
                     base_name = "message"
+                    audio_suffix = "wav"
                     filename = base_name + "." + audio_suffix
                     client_instance.subscribe_file(caliente, filename)
             else:
