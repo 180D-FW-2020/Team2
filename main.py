@@ -57,6 +57,7 @@ class WaitScreen(Screen):
         else:
             self.ids.lbl1.text = congrats_message
         congrats(activity)
+        Clock.schedule_once(partial(self.message, activity), (time*60))  #gets called every hour
 
     def activity_callback(self, activity, time, *largs):
         print("entered callback for " + activity)
