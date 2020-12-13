@@ -44,7 +44,7 @@ class client_mqtt:
     #         f = open(filename, 'wb')
     #         f.write(msg.payload)
     #         f.close()
-    # 
+    #
     #     client.subscribe(self.topic)
     #     client.on_message = on_message
 
