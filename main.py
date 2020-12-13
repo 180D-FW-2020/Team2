@@ -15,7 +15,6 @@ from functools import partial
 
 Builder.load_file('./UI/screen.kv')
 
-exercise_message="Exercise activated! Time to complete your task."
 congrats_message ="Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day."
 
 class StartScreen(Screen):
@@ -39,27 +38,36 @@ class WaitScreen(Screen):
             self.ids.lbl1.text = 'Time to breathe!\nActivate the exercise using the IMU.'
         if activity == 'talk':
             self.ids.lbl1.text = 'Time to talk to friends!\nActivate sending a message using the IMU.'
+        Clock.schedule_once(partial(self.activity_callback, activity, largs[0]))
+
+    def message2(self, activity, time, *largs):
+        if activity == 'stretch':
+            self.ids.lbl1.text = 'Stretching activated! Follow Jackie\'s instructions :)'
+        if activity == 'breathe':
+            self.ids.lbl1.text = 'Follow along with the breathing exercise on the matrix!'
+        if activity == 'talk':
+            self.ids.lbl1.text = 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
+        Clock.schedule_once(partial(self.exercise_callback, activity, time))
 
     def exercise_callback(self, activity, time, *largs):
         print('entered exercise callback')
         exercise(activity)
-        self.ids.lbl1.text = congrats_message
+        if activity == 'talk':
+            self.ids.lbl1.text = "Message saved and sending...\n\n" + congrats_message
+        else:
+            self.ids.lbl1.text = congrats_message
         congrats(activity)
-        Clock.schedule_once(partial(self.message, activity), (time - 0.5))
-        Clock.schedule_once(partial(self.activity_callback, activity), time)
 
-    def activity_callback(self, activity, *largs):
+    def activity_callback(self, activity, time, *largs):
         print("entered callback for " + activity)
         activate(activity)
-        Clock.schedule_once(partial(self.exercise_callback, activity, largs[0]))
-        self.ids.lbl1.text = exercise_message
+        Clock.schedule_once(partial(self.message2, activity, time))
 
     def on_pre_enter(self, *args):
         a = App.get_running_app()
         for k,v in a.big_dict.items():
             if v:
-                Clock.schedule_once(partial(self.message, k), (a.time_dict[k] * 60) - .5)
-                Clock.schedule_once(partial(self.activity_callback, k), a.time_dict[k] * 60)
+                Clock.schedule_once(partial(self.message, k), (a.time_dict[k] * 60))
 
 class Root(ScreenManager):
     pass
@@ -69,7 +77,7 @@ class WAP(App):
     big_dict=DictProperty({'stretch':False,'breathe':False,'talk':False})
 
     #time in minutes
-    time_dict=DictProperty({'stretch':.5,'breathe':.5,'talk':.5})
+    time_dict=DictProperty({'stretch':2,'breathe':.1,'talk':1})
     def build(self):
         return Root()
 

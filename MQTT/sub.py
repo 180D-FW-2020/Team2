@@ -38,31 +38,29 @@ class client_mqtt:
         client.connect(broker, port)
         return client
 
-    # def subscribe_file(self, client: mqtt_client, filename):
-    #     def on_message(client, userdata, msg):
-    #         print("Write")
-    #         f = open(filename, 'wb')
-    #         f.write(msg.payload)
-    #         f.close()
-    # 
-    #     client.subscribe(self.topic)
-    #     client.on_message = on_message
+    def subscribe_file(self, client: mqtt_client, filename):
+        def on_message(client, userdata, msg):
+            print("Write")
+            f = open(filename, 'wb')
+            f.write(msg.payload)
+            f.close()
 
-    def subscribe_msg(self, client: mqtt_client, filename):
+        client.subscribe(self.topic)
+        client.on_message = on_message
+
+    def subscribe_msg(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             self.message = msg.payload.decode()
-            if(self.message.find(':')!= -1):
+            try:
                 get_user = self.message.split(':')[0]
                 task = self.message.split(':')[1]
                 if(get_user == user_id):
                     print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
                 else:
-                    if(task == 'finish'):
-                        print(get_user + " completed a goal. Send a congrats message!")
-            else:
-                f = open(filename, 'wb')
-                f.write(msg.payload)
-                f.close()
+                    if(task == 'stretch' or task == 'breathe' or task == 'talk'):
+                        print(get_user + " completed " + task + ". Send a congrats message!")
+            except:
+                print('receiving a file')
 
         client.subscribe(self.topic)
         client.on_message = on_message
