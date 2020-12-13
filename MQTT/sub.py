@@ -44,7 +44,7 @@ class client_mqtt:
     #         f = open(filename, 'wb')
     #         f.write(msg.payload)
     #         f.close()
-    # 
+    #
     #     client.subscribe(self.topic)
     #     client.on_message = on_message
 
@@ -58,8 +58,8 @@ class client_mqtt:
                 if(get_user == user_id):
                     print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
                 else:
-                    if(task == 'stretch' or task == 'breathe' or task == 'talk'):
-                        print(get_user + " completed " + task + ". Send a congrats message!")
+                    if(task == 'finish'):
+                        print(get_user + " completed a goal. Send a congrats message!")
             else:
                 f = open(filename, 'wb')
                 f.write(msg.payload)
