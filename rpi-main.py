@@ -22,20 +22,22 @@ def listen():
 
     while True:
         if(client_instance.message != ''):
-            #print('message on network:' + client_instance.message)
-            get_user = client_instance.message.split(':')[0]
-            task = client_instance.message.split(':')[1]
-            if(get_user == user_id):
-                if(task == 'reminder'):
-                    print('calling reminder led matrix')
-                    run_reminder()
-                if(task == 'breathe'):
-                    print('calling breath led program')
-                    run_breathe()
-            else:
-                if (task == 'finish'):
-                    print('calling congrats led program')
-                    run_congrats()
+            print('message on network:' + client_instance.message)
+            if(client_instance.message.find(':') != -1):
+                print("entered")
+                get_user = client_instance.message.split(':')[0]
+                task = client_instance.message.split(':')[1]
+                if(get_user == user_id):
+                    if(task == 'reminder'):
+                        print('calling reminder led matrix')
+                        run_reminder()
+                    if(task == 'breathe'):
+                        print('calling breath led program')
+                        run_breathe()
+                else:
+                    if (task == 'finish'):
+                        print('calling congrats led program')
+                        run_congrats()
 
             client_instance.set_message('')
 

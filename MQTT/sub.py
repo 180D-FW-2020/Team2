@@ -51,13 +51,16 @@ class client_mqtt:
     def subscribe_msg(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             self.message = msg.payload.decode()
-            get_user = self.message.split(':')[0]
-            task = self.message.split(':')[1]
-            if(get_user == user_id):
-                print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-            else:
-                if(task == 'stretch' or task == 'breathe' or task == 'talk'):
-                    print(get_user + " completed " + task + ". Send a congrats message!")
+            print("message:" + self.message)
+            print("index:" + str(self.message.find(':')))
+            if(self.message.find(':') != -1):
+                get_user = self.message.split(':')[0]
+                task = self.message.split(':')[1]
+                if(get_user == user_id):
+                    print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+                else:
+                    if(task == 'finish'):
+                        print(get_user + " completed a goal. Send a congrats message!")
 
         client.subscribe(self.topic)
         client.on_message = on_message
