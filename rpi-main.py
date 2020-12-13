@@ -24,7 +24,6 @@ def listen():
         if(client_instance.message != ''):
             #print('message on network:' + client_instance.message)
             if(client_instance.message.find(':') != -1):
-                print("entered")
                 get_user = client_instance.message.split(':')[0]
                 task = client_instance.message.split(':')[1]
                 if(get_user == user_id):
