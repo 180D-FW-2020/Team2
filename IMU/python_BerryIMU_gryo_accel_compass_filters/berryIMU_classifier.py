@@ -259,8 +259,8 @@ def imu_run():
         sys.exit()
     IMU.initIMU()       #Initialise the accelerometer, gyroscope and compass
 
-    if(os.path.exists("calibration.csv")):
-        calibrate_init()
+    #if(os.path.exists("calibration.csv")):
+       # calibrate_init()
 
     accx_list = []
     accy_list = []
@@ -501,7 +501,7 @@ def imu_run():
         max_gyrox = max(gyrox_list[5:len(gyrox_list)])
         min_gyrox = min(gyrox_list[5:len(gyrox_list)])
 
-       # print('max acc_x difference: %d', max_accx - min_accx)
+        #print('max acc_x difference: %d', max_accx - min_accx)
         #print('max acc_y difference: %d', max_accy - min_accy)
         #print('max gyro_x difference: %d', max_gyrox - min_gyrox)
 
@@ -527,7 +527,7 @@ def imu_run():
             else:
                 print('Horizontal shake was too soft')
         elif max_accy_diff > max_accx_diff:
-            if max_accy_diff in range(15,60):
+            if max_accy_diff in range(5,60):
                 classifier_action="VS"
             else:
                 print('Lift up higher')
