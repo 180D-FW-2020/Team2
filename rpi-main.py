@@ -17,7 +17,7 @@ def listen():
     # MQTT setup for laptop - RPI communication
     client_instance = client_mqtt(my_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
+    client_instance.subscribe_msg(caliente, "msg.txt")
     caliente.loop_start()
 
     while True:
@@ -32,12 +32,6 @@ def listen():
                 if(task == 'breathe'):
                     print('calling breath led program')
                     run_breathe()
-                if(task == "talk"):
-                    print('calling breath led program')
-                    base_name = "message"
-                    audio_suffix = "wav"
-                    filename = base_name + "." + audio_suffix
-                    client_instance.subscribe_file(caliente, filename)
             else:
                 if (task == 'finish'):
                     print('calling congrats led program')
