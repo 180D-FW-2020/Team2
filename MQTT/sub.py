@@ -51,8 +51,6 @@ class client_mqtt:
     def subscribe_msg(self, client: mqtt_client):
         def on_message(client, userdata, msg):
             self.message = msg.payload.decode()
-            print("message:" + self.message)
-            print("index:" + str(self.message.find(':')))
             if(self.message.find(':') != -1):
                 get_user = self.message.split(':')[0]
                 task = self.message.split(':')[1]
