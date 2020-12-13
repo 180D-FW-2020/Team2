@@ -22,7 +22,7 @@ def listen():
 
     while True:
         if(client_instance.message != ''):
-            print('message on network:' + client_instance.message)
+            #print('message on network:' + client_instance.message)
             if(client_instance.message.find(':') != -1):
                 print("entered")
                 get_user = client_instance.message.split(':')[0]
