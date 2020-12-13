@@ -109,10 +109,15 @@ python run.py --model=mobilenet_thin --resize=432x368 --image=./images/p1.jpg
 ```
 python run_webcam.py --model=mobilenet_thin --resize=432x368 --camera=0
 ```
+### 16. For the audio files to play, install the following:
+```
+pip3 install playsound
+pip3 install -U PyObjC
+```
 
 # To run our pose determination script, "run_compare_ref_test_webcam.py":
 
-You need to specify the reference pose as <pose_name>:
+You need to specify the reference pose to replace <pose_name>:
 ```
 python run_compare_ref_test_webcam.py --pose=<pose_name(s)>
 ```
@@ -125,7 +130,11 @@ python run_compare_ref_test_webcam.py --pose=squat,tree
 # To add your own reference pose, you will need to do the following:
 Run script by specifying the pose you want to create a reference for (e.g. squat). This is a requirement**
 1. python timed_capture.py --ref_pose=<pose_name> (e.g. python timed_capture.py --ref_pose=squat)
+<<<<<<< HEAD
+2. To start the timer, press the space bar (you might have to click on the window with the webcam first so it can register the key press)
+=======
 2. To start the timer, press tje spacebar (you might have to click on the window with the webcam first so it can register the key press)
+>>>>>>> dce38f330d6e344d7603da621b4973c41c611263
 3. The timer is by default 7 seconds, but you can change it by passing in --timer=<num_seconds> (e.g. python timed_capture.py --ref_pose=squat --timer=10)
 4. Once the timer is done, the reference image will be saved in images/references/<pose_name>_reference.jpg, which can be used to find the joints
 ```
@@ -136,3 +145,9 @@ python timed_capture.py --ref_pose=<pose_name> --timer=10
 - run_compare_ref_test_webcam.py
 - timed_capture.py
 - images/references
+
+## To clone a specific branch
+git clone --single-branch --branch <branchname> <remote-repo>
+
+## To install homebrew
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
