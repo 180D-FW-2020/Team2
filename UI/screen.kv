@@ -4,10 +4,16 @@
     WaitScreen:
         name: 'wait'
 <StartScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
     BoxLayout:
         orientation:'vertical'
         Label:
             text: "Select what you want to focus on today!"
+            color: 0, 0, 0, 1
             font_size: 20
             size_hint: (1, .3)
         GridLayout:
@@ -16,29 +22,43 @@
             Label:
                 text: "I want to work on stretching more"
                 font_size: 18
+                color: 0, 0, 0, 1
             CheckBox:
                 on_active:root.ping('stretch', self.active)
+                color: 0, 0, 0, 1
             Label:
                 text: "I want to work on guided breathing"
                 font_size: 18
+                color: 0, 0, 0, 1
             CheckBox:
                 on_active:root.ping('breathe', self.active)
+                color: 0, 0, 0, 1
             Label:
                 text: "I want to talk to my friends"
                 font_size: 18
+                color: 0, 0, 0, 1
             CheckBox:
                 on_active:root.ping('talk', self.active)
+                color: 0, 0, 0, 1
             Button:
                 text: "Exit"
-                background_color: .7, .7, 6, 1
+                font_size: 18
+                background_color: .7, .7, 1, 1
                 on_release:root.quit()
             Button:
                 text: "Submit"
+                font_size: 18
                 background_color: .7, .7, 1, 1
                 on_release: root.parent.current='wait'
 <WaitScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
     Label:
         id: lbl1
         text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
         halign: 'center'
         font_size: 20
+        color: 0, 0, 0, 1
