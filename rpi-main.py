@@ -2,12 +2,15 @@ from multiprocessing import Process
 from MQTT.sub import client_mqtt
 from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import imu_run
 from Matrix.matrix_functions import *
+from datetime import datetime
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
 
+
 def listen():
+    cur_time = datetime.now()
     #my_topic = '/team2' + user_id + '/reminders'
     my_topic = '/team2/network'
     get_user = ''
@@ -23,20 +26,24 @@ def listen():
     while True:
         if(client_instance.message != ''):
             #print('message on network:' + client_instance.message)
-            if(client_instance.message.find(':') != -1):
+            try:
                 get_user = client_instance.message.split(':')[0]
                 task = client_instance.message.split(':')[1]
-                if(get_user == user_id):
+            except:
+                print('receiving a file')
+            if(get_user == user_id):
+                if(((datetime.now() - cur_time).total_seconds()) > 1):
                     if(task == 'reminder'):
                         print('calling reminder led matrix')
                         run_reminder()
                     if(task == 'breathe'):
                         print('calling breath led program')
                         run_breathe()
-                else:
-                    if (task == 'finish'):
-                        print('calling congrats led program')
-                        run_congrats()
+                cur_time = datetime.now()
+            else:
+                if (task == 'finish'):
+                    print('calling congrats led program')
+                    run_congrats()
 
             client_instance.set_message('')
 

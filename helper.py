@@ -70,8 +70,7 @@ def exercise(activity):
 
 def congrats(activity):
     if activity == 'breathe':
-        time.sleep(15)
-    #TODO: let users in network know you finished activity
+        time.sleep(30)
     print("letting friends know you finished an activity")
     pub = PUB('/team2/network', user_id + ":" + 'finish')
     client = pub.connect_mqtt()

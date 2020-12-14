@@ -67,7 +67,7 @@ class matrix:
             text(draw, (0, 0), chr(7), fill="white")
 
         time.sleep(1)
-        num_reps = 1
+        num_reps = 3
         for _ in range(num_reps):
             for intensity in range(2, 16):
                 self.device.contrast(intensity * 16)
