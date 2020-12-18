@@ -37,10 +37,10 @@ $ sudo reboot -h now
 
 IMU installation is complete!
 
-# IMU CALIBRATION (Optional):
+# IMU Calibration (Optional):
 Run the calibration script under `IMU/python-BerryIMU-gyro-accel-compass-filters`
 ```
-	$ python3 calibrateBerryIMU.py
+$ python3 calibrateBerryIMU.py
 ```
 	
 Rotate the IMU in all directions. After about 30 seconds when the values are not changing, press Ctrl-C. 
@@ -48,10 +48,10 @@ Rotate the IMU in all directions. After about 30 seconds when the values are not
 This will save the data in a file named `calibration.csv` (do not delete)
 
 
-# IMU CONTROLLER:
+# IMU Controller:
 Run the classifier script:
 ```
-	python3 berryIMU_classifier.py
+python3 berryIMU_classifier.py
 ```
 
 Using the controller:
