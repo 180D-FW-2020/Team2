@@ -1,7 +1,10 @@
+# Description
+The script is based on the examples provided in Richard Hull's LED matrix repository. Each function acts as a different visualization on the LED matrix.
+
 # Hardware Matrix Setup
 LED Matrix -> RPi [(RPi pinout)](https://pinout.xyz/)
 ```
-VCC->GPIO Pin #2 (5v)
+VCC->GPIO Pin #2 (5v) 
 GND->GPIO Pin #6 (GND)
 DIN->GPIO Pin #19
 CS ->GPIO Pin #24
