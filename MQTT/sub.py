@@ -63,6 +63,7 @@ class client_mqtt:
 
     def subscribe_msg(self, client: mqtt_client):
         def on_message(client, userdata, msg):
+            self.message = msg.payload.decode()
             print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
 
         client.subscribe(self.topic_list)

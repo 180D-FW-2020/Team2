@@ -17,8 +17,8 @@ network_topic = '/team2/network'
 ### HELPER FUNCTIONS ###
 
 def activate(activity):
-    print("send message to LED Matrix"
-    pub = PUB(reminder_topic)
+    print("send message to LED Matrix")
+    pub = PUB(reminder_topic, 'reminder')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
@@ -46,7 +46,7 @@ def exercise(activity):
 
     if activity == 'breathe':
         print("calling " + activity + " exercise")
-        pub = PUB(reminder_topic)
+        pub = PUB(reminder_topic, 'breathe')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
@@ -61,7 +61,7 @@ def exercise(activity):
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
         # Send transcription over - no audio message -
-        pub = PUB(msg_topic)
+        pub = PUB(msg_topic, "hello")
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
@@ -72,7 +72,7 @@ def congrats(activity):
     if activity == 'breathe':
         time.sleep(30)
     print("letting friends know you finished an activity")
-    pub = PUB(msg_topic)
+    pub = PUB(msg_topic, "hello")
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
