@@ -27,7 +27,7 @@ def activate(activity):
     print("waiting for IMU activation for " + activity)
     client_instance = client_mqtt(imu_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente, "msg.txt")
+    client_instance.subscribe_msg(caliente)
     caliente.loop_start()
     while(client_instance.message == ''):
         pass
@@ -81,7 +81,7 @@ def congrats(activity):
 def always_subbing():
     client_instance = client_mqtt(msg_topic,network_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente, "msg.txt")
+    client_instance.subscribe_msg(caliente)
     caliente.loop_start()
     while(client_instance.message == ''):
         pass

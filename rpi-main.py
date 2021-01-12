@@ -23,7 +23,7 @@ def listen():
     # MQTT setup for laptop - RPI communication
     client_instance = client_mqtt(my_topic, network)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente, "msg.txt")
+    client_instance.subscribe_msg(caliente)
     caliente.loop_start()
 
      while True:
