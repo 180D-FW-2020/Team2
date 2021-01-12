@@ -25,6 +25,7 @@ class PUB:
 
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
+            print("heo")
             if rc == 0:
                 print("Connected to MQTT Broker!")
             else:
@@ -51,7 +52,7 @@ class PUB:
 
     def publish_file(self, client, file_path):
          msg_count = 0
-         for i in range(1, 4):
+         for i in range(1, 30):
              time.sleep(1)
              #msg = f"messages: {msg_count}"
              f = open(file_path, "rb")
@@ -71,10 +72,10 @@ class PUB:
 
 
 def run():
-    pub=PUB("/team2/imu","hello")
+    pub=PUB("/team2/michelletan","hello")
     client = pub.connect_mqtt()
     client.loop_start()
-    pub.publish_text(client)
+    pub.publish_file(client, "msg.txt")
 
 
 if __name__ == '__main__':
