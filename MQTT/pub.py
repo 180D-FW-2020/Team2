@@ -25,7 +25,6 @@ class PUB:
 
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
-            print("heo")
             if rc == 0:
                 print("Connected to MQTT Broker!")
             else:
