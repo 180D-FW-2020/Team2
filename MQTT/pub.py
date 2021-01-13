@@ -10,7 +10,7 @@ import time
 import random
 from paho.mqtt import client as mqtt_client
 import sys
-broker = 'test.mosquitto.org'
+broker = 'mqtt.eclipseprojects.io'
 port = 1883
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
 sys.path.insert(1, '../../MQTT')
