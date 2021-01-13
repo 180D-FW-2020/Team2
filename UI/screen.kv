@@ -1,8 +1,22 @@
 <Root>:
     StartScreen:
         name: 'start'
+    TimeScreen:
+        name: 'time'
     WaitScreen:
         name: 'wait'
+    CheckScreen:
+        name: 'check'
+    StretchScreen:
+        name: 'stretch'
+    TalkScreen:
+        name: 'talk'
+    TalkScreen2:
+        name: 'talk2'
+    BreatheScreen:
+        name: 'breathe'
+    CongratsScreen:
+        name: 'congrats'
 <StartScreen>:
     canvas.before:
         Rectangle:
@@ -49,7 +63,26 @@
                 text: "Submit"
                 font_size: 18
                 background_color: .7, .7, 1, 1
-                on_release: root.parent.current='wait'
+                on_release: root.parent.current='time'
+<TimeScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        orientation:'vertical'
+        Label:
+            text: "How often do you want to be reminded for each activity?"
+            color: 0, 0, 0, 1
+            font_size: 20
+            size_hint: (1, .2)
+        GridLayout:
+            id: gl
+            cols: 2
+            size_hint: (1, .8)
+            padding: (1, 0)
+
 <WaitScreen>:
     canvas.before:
         Rectangle:
@@ -59,6 +92,87 @@
     Label:
         id: lbl1
         text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+<CheckScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        id: lbl1
+        text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+<StretchScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        id: lbl_stretch
+        text: 'Time to stretch!\nActivate the exercise using the IMU.'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+<BreatheScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        id: lbl_breathe
+        text: 'Time to breathe!\nActivate the exercise using the IMU.'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+<TalkScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        orientation:'vertical'
+        Label:
+            id: lbl_talk
+            text: 'Time to talk to friends!\nActivate sending a message using the IMU.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
+        TextInput:
+            height: '0dp'
+            size_hint_y: None
+            id: txtinput
+            hint_text: 'Press enter to submit'
+            multiline: False
+<TalkScreen2>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        id: lbl_talk
+        text: 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+
+<CongratsScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        id: lbl_congrats
+        text: 'Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day.'
         halign: 'center'
         font_size: 20
         color: 0, 0, 0, 1
