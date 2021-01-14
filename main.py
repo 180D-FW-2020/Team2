@@ -18,6 +18,36 @@ from kivy.uix.boxlayout import BoxLayout
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
 
+class LoginScreen(Screen):
+    def __init__(self, **kw):
+        super(LoginScreen, self).__init__(**kw)
+
+    def update(self):
+        userID = self.ids.login.text
+        if(userID !=''):
+            id = open('ID.txt', 'w')
+            id.write(userID)
+            id.close()
+            self.ids.login.background_color = (1, 1, 1, 1)
+            self.manager.current = 'version'
+            self.manager.transition.direction = 'left'
+        else:
+            self.ids.login.background_color = (1, 0, 0, .3)
+            print('blank userID')
+    def quit(self):
+        sys.exit(0)
+
+class VersionScreen(Screen):
+    def __init__(self, **kw):
+        super(VersionScreen, self).__init__(**kw)
+
+    def ping(self, type):
+        a = App.get_running_app()
+        a.non_hardware = type
+
+    def quit(self):
+        sys.exit(0)
+
 class StartScreen(Screen):
     def __init__(self, **kw):
         super(StartScreen, self).__init__(**kw)
@@ -31,11 +61,6 @@ class StartScreen(Screen):
 class TimeScreen(Screen):
     def __init__(self, **kw):
         super(TimeScreen, self).__init__(**kw)
-        self.btn_back = Button(text='Back', font_size=18, background_color=(.7,.7,1,1), size_hint_y=.3)
-        self.btn_back.bind(on_release=self.switch_back)
-
-        self.btn_submit = Button(text='Submit', font_size=18, background_color=(.7,.7,1,1), size_hint_y=.3)
-        self.btn_submit.bind(on_release=self.switch_submit)
 
         self.widgets = {'stretch': [], 'breathe': [], 'talk': []}
         for k, v in self.widgets.items():
@@ -51,12 +76,10 @@ class TimeScreen(Screen):
             if v[0]:
                 self.ids.gl.remove_widget(self.widgets[k][0])
                 self.ids.gl.remove_widget(self.widgets[k][1])
-        self.ids.gl.remove_widget(self.btn_back)
-        self.ids.gl.remove_widget(self.btn_submit)
         self.manager.current = 'start'
-
-    def switch_submit(self, *largs):
-        self.manager.current = 'wait'
+        self.manager.transition.direction='right'
+    def quit(self):
+        sys.exit(0)
 
     def make_selection(self, k):
         if k == 'stretch':
@@ -102,9 +125,6 @@ class TimeScreen(Screen):
             if v[0]:
                 self.ids.gl.add_widget(self.widgets[k][0])
                 self.ids.gl.add_widget(self.widgets[k][1])
-
-        self.ids.gl.add_widget(self.btn_back)
-        self.ids.gl.add_widget(self.btn_submit)
 
 class WaitScreen(Screen):
     def __init__(self, **kw):
@@ -277,6 +297,7 @@ class WAP(App):
     time_elapsed = 0
 
     dest_user = ''
+    non_hardware = False
 
     def build(self):
         return Root()
