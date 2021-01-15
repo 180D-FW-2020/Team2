@@ -9,6 +9,8 @@
 import random
 from paho.mqtt import client as mqtt_client
 import os
+import os.path
+from os import path
 import sys
 
 broker = 'test.mosquitto.org'
@@ -53,12 +55,15 @@ class client_mqtt:
 
     def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
-            print("Write")
-            f = open(filename, 'wb')
-            f.write(msg.payload)
-            f.close()
+            # Added this because subscriber kept overwriting files with "self.msg" parameters
+            if not path.exists(filename):
+                print("Write")
+                f = open(filename, 'wb')
+                print(msg.payload)
+                f.write(msg.payload)
+                f.close()
 
-        client.subscribe(self.topic)
+        client.subscribe(self.topic_list)
         client.on_message = on_message
 
     def subscribe_msg(self, client: mqtt_client):
@@ -82,7 +87,7 @@ def run():
     client_instance = client_mqtt("/team2/audiomsg", "/team2/michelletan")
     client_instance.get_topics()
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
+    client_instance.subscribe_file(caliente, "testing.txt")
     caliente.loop_start()
     for i in range(0, 20):
         while(client_instance.message == ''):

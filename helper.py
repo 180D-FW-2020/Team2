@@ -11,6 +11,8 @@ f.close()
 
 reminder_topic = '/' + user_id + '/reminders'
 msg_topic = '/' + user_id + '/messages'
+audio_topic = '/' + user_id + '/audio'
+txt_topic = '/' + user_id + '/text'
 imu_topic = '/' + user_id + '/imu'
 network_topic = '/team2/network'
 
@@ -61,10 +63,16 @@ def exercise(activity):
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
         # Send transcription over - no audio message -
-        pub = PUB(msg_topic, "hello")
+        pub = PUB(audio_topic, "hello")
         client = pub.connect_mqtt()
         client.loop_start()
-        pub.publish_text(client)
+        pub.publish_file(client, audio_path)
+        pub.publish_file(client, txt_path)
+        client.disconnect()
+
+        pub = PUB(txt_topic, "hello")
+        client = pub.connect_mqtt()
+        client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
 
