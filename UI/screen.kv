@@ -1,4 +1,8 @@
 <Root>:
+    LoginScreen:
+        name: 'login'
+    VersionScreen:
+        name: 'version'
     StartScreen:
         name: 'start'
     TimeScreen:
@@ -17,6 +21,103 @@
         name: 'breathe'
     CongratsScreen:
         name: 'congrats'
+<LoginScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'Welcome to Wellness and Productivity'
+            font_size: 24
+            color: 0,0,0,1
+        GridLayout:
+            cols: 2
+            padding: [10,70,50,70]
+            spacing: 50
+            Label:
+                text: 'Enter your User ID'
+                font_size: 18
+                color: 0,0,0,1
+                halign: 'center'
+                size_hint: (.3, 1)
+            TextInput:
+                id: login
+                multiline:False
+                font_size: 18
+                size_hint: (.7, 1)
+                on_text_validate: root.update()
+        GridLayout:
+            cols: 2
+            height: 125
+            size_hint_y: None
+            Button:
+                text: "Exit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release:root.quit()
+            Button:
+                text: "Submit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release: root.update()
+<VersionScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Which version do you want to run?"
+            color: 0, 0, 0, 1
+            font_size: 20
+        GridLayout:
+            cols: 2
+            CheckBox:
+                group: 'version'
+                color: 0,0,0,1
+                on_active:root.ping(False)
+            Label:
+                text: "Hardware"
+                color: 0,0,0,1
+                font_size: 18
+            CheckBox
+                group: 'version'
+                color: 0, 0, 0, 1
+                on_active:root.ping(True)
+            Label:
+                text: "Hardware not included"
+                color: 0,0,0,1
+                font_size: 18
+        GridLayout:
+            cols: 2
+            height: 125
+            size_hint_y: None
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    text: "Go back"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:
+                        root.parent.current='login'
+                        root.parent.transition.direction = 'right'
+                Button:
+                    text: "Exit"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.quit()
+            Button:
+                text: "Submit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release:
+                    root.parent.current='start'
+                    root.parent.transition.direction = 'left'
 <StartScreen>:
     canvas.before:
         Rectangle:
@@ -32,7 +133,6 @@
             size_hint: (1, .3)
         GridLayout:
             cols: 2
-            size_hint: (1, .7)
             Label:
                 text: "I want to work on stretching more"
                 font_size: 18
@@ -54,16 +154,31 @@
             CheckBox:
                 on_active:root.ping('talk', self.active)
                 color: 0, 0, 0, 1
-            Button:
-                text: "Exit"
-                font_size: 18
-                background_color: .7, .7, 1, 1
-                on_release:root.quit()
+        GridLayout:
+            cols: 2
+            height: 125
+            size_hint_y: None
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    text: "Go back"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:
+                        root.parent.current='version'
+                        root.parent.transition.direction = 'right'
+                Button:
+                    text: "Exit"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.quit()
             Button:
                 text: "Submit"
                 font_size: 18
                 background_color: .7, .7, 1, 1
-                on_release: root.parent.current='time'
+                on_release:
+                    root.parent.current='time'
+                    root.parent.transition.direction = 'left'
 <TimeScreen>:
     canvas.before:
         Rectangle:
@@ -82,6 +197,29 @@
             cols: 2
             size_hint: (1, .8)
             padding: (1, 0)
+        GridLayout:
+            cols: 2
+            height: 125
+            size_hint_y: None
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    text: "Go back"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.switch_back()
+                Button:
+                    text: "Exit"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.quit()
+            Button:
+                text: "Submit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release:
+                    root.parent.current='wait'
+                    root.parent.transition.direction = 'left'
 
 <WaitScreen>:
     canvas.before:
@@ -113,24 +251,30 @@
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_stretch
-        text: 'Time to stretch!\nActivate the exercise using the IMU.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_stretch
+        Label:
+            id: lbl_stretch
+            text: 'Time to stretch!\nActivate the exercise using the IMU.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
 <BreatheScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_breathe
-        text: 'Time to breathe!\nActivate the exercise using the IMU.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_breathe
+        Label:
+            id: lbl_breathe
+            text: 'Time to breathe!\nActivate the exercise using the IMU.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
 <TalkScreen>:
     canvas.before:
         Rectangle:
@@ -138,6 +282,7 @@
             size: self.size
             source: 'UI/holo-01.png'
     BoxLayout:
+        id: bl_talk
         orientation:'vertical'
         Label:
             id: lbl_talk
