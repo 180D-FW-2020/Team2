@@ -48,6 +48,7 @@
                 multiline:False
                 font_size: 18
                 size_hint: (.7, 1)
+                on_text_validate: root.update()
         GridLayout:
             cols: 2
             height: 125
@@ -250,24 +251,30 @@
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_stretch
-        text: 'Time to stretch!\nActivate the exercise using the IMU.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_stretch
+        Label:
+            id: lbl_stretch
+            text: 'Time to stretch!\nActivate the exercise using the IMU.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
 <BreatheScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_breathe
-        text: 'Time to breathe!\nActivate the exercise using the IMU.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_breathe
+        Label:
+            id: lbl_breathe
+            text: 'Time to breathe!\nActivate the exercise using the IMU.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
 <TalkScreen>:
     canvas.before:
         Rectangle:
@@ -275,6 +282,7 @@
             size: self.size
             source: 'UI/holo-01.png'
     BoxLayout:
+        id: bl_talk
         orientation:'vertical'
         Label:
             id: lbl_talk

@@ -1,6 +1,7 @@
 import sys
 import time
 from kivy.app import App
+from kivy.app import Widget
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
@@ -14,6 +15,7 @@ from functools import partial
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
+from kivy.graphics import Color, Ellipse
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -189,6 +191,13 @@ class CheckScreen(Screen):
 class TalkScreen(Screen):
     def __init__(self, **kw):
         super(TalkScreen, self).__init__(**kw)
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.get_user)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.snooze)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
 
     def switch(self, *largs):
         self.manager.current = 'talk2'
@@ -199,20 +208,31 @@ class TalkScreen(Screen):
         Clock.schedule_once(self.switch)
 
     def get_user(self, *largs):
+        self.ids.bl_talk.remove_widget(self.gl)
         self.ids.txtinput.bind(on_text_validate = self.handle_input)
         self.ids.lbl_talk.size_hint = (1, .7)
         self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\nNote: must use their user ID.'
         self.ids.txtinput.size_hint = (1, .3)
 
-    def on_enter(self, *args):
-        if activate():
-            Clock.schedule_once(self.get_user)
+    def snooze(self, *args):
+        self.ids.bl_talk.remove_widget(self.gl)
+        a = App.get_running_app()
+        a.index = 'stretch'
+        a.immediate = False
+        a.cur_time += TIME_INTERVAL
+        self.manager.current = 'wait'
+        print('reminder snoozed')
+
+    def on_pre_enter(self, *args):
+        a = App.get_running_app()
+        if a.non_hardware:
+            self.ids.lbl_talk.text='Time to talk to friends!\nActivate sending a message using the buttons below.'
+            self.ids.bl_talk.add_widget(self.gl)
         else:
-            a = App.get_running_app()
-            a.index = 'stretch'
-            a.immediate = 'False'
-            a.cur_time += TIME_INTERVAL
-            print('reminder snoozed')
+            if activate():
+                Clock.schedule_once(self.get_user)
+            else:
+                Clock.schedule_once(self.snooze)
 
 class TalkScreen2(Screen):
     def __init__(self, **kw):
@@ -232,6 +252,13 @@ class TalkScreen2(Screen):
 class StretchScreen(Screen):
     def __init__(self, **kw):
         super(StretchScreen, self).__init__(**kw)
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.transition)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.snooze)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
 
     def switch_congrats(self, *largs):
         self.manager.current = 'congrats'
@@ -240,38 +267,105 @@ class StretchScreen(Screen):
         exercise_stretch()
         Clock.schedule_once(self.switch_congrats)
 
-    def on_enter(self, *args):
-        if activate():
-            self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
-            Clock.schedule_once(self.activity)
+    def snooze(self, *args):
+        self.ids.bl_stretch.remove_widget(self.gl)
+        a = App.get_running_app()
+        a.index = 'stretch'
+        a.immediate = False
+        a.cur_time += TIME_INTERVAL
+        self.manager.current = 'wait'
+        print('reminder snoozed')
+
+    def transition(self, *args):
+        self.ids.bl_stretch.remove_widget(self.gl)
+        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
+        Clock.schedule_once(self.activity)
+
+    def on_pre_enter(self, *args):
+        a = App.get_running_app()
+        if a.non_hardware:
+            self.ids.lbl_stretch.text='Time to stretch!\nActivate using the buttons below.'
+            self.ids.bl_stretch.add_widget(self.gl)
         else:
-            print('reminder snoozed')
-            a = App.get_running_app()
-            a.index = 'stretch'
-            a.immediate = 'False'
-            a.cur_time += TIME_INTERVAL
+            if activate():
+                self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
+                Clock.schedule_once(self.activity)
+            else:
+                Clock.schedule_once(self.snooze)
 
 class BreatheScreen(Screen):
     def __init__(self, **kw):
         super(BreatheScreen, self).__init__(**kw)
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.activity_software)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.snooze)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
+
+        self.size_ball_x = 101
+        self.size_ball_y = 101
+        self.inc = True
 
     def switch_congrats(self, *largs):
+        a = App.get_running_app()
+        if a.non_hardware:
+            self.canvas.clear()
+            Clock.unschedule(self.ball)
         self.manager.current = 'congrats'
+
+    def snooze(self, *args):
+        self.ids.bl_breathe.remove_widget(self.gl)
+        a = App.get_running_app()
+        a.index = 'stretch'
+        a.immediate = False
+        a.cur_time += TIME_INTERVAL
+        self.manager.current = 'wait'
+        print('reminder snoozed')
+
+    def ball(self, dt):
+        self.canvas.clear()
+        with self.canvas:
+            Color(.7,.7,1,1)
+            Ellipse(pos= (self.center_x - (self.size_ball_x/2), self.center_y - (self.size_ball_y/2)), size=(self.size_ball_x,self.size_ball_y))
+        if self.size_ball_x == 200 or self.size_ball_x == 100:
+            self.inc = not self.inc
+        if self.inc:
+            self.size_ball_x += 1
+            self.size_ball_y += 1
+        else:
+            self.size_ball_x -= 1
+            self.size_ball_y -= 1
+
+    def activity_software2 (self, dt):
+        Clock.schedule_interval(self.ball, .05)
+        Clock.schedule_once(self.switch_congrats, 30)
+
+    def activity_software(self, *largs):
+        self.ids.bl_breathe.remove_widget(self.gl)
+        self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
+        Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *largs):
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe()
         Clock.schedule_once(self.switch_congrats, 30)
 
-    def on_enter(self, *args):
-        if activate():
-            Clock.schedule_once(self.activity)
+    def on_pre_enter(self, *args):
+        a = App.get_running_app()
+        if a.non_hardware:
+            self.ids.lbl_breathe.text='Time to breathe!\nActivate using the buttons below.'
+            self.ids.bl_breathe.add_widget(self.gl)
         else:
-            print('reminder snoozed')
-            a = App.get_running_app()
-            a.index = 'stretch'
-            a.immediate = 'False'
-            a.cur_time += TIME_INTERVAL
+            if activate():
+                Clock.schedule_once(self.activity)
+            else:
+                print('reminder snoozed')
+                a = App.get_running_app()
+                a.index = 'stretch'
+                a.immediate = 'False'
+                a.cur_time += TIME_INTERVAL
 
 class CongratsScreen(Screen):
     def __init__(self, **kw):
