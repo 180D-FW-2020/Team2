@@ -63,14 +63,14 @@ def exercise(activity):
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
         # Send transcription over - no audio message -
-        pub = PUB(audio_topic, "hello")
+
+        pub = PUB(audio_topic, "hello from audio")
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_file(client, audio_path)
-        pub.publish_file(client, txt_path)
         client.disconnect()
 
-        pub = PUB(txt_topic, "hello")
+        pub = PUB(txt_topic, "hello from txt")
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_file(client, txt_path)
