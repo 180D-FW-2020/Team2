@@ -11,8 +11,11 @@ f.close()
 
 def listen():
     cur_time = datetime.now()
-    #my_topic = '/team2' + user_id + '/reminders'
-    my_topic = '/team2/network'
+    my_topic = '/' + user_id + '/reminders'
+    # task = ''
+    get_user = ''
+    network = '/team2/network'
+    #my_topic = '/team2/network'
     get_user = ''
     print("listening for reminders!")
     print("listening for finished tasks!")
@@ -20,9 +23,32 @@ def listen():
     # MQTT setup for laptop - RPI communication
     client_instance = client_mqtt(my_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente, "msg.txt")
+    client_instance.subscribe_msg(caliente)
     caliente.loop_start()
 
+    while True:
+        if(client_instance.message != ''):
+            #print('message on network:' + client_instance.message)
+            task = client_instance.message
+            if(((datetime.now() - cur_time).total_seconds()) > 1):
+                if(task == 'reminder'):
+                    print('calling reminder led matrix')
+                    run_reminder()
+                elif(task == 'breathe'):
+                    print('calling breath led program')
+                    run_breathe()
+                else:
+                    print(task)
+                    get_user = client_instance.message.split(':')[0]
+                    task = client_instance.message.split(':')[1]
+                    if(get_user != user_id):
+                        print('calling congrats led program')
+                        run_congrats()
+
+            cur_time = datetime.now()
+            client_instance.set_message('')
+
+"""
     while True:
         if(client_instance.message != ''):
             #print('message on network:' + client_instance.message)
@@ -46,6 +72,7 @@ def listen():
                     run_congrats()
 
             client_instance.set_message('')
+"""
 
 def imu():
     print("starting IMU here!")

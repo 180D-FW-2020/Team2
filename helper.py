@@ -9,22 +9,29 @@ f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
 
+reminder_topic = '/' + user_id + '/reminders'
+msg_topic = '/' + user_id + '/messages'
+audio_topic = '/' + user_id + '/audio'
+txt_topic = '/' + user_id + '/text'
+imu_topic = '/' + user_id + '/imu'
+network_topic = '/team2/network'
+
 ### HELPER FUNCTIONS ###
 
 def activate():
     print("send message to LED Matrix")
-    topic = "/team2/network"
-    pub = PUB(topic, user_id + ':reminder')
+    #topic = "/team2/network"
+    pub = PUB(reminder_topic, 'reminder')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
 
     print("waiting for IMU activation")
-    imu_topic = '/' + user_id + '/imu'
+    #imu_topic = '/' + user_id + '/imu'
     client_instance = client_mqtt(imu_topic)
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente, "msg.txt")
+    client_instance.subscribe_msg(caliente)
     caliente.loop_start()
     t_end = time.time() + (2*60) #give them 2 minutes to activate
     while(client_instance.message == '') and time.time() < t_end:
@@ -48,16 +55,16 @@ def exercise_stretch():
         os.chdir('..')
 
 def exercise_breathe():
-        topic = '/team2/network'
+        #topic = '/team2/network'
         print("calling breathing exercise")
-        pub = PUB(topic, user_id + ':breathe')
+        pub = PUB(reminder_topic, 'breathe')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_text(client)
         client.disconnect()
 
 def exercise_talk():
-        topic = "/team2/network"
+        #topic = "/team2/network"
         print("calling talking to friends exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
@@ -66,16 +73,22 @@ def exercise_talk():
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
         # Send transcription over - no audio message -
-        pub = PUB(topic, user_id + ':talk')
+        pub = PUB(audio_topic, "hello from audio")
         client = pub.connect_mqtt()
         client.loop_start()
-        pub.publish_text(client)
+        pub.publish_file(client, audio_path)
+        client.disconnect()
+
+        pub = PUB(txt_topic, user_id + 'hello from txt')
+        client = pub.connect_mqtt()
+        client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
 
+
 def congrats():
     print("letting friends know you finished an activity")
-    pub = PUB('/team2/network', user_id + ":" + 'finish')
+    pub = PUB(network_topic, user_id + ":" + 'finish')
     client = pub.connect_mqtt()
     client.loop_start()
     pub.publish_text(client)
