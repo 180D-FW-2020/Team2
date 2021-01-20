@@ -13,7 +13,7 @@ import os.path
 from os import path
 import sys
 
-broker = 'test.mosquitto.org'
+broker = 'mqtt.eclipseprojects.io'
 port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
