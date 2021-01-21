@@ -2,14 +2,20 @@ from multiprocessing import Process
 from MQTT.sub import client_mqtt
 from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import imu_run
 from Matrix.matrix_functions import *
+from datetime import datetime
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
 
+
 def listen():
-    #my_topic = '/team2' + user_id + '/reminders'
-    my_topic = '/team2/network'
+    cur_time = datetime.now()
+    my_topic = '/' + user_id + '/reminders'
+    # task = ''
+    get_user = ''
+    network = '/team2/network'
+    #my_topic = '/team2/network'
     get_user = ''
     print("listening for reminders!")
     print("listening for finished tasks!")
@@ -23,21 +29,50 @@ def listen():
     while True:
         if(client_instance.message != ''):
             #print('message on network:' + client_instance.message)
-            get_user = client_instance.message.split(':')[0]
-            task = client_instance.message.split(':')[1]
-            if(get_user == user_id):
+            task = client_instance.message
+            if(((datetime.now() - cur_time).total_seconds()) > 1):
                 if(task == 'reminder'):
                     print('calling reminder led matrix')
                     run_reminder()
-                if(task == 'breathe'):
+                elif(task == 'breathe'):
                     print('calling breath led program')
                     run_breathe()
+                else:
+                    print(task)
+                    get_user = client_instance.message.split(':')[0]
+                    task = client_instance.message.split(':')[1]
+                    if(get_user != user_id):
+                        print('calling congrats led program')
+                        run_congrats()
+
+            cur_time = datetime.now()
+            client_instance.set_message('')
+
+"""
+    while True:
+        if(client_instance.message != ''):
+            #print('message on network:' + client_instance.message)
+            try:
+                get_user = client_instance.message.split(':')[0]
+                task = client_instance.message.split(':')[1]
+            except:
+                print('receiving a file')
+            if(get_user == user_id):
+                if(((datetime.now() - cur_time).total_seconds()) > 1):
+                    if(task == 'reminder'):
+                        print('calling reminder led matrix')
+                        run_reminder()
+                    if(task == 'breathe'):
+                        print('calling breath led program')
+                        run_breathe()
+                cur_time = datetime.now()
             else:
                 if (task == 'finish'):
                     print('calling congrats led program')
                     run_congrats()
 
             client_instance.set_message('')
+"""
 
 def imu():
     print("starting IMU here!")

@@ -1,32 +1,49 @@
 from MQTT.sub import client_mqtt
+import os
 from os import path
+import time
+import shutil
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
 topic = '/' + user_id + '/messages'
+audio_topic = '/' + user_id + '/audio'
+txt_topic = '/' + user_id + '/text'
 
 txt_suffix = "txt"
 audio_suffix = "wav"
 
 def listen():
-    print("listening on topic for received messages and transcriptions!")
-    client_instance = client_mqtt(topic)
+    client_instance = client_mqtt(txt_topic, audio_topic)
+    client_instance.get_topics()
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
-    caliente.loop_start()
-    while True:
-        base_name = "message"
-        if(client_instance.message == 'audio'):
-            print ("audio file!")
-            filename = base_name + "." + audio_suffix
-            client_instance.subscribe_file(caliente, filename)
-            client_instance.set_message('')
-        # if(client_instance.message == 'transcript'):
-        #     print ("transcript file!")
-        #     filename = base_name + "_transcript" + "." + txt_suffix
-        #     client_instance.subscribe_file(caliente, filename)
-        #     client_instance.set_message('')
+    count = 1
+    while(1):
+        print("new while loop iteration")
+        wav_file = "test.wav"
+        client_instance.subscribe_file(caliente, wav_file)
+        count += 1
+        caliente.loop_start()
+        while(client_instance.message == ''):
+            if path.exists(wav_file):
+                time.sleep(10)
+                print("found .wav now save .txt")
+                if not path.exists("test.txt"):
+                    client_instance.subscribe_file(caliente, "test.txt")
+                    time.sleep(7)
+
+            if path.exists("test.wav") and path.exists("test.txt"):
+                shutil.move("test.wav", "./RecAudio/test.wav")
+                shutil.move("test.txt", "./RecTxt/test.txt")
+                time.sleep(10)
+                break
+
+    #caliente.disconnect()
+
 
 if __name__ == "__main__":
+    os.mkdir('./RecAudio/')
+    os.mkdir('./RecTxt/')
     listen()
+
