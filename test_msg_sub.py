@@ -20,7 +20,7 @@ def listen():
     caliente = client_instance.connect_mqtt()
     count = 1
     while(1):
-        "new while loop iteration"
+        print("new while loop iteration")
         wav_file = "test.wav"
         client_instance.subscribe_file(caliente, wav_file)
         count += 1
@@ -31,13 +31,14 @@ def listen():
                 print("found .wav now save .txt")
                 if not path.exists("test.txt"):
                     client_instance.subscribe_file(caliente, "test.txt")
-                    time.sleep(5)
-                    if path.exists("./test.wav") and path.exists("./test.txt"):
-                        shutil.move("test.wav", "./RecAudio/test.wav")
-                        shutil.move("test.txt", "./RecTxt/test.txt")
-                        break
+                    time.sleep(7)
 
-    
+            if path.exists("test.wav") and path.exists("test.txt"):
+                shutil.move("test.wav", "./RecAudio/test.wav")
+                shutil.move("test.txt", "./RecTxt/test.txt")
+                time.sleep(10)
+                break
+
     #caliente.disconnect()
 
 
