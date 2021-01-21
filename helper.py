@@ -63,8 +63,9 @@ def exercise_breathe():
         pub.publish_text(client)
         client.disconnect()
 
-def exercise_talk():
+def exercise_talk(dest_user):
         #topic = "/team2/network"
+        print(dest_user)
         print("calling talking to friends exercise")
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
