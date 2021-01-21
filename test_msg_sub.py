@@ -3,6 +3,7 @@ import os
 from os import path
 import time
 import shutil
+from datetime import datetime
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -36,8 +37,10 @@ def listen():
 
             if path.exists("test.wav") and path.exists("test.txt"):
                 received = True 
-                shutil.move("test.wav", "./RecAudio/test.wav")
-                shutil.move("test.txt", "./RecTxt/test.txt")
+                now = datetime.now()
+                current_time = now.strftime("%H--%M--%S")
+                shutil.move("test.wav", "./RecAudio/" + current_time + ".wav")
+                shutil.move("test.txt", "./RecTxt/" + current_time + ".txt")
                 time.sleep(10)
                 break
 
@@ -45,6 +48,7 @@ def listen():
 
 
 if __name__ == "__main__":
-    os.mkdir('./RecAudio/')
-    os.mkdir('./RecTxt/')
+    if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
+        os.mkdir('./RecAudio/')
+        os.mkdir('./RecTxt/')
     listen()
