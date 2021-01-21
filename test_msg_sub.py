@@ -22,7 +22,10 @@ def listen():
     count = 1
     while(1):
         print("new while loop iteration")
-        wav_file = "test.wav"
+        curr_time = datetime.now()
+        curr_time = curr_time.strftime("%H--%M--%S");
+        wav_file = curr_time + ".wav"
+        txt_file = curr_time + ".txt"
         client_instance.subscribe_file(caliente, wav_file)
         count += 1
         caliente.loop_start()
@@ -31,16 +34,14 @@ def listen():
             if path.exists(wav_file):
                 time.sleep(10)
                 print("found .wav now save .txt")
-                if not path.exists("test.txt"):
-                    client_instance.subscribe_file(caliente, "test.txt")
+                if not path.exists(txt_file):
+                    client_instance.subscribe_file(caliente, txt_file)
                     time.sleep(7)
 
-            if path.exists("test.wav") and path.exists("test.txt"):
-                received = True 
-                now = datetime.now()
-                current_time = now.strftime("%H--%M--%S")
-                shutil.move("test.wav", "./RecAudio/" + current_time + ".wav")
-                shutil.move("test.txt", "./RecTxt/" + current_time + ".txt")
+            if path.exists(wav_file) and path.exists(txt_file):
+                received = True
+                shutil.move(wav_file, "./RecAudio/" + wav_file)
+                shutil.move(txt_file, "./RecTxt/" + txt_file)
                 time.sleep(10)
                 break
 
