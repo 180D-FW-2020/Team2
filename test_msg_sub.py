@@ -3,6 +3,7 @@ import os
 from os import path
 import time
 import shutil
+from datetime import datetime
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -21,7 +22,10 @@ def listen():
     count = 1
     while(1):
         print("new while loop iteration")
-        wav_file = "test.wav"
+        curr_time = datetime.now()
+        curr_time = curr_time.strftime("%H--%M--%S");
+        wav_file = curr_time + ".wav"
+        txt_file = curr_time + ".txt"
         client_instance.subscribe_file(caliente, wav_file)
         count += 1
         caliente.loop_start()
@@ -30,14 +34,14 @@ def listen():
             if path.exists(wav_file):
                 time.sleep(10)
                 print("found .wav now save .txt")
-                if not path.exists("test.txt"):
-                    client_instance.subscribe_file(caliente, "test.txt")
+                if not path.exists(txt_file):
+                    client_instance.subscribe_file(caliente, txt_file)
                     time.sleep(7)
 
-            if path.exists("test.wav") and path.exists("test.txt"):
-                received = True 
-                shutil.move("test.wav", "./RecAudio/test.wav")
-                shutil.move("test.txt", "./RecTxt/test.txt")
+            if path.exists(wav_file) and path.exists(txt_file):
+                received = True
+                shutil.move(wav_file, "./RecAudio/" + wav_file)
+                shutil.move(txt_file, "./RecTxt/" + txt_file)
                 time.sleep(10)
                 break
 
@@ -45,6 +49,7 @@ def listen():
 
 
 if __name__ == "__main__":
-    os.mkdir('./RecAudio/')
-    os.mkdir('./RecTxt/')
+    if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
+        os.mkdir('./RecAudio/')
+        os.mkdir('./RecTxt/')
     listen()
