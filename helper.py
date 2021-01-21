@@ -63,9 +63,13 @@ def exercise_breathe():
         pub.publish_text(client)
         client.disconnect()
 
-def exercise_talk():
+def exercise_talk(dest_user):
         #topic = "/team2/network"
+        print(dest_user)
         print("calling talking to friends exercise")
+        audio_topic = '/' + dest_user + '/audio'
+        txt_topic = '/' + dest_user + '/text'
+
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
         speech_instance.msg_flow()
@@ -79,7 +83,7 @@ def exercise_talk():
         pub.publish_file(client, audio_path)
         client.disconnect()
 
-        pub = PUB(txt_topic, user_id + 'hello from txt')
+        pub = PUB(txt_topic, dest_user + 'hello from txt')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_file(client, txt_path)
