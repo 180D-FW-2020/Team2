@@ -25,6 +25,7 @@ def listen():
         client_instance.subscribe_file(caliente, wav_file)
         count += 1
         caliente.loop_start()
+        received = False
         while(client_instance.message == ''):
             if path.exists(wav_file):
                 time.sleep(10)
@@ -34,6 +35,7 @@ def listen():
                     time.sleep(7)
 
             if path.exists("test.wav") and path.exists("test.txt"):
+                received = True 
                 shutil.move("test.wav", "./RecAudio/test.wav")
                 shutil.move("test.txt", "./RecTxt/test.txt")
                 time.sleep(10)
@@ -46,4 +48,3 @@ if __name__ == "__main__":
     os.mkdir('./RecAudio/')
     os.mkdir('./RecTxt/')
     listen()
-

@@ -1,8 +1,5 @@
 .DS_Store
-__pycache__
-MQTT/__pycache__
-Speech/__pycache__
-IMU/__pycache__
+*__pycache__
 ID.txt
 msg.txt
 .idea
