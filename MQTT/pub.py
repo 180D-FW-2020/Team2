@@ -37,7 +37,7 @@ class PUB:
 
     def publish_text(self, client):
          msg_count = 0
-         for i in range(1, 3):
+         for i in range(1, 2):
              time.sleep(1)
              result = client.publish(self.topic, self.msg)
              # result: [0, 1]
