@@ -42,9 +42,13 @@ def activate():
         type = ''
     caliente.disconnect()
     if type == 'VS':
-        return True
         print("activation received!")
-    return False
+        return True
+    elif type == 'RR':
+        print("reminder snoozed (hardware)")
+        return False
+    else:
+        return False
 
 def exercise_stretch():
         print("calling stretching exercise")
