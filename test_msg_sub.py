@@ -30,7 +30,7 @@ def listen():
         count += 1
         caliente.loop_start()
         received = False
-        while(client_instance.message == ''):
+        while(1):
             if path.exists(wav_file):
                 time.sleep(10)
                 print("found .wav now save .txt")
