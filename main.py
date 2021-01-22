@@ -242,7 +242,8 @@ class TalkScreen2(Screen):
         self.manager.current = 'congrats'
 
     def activity(self, *largs):
-        exercise_talk()
+        a = App.get_running_app()
+        exercise_talk(a.dest_user)
         Clock.schedule_once(self.switch_congrats)
 
     def on_enter(self, *args):
