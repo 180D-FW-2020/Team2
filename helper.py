@@ -76,7 +76,7 @@ def exercise_talk(dest_user):
 
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
-        speech_instance.msg_flow()
+        speech_instance.main_record()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
@@ -101,4 +101,3 @@ def congrats():
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
-
