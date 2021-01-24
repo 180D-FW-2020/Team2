@@ -501,15 +501,32 @@ def imu_run():
         max_gyrox = max(gyrox_list[5:len(gyrox_list)])
         min_gyrox = min(gyrox_list[5:len(gyrox_list)])
 
-        #print('max acc_x difference: %d', max_accx - min_accx)
-        #print('max acc_y difference: %d', max_accy - min_accy)
-        #print('max gyro_x difference: %d', max_gyrox - min_gyrox)
+        print('max acc_x difference: %d', max_accx - min_accx)
+        print('max acc_y difference: %d', max_accy - min_accy)
+        print('max gyro_x difference: %d', max_gyrox - min_gyrox)
 
         max_accx_diff = int(max_accx - min_accx)
         max_accy_diff = int(max_accy - min_accy)
         max_gyrox_diff = int(max_gyrox - min_gyrox)
 
+        # save data
+        samplenum = range(1,60)
+        acc_rows = [samplenum, accx_list, accy_list]
+        gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
+        all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
 
+        """
+        acc_rows = zip(*acc_rows)
+        gyro_rows = zip(*gyro_rows)
+        all_rows = zip(*all_rows)
+
+        with open("horizontal_shake.csv", 'w') as csvfile:
+	        csvwriter=csv.writer(csvfile)
+	        csvwriter.writerow(acc_fields)
+	        csvwriter.writerows(acc_rows)
+		"""
+
+	      
         #################### Main Classifer Logic ###############################
 
         global classifier_action
@@ -521,16 +538,16 @@ def imu_run():
                 classifier_action="RR"
             else:
                 classifier_action="LR"
-        elif max_accx_diff > max_accy_diff:
+        elif (max_accy_diff + 5) > max_accx_diff:
+            if max_accy_diff in range(5,40):
+                classifier_action="VS"
+        elif max_accx_diff > (max_accy_diff + 5):
             if max_accx_diff in range(15,40):
                 classifier_action="HS"
-            else:
-                print('Horizontal shake was too soft')
-        elif max_accy_diff > max_accx_diff:
-            if max_accy_diff in range(5,60):
-                classifier_action="VS"
-            else:
-                print('Lift up higher')
+            #else:
+                #print('Horizontal shake was too soft')
+            #else:
+                #print('Lift up higher')
 
         print("Classifier action:", classifier_action)
 
@@ -542,23 +559,3 @@ def imu_run():
 
         if classifier_action is "VS":
             reminder_handler()
-        """
-        if classifier_action is "HS":
-            audio_handler()
-        """
-
-def save_data():
-    filename = "shake.csv"
-    samplenum = range(1,MAXSAMPLES)
-    acc_rows = [samplenum, accx_list, accy_list]
-    gyro_rows = [samplenum, gyrox_list, gyroy_list, gyroz_list]
-    all_rows = [samplenum, accx_list, accy_list, gyrox_list, gyroy_list, gyroz_list]
-
-    acc_rows = zip(*acc_rows)
-    gyro_rows = zip(*gyro_rows)
-    all_rows = zip(*all_rows)
-
-    with open(filename, 'w') as csvfile:
-        csvwriter=csv.writer(csvfile)
-        csvwriter.writerow(acc_fields)
-        csvwriter.writerows(acc_rows)

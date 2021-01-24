@@ -1,32 +1,55 @@
 from MQTT.sub import client_mqtt
+import os
 from os import path
+import time
+import shutil
+from datetime import datetime
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
 topic = '/' + user_id + '/messages'
+audio_topic = '/' + user_id + '/audio'
+txt_topic = '/' + user_id + '/text'
 
 txt_suffix = "txt"
 audio_suffix = "wav"
 
 def listen():
-    print("listening on topic for received messages and transcriptions!")
-    client_instance = client_mqtt(topic)
+    client_instance = client_mqtt(txt_topic, audio_topic)
+    client_instance.get_topics()
     caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
-    caliente.loop_start()
-    while True:
-        base_name = "message"
-        if(client_instance.message == 'audio'):
-            print ("audio file!")
-            filename = base_name + "." + audio_suffix
-            client_instance.subscribe_file(caliente, filename)
-            client_instance.set_message('')
-        # if(client_instance.message == 'transcript'):
-        #     print ("transcript file!")
-        #     filename = base_name + "_transcript" + "." + txt_suffix
-        #     client_instance.subscribe_file(caliente, filename)
-        #     client_instance.set_message('')
+    count = 1
+    while(1):
+        print("new while loop iteration")
+        curr_time = datetime.now()
+        curr_time = curr_time.strftime("%H--%M--%S");
+        wav_file = curr_time + ".wav"
+        txt_file = curr_time + ".txt"
+        client_instance.subscribe_file(caliente, wav_file)
+        count += 1
+        caliente.loop_start()
+        received = False
+        while(1):
+            if path.exists(wav_file):
+                time.sleep(10)
+                print("found .wav now save .txt")
+                if not path.exists(txt_file):
+                    client_instance.subscribe_file(caliente, txt_file)
+                    time.sleep(7)
+
+            if path.exists(wav_file) and path.exists(txt_file):
+                received = True
+                shutil.move(wav_file, "./RecAudio/" + wav_file)
+                shutil.move(txt_file, "./RecTxt/" + txt_file)
+                time.sleep(10)
+                break
+
+    #caliente.disconnect()
+
 
 if __name__ == "__main__":
+    if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
+        os.mkdir('./RecAudio/')
+        os.mkdir('./RecTxt/')
     listen()

@@ -35,6 +35,3 @@ on your rpi, enter the command `python rpi-main.py`
 
 ### tips n tricks
 if tensorflow issues persist, run the command `pip install tensorflow-estimator==2.1.*` in your conda environment
-
-## raspberry pi setup
-[todo]
