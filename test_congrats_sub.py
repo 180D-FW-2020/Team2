@@ -38,7 +38,7 @@ def listen():
 
             audio_filename = "Message"
             speech_instance = speech(audio_filename)
-            speech_instance.msg_flow()
+            speech_instance.main_record()
             # Send recorded message to specific person
             audio_path = speech_instance.get_audiopath()
             txt_path = speech_instance.get_txtpath()
@@ -57,7 +57,7 @@ def listen():
             pub.publish_file(client, txt_path)
             client.disconnect()
 
-    #caliente.disconnect()
+            client_instance.message = ''
 
 
 if __name__ == "__main__":
