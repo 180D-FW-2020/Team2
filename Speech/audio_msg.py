@@ -88,11 +88,13 @@ class speech:
     def record_msg(self):
         with self.microphone as source:
             print("Send over an audio message! (Max: 10 seconds)")
-            try:
-                start_time = time.time()
-                audio = self.recognizer.listen(source, listen_limit, msg_limit)
-            except sr.WaitTimeoutError:
-                print("No audio detected...Try again...")
+            while (1):
+                try:
+                    start_time = time.time()
+                    audio = self.recognizer.listen(source, listen_limit, msg_limit)
+                    break
+                except sr.WaitTimeoutError:
+                    print("No audio detected...Try again...")
 
         print("Recording finished!")
 
