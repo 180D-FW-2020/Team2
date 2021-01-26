@@ -43,9 +43,13 @@ def activate():
         type = ''
     caliente.disconnect()
     if type == 'VS':
-        return True
         print("activation received!")
-    return False
+        return True
+    elif type == 'RR':
+        print("reminder snoozed (hardware)")
+        return False
+    else:
+        return False
 
 def exercise_stretch():
         print("calling stretching exercise")
@@ -73,7 +77,7 @@ def exercise_talk(dest_user):
 
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
-        speech_instance.msg_flow()
+        speech_instance.main_record()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()

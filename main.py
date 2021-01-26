@@ -358,11 +358,7 @@ class BreatheScreen(Screen):
             if activate():
                 Clock.schedule_once(self.activity)
             else:
-                print('reminder snoozed')
-                a = App.get_running_app()
-                a.index = 'stretch'
-                a.immediate = 'False'
-                a.cur_time += TIME_INTERVAL
+                Clock.schedule_once(self.snooze)
 
 class BallScreen(Screen):
     def __init__(self, **kw):
