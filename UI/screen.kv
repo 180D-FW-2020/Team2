@@ -19,6 +19,8 @@
         name: 'talk2'
     BreatheScreen:
         name: 'breathe'
+    BallScreen:
+        name: 'ball'
     CongratsScreen:
         name: 'congrats'
 <LoginScreen>:
@@ -275,6 +277,12 @@
             halign: 'center'
             font_size: 20
             color: 0, 0, 0, 1
+<BallScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
 <TalkScreen>:
     canvas.before:
         Rectangle:
