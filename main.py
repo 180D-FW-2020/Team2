@@ -21,6 +21,7 @@ import threading
 from playsound import playsound
 import glob
 import os
+from send_congrats import Congrats_Listener
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -53,20 +54,14 @@ class VersionScreen(Screen):
         a.non_hardware = type
 
     def on_pre_enter(self):
-<<<<<<< HEAD
         a = App.get_running_app()
         x = threading.Thread(target = a.listener.listen)
-        print('main boy')
+        y = threading.Thread(target=a.congrats_listener.listen)
         print(a.listener.received)
         x.daemon = True
+        y.daemon = True
         x.start()
-        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-        latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
-=======
-        x = threading.Thread(target = listen)
-        x.daemon = True
-        x.start()
->>>>>>> 96a56670acb7e79cedeabfdc329da60fbd34c120
+        y.start()
 
     def quit(self):
         sys.exit(0)
@@ -152,17 +147,13 @@ class TimeScreen(Screen):
 class WaitScreen(Screen):
     def __init__(self, **kw):
         super(WaitScreen, self).__init__(**kw)
-<<<<<<< HEAD
         self.time_check = time.time()
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
-=======
->>>>>>> 96a56670acb7e79cedeabfdc329da60fbd34c120
 
     def switch_check(self, *largs):
         self.manager.current = 'check'
 
     def switch_congrats(self, *largs):
-<<<<<<< HEAD
         Clock.unschedule(self.check_congrats)
         self.manager.current = 'congrats'
 
@@ -190,11 +181,6 @@ class WaitScreen(Screen):
         elif not a.listener.received:
             self.ids.lbl1 = 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
 
-
-=======
-        self.manager.current = 'congrats'
-
->>>>>>> 96a56670acb7e79cedeabfdc329da60fbd34c120
     def on_pre_enter(self, *args):
         a = App.get_running_app()
         print('entered wait')
@@ -209,10 +195,7 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.switch_congrats)
                 a.completed = False
             else:
-<<<<<<< HEAD
                 Clock.schedule_interval(self.check_congrats, 1)
-=======
->>>>>>> 96a56670acb7e79cedeabfdc329da60fbd34c120
                 Clock.schedule_once(self.switch_check, TIME_INTERVAL) #*60) - a.time_elapsed)
 
 class CheckScreen(Screen):
@@ -395,11 +378,7 @@ class BreatheScreen(Screen):
 
     def activity_software2 (self, dt):
         self.manager.current = 'ball'
-<<<<<<< HEAD
 
-=======
-
->>>>>>> 96a56670acb7e79cedeabfdc329da60fbd34c120
     def activity_software(self, *largs):
         self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
@@ -481,6 +460,7 @@ class WAP(App):
     non_hardware = False
 
     listener = Listener()
+    congrats_listener = Congrats_Listener()
 
     def build(self):
         return Root()
