@@ -4,7 +4,6 @@ from Speech.audio_msg import speech
 import subprocess
 import os
 import time
-from test_msg_sub import listen
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -29,27 +28,6 @@ def activate():
     client.disconnect()
 
     print("waiting for IMU activation")
-    #imu_topic = '/' + user_id + '/imu'
-    client_instance = client_mqtt(imu_topic)
-    caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
-    caliente.loop_start()
-    t_end = time.time() + (2*60) #give them 2 minutes to activate
-    while(client_instance.message == '') and time.time() < t_end:
-        pass
-    try:
-        type = client_instance.message.split(':')[1]
-    except:
-        type = ''
-    caliente.disconnect()
-    if type == 'VS':
-        print("activation received!")
-        return True
-    elif type == 'RR':
-        print("reminder snoozed (hardware)")
-        return False
-    else:
-        return False
 
 def exercise_stretch():
         print("calling stretching exercise")
@@ -102,6 +80,7 @@ def congrats():
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
+
 
 if __name__ == "__main__":
     exercise_talk('isabelketner')

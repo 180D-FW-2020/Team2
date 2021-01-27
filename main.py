@@ -55,13 +55,8 @@ class VersionScreen(Screen):
 
     def on_pre_enter(self):
         a = App.get_running_app()
-        x = threading.Thread(target = a.listener.listen)
-        y = threading.Thread(target=a.congrats_listener.listen)
-        print(a.listener.received)
-        x.daemon = True
-        y.daemon = True
+        x = threading.Thread(target = a.listener.listen, daemon=True)
         x.start()
-        y.start()
 
     def quit(self):
         sys.exit(0)
@@ -282,7 +277,16 @@ class TalkScreen(Screen):
             self.ids.lbl_talk.text='Time to talk to friends!\nActivate sending a message using the buttons below.'
             self.ids.bl_talk.add_widget(self.gl)
         else:
-            if activate():
+            activate()
+            a.listener.set_activated(False)
+            t_now = time.time()
+            while time.time() < (t_now +2*60):
+                if a.listener.activated:
+                    break
+                if a.listener.snoozed:
+                    break
+            print(a.listener.activated)
+            if a.listener.activated:
                 Clock.schedule_once(self.get_user)
             else:
                 Clock.schedule_once(self.snooze)
@@ -345,8 +349,16 @@ class StretchScreen(Screen):
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the buttons below.'
             self.ids.bl_stretch.add_widget(self.gl)
         else:
-            if activate():
-                self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
+            activate()
+            a.listener.set_activated(False)
+            t_now = time.time()
+            while time.time() < (t_now +2*60):
+                if a.listener.activated:
+                    break
+                if a.listener.snoozed:
+                    break
+            print(a.listener.activated)
+            if a.listener.activated:
                 Clock.schedule_once(self.activity)
             else:
                 Clock.schedule_once(self.snooze)
@@ -395,7 +407,16 @@ class BreatheScreen(Screen):
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the buttons below.'
             self.ids.bl_breathe.add_widget(self.gl)
         else:
-            if activate():
+            activate()
+            a.listener.set_activated(False)
+            t_now = time.time()
+            while time.time() < (t_now +2*60):
+                if a.listener.activated:
+                    break
+                if a.listener.snoozed:
+                    break
+            print(a.listener.activated)
+            if a.listener.activated:
                 Clock.schedule_once(self.activity)
             else:
                 Clock.schedule_once(self.snooze)
@@ -460,7 +481,6 @@ class WAP(App):
     non_hardware = False
 
     listener = Listener()
-    congrats_listener = Congrats_Listener()
 
     def build(self):
         return Root()

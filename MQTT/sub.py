@@ -12,6 +12,7 @@ import os
 import os.path
 from os import path
 import sys
+import re
 
 broker = 'mqtt.eclipseprojects.io'
 port = 1883
@@ -56,12 +57,19 @@ class client_mqtt:
     def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
-            if not path.exists(filename):
-                print("Write")
-                f = open(filename, 'wb')
-                print(msg.payload)
-                f.write(msg.payload)
-                f.close()
+            audio_rec = re.search('audio', msg.topic)
+            text_rec = re.search('text', msg.topic)
+            if audio_rec or text_rec:
+                if not path.exists(filename):
+                    print("Write")
+                    f = open(filename, 'wb')
+                    print(msg.payload)
+                    f.write(msg.payload)
+                    f.close()
+            else:
+                self.message = msg.payload.decode()
+                print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+
 
         client.subscribe(self.topic_list)
         client.on_message = on_message
