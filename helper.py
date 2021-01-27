@@ -4,6 +4,7 @@ from Speech.audio_msg import speech
 import subprocess
 import os
 import time
+from test_msg_sub import listen
 
 f = open('ID.txt', 'r')
 user_id = f.readline().replace('\n', '')
@@ -101,3 +102,6 @@ def congrats():
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
+
+if __name__ == "__main__":
+    exercise_talk('isabelketner')
