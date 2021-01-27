@@ -11,6 +11,8 @@ class Listener:
         self.received = False
         self.activated = False
         self.snoozed = False
+        self.congrats = False
+        self.dest_user=''
 
         f = open('ID.txt', 'r')
         self.user_id = f.readline().replace('\n', '')
@@ -72,9 +74,15 @@ class Listener:
                     self.activated = True
                 elif self.client_instance.message == "Reminder:RR":
                     self.snoozed = True
+                elif self.client_instance.message != '':
+                    self.dest_user = self.client_instance.message.split(':')[0]
+                    task = self.client_instance.message.split(':')[1]
+                    if(self.dest_user != self.user_id):
+                        self.congrats = True
                 else:
                     self.activated = False
                     self.snoozed = False
+                    self.congrats = False
 
 
 if __name__ == "__main__":
