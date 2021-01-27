@@ -101,3 +101,6 @@ def congrats():
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
+
+if __name__ == "__main__":
+    exercise_talk('isabelketner')
