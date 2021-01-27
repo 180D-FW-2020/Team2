@@ -21,7 +21,6 @@ import threading
 from playsound import playsound
 import glob
 import os
-from send_congrats import Congrats_Listener
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -143,7 +142,16 @@ class WaitScreen(Screen):
     def __init__(self, **kw):
         super(WaitScreen, self).__init__(**kw)
         self.time_check = time.time()
+        self.time_check2 = time.time()
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
+
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.send_msg)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.update_screen2)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
 
     def switch_check(self, *largs):
         self.manager.current = 'check'
@@ -152,11 +160,75 @@ class WaitScreen(Screen):
         Clock.unschedule(self.check_congrats)
         self.manager.current = 'congrats'
 
-    def update_screen(self, *args):
+    def update_screen2(self, *args):
+        try:
+            self.ids.boxy.remove_widget(self.lbl)
+            self.ids.boxy.remove_widget(self.lbl1)
+            self.ids.boxy.remove_widget(self.lbl2)
+            self.ids.boxy.remove_widget(self.lbl3)
+            self.ids.boxy.remove_widget(self.gl)
+        except:
+            print('widgets already removed')
+        self.ids.boxy.add_widget(self.lbl_normal)
+
+    def update_screen(self,*args):
         latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
         playsound(latest_audio)
-        self.ids.boxy.remove_widget(self.lbl)
+        try:
+            self.ids.boxy.remove_widget(self.lbl)
+            self.ids.boxy.remove_widget(self.lbl1)
+            self.ids.boxy.remove_widget(self.lbl2)
+            self.ids.boxy.remove_widget(self.lbl3)
+            self.ids.boxy.remove_widget(self.gl)
+        except:
+            print('widgets already removed')
         self.ids.boxy.add_widget(self.lbl_normal)
+
+    def send_msg(self, *largs):
+        a = App.get_running_app()
+        try:
+            self.ids.boxy.remove_widget(self.lbl)
+            self.ids.boxy.remove_widget(self.lbl1)
+            self.ids.boxy.remove_widget(self.lbl2)
+            self.ids.boxy.remove_widget(self.lbl3)
+        except:
+            print('end me.')
+        msg = 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
+        self.lbl3 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+        self.ids.boxy.remove_widget(self.lbl_normal)
+        self.ids.boxy.add_widget(self.lbl3)
+        exercise_talk(a.listener.dest_user)
+        Clock.schedule_once(self.update_screen2)
+
+    def check_other(self, *largs):
+        a = App.get_running_app()
+        if a.listener.congrats and (time.time() > (self.time_check2 + 10)):
+            self.time_check2 = time.time()
+            self.ids.boxy.remove_widget(self.lbl_normal)
+            print('SOMEBODY FINISHED SMTHG WOWOWOWOW')
+            if a.non_hardware:
+                print('dear god end my pain')
+                msg = 'Your friend ' + a.listener.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
+                self.lbl2 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+                self.ids.boxy.add_widget(self.lbl2)
+                self.ids.boxy.add_widget(self.gl)
+            else:
+                msg = 'Your friend ' + a.listener.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
+                self.lbl1 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+                self.ids.boxy.add_widget(self.lbl1)
+
+                a.listener.set_activated(False)
+                t_now = time.time()
+                while time.time() < (t_now +2*60):
+                    if a.listener.activated:
+                        break
+                    if a.listener.snoozed:
+                        break
+                print(a.listener.activated)
+                if a.listener.activated:
+                    Clock.schedule_once(self.send_msg)
+                else:
+                    Clock.schedule_once(self.snooze)
 
     def check_congrats(self, *largs):
         a = App.get_running_app()
@@ -173,9 +245,6 @@ class WaitScreen(Screen):
             self.ids.boxy.add_widget(self.lbl)
             Clock.schedule_once(self.update_screen)
 
-        elif not a.listener.received:
-            self.ids.lbl1 = 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
-
     def on_pre_enter(self, *args):
         a = App.get_running_app()
         print('entered wait')
@@ -191,6 +260,7 @@ class WaitScreen(Screen):
                 a.completed = False
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
+                Clock.schedule_interval(self.check_other, 1)
                 Clock.schedule_once(self.switch_check, TIME_INTERVAL) #*60) - a.time_elapsed)
 
 class CheckScreen(Screen):
