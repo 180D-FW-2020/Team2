@@ -3,7 +3,6 @@ import os
 from os import path
 import time
 import shutil
-from datetime import datetime
 
 class Listener:
     def __init__(self, *args):
@@ -58,9 +57,7 @@ class Listener:
 
     #caliente.disconnect()
 
-
 if __name__ == "__main__":
-    if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
-        os.mkdir('./RecAudio/')
-        os.mkdir('./RecTxt/')
+    os.mkdir('./RecAudio/')
+    os.mkdir('./RecTxt/')
     listen()
