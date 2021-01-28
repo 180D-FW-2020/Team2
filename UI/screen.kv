@@ -222,7 +222,6 @@
                 on_release:
                     root.parent.current='wait'
                     root.parent.transition.direction = 'left'
-
 <WaitScreen>:
     canvas.before:
         Rectangle:
@@ -232,7 +231,6 @@
     BoxLayout:
         id: boxy
         orientation: 'vertical'
-
 <CheckScreen>:
     canvas.before:
         Rectangle:
@@ -308,13 +306,9 @@
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_talk
-        text: 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
-
+    BoxLayout:
+        orientation: 'vertical'
+        id: box
 <CongratsScreen>:
     canvas.before:
         Rectangle:

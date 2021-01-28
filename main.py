@@ -3,7 +3,7 @@ import time
 from kivy.app import App
 from kivy.app import Widget
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition, SlideTransition
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -21,9 +21,12 @@ import threading
 from playsound import playsound
 import glob
 import os
+from MQTT.pub import PUB
+from Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
+debug = 1
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -154,51 +157,65 @@ class WaitScreen(Screen):
         self.gl.add_widget(self.btn_submit)
 
     def switch_check(self, *largs):
+        Clock.unschedule(self.check_congrats)
+        Clock.unschedule(self.check_other)
         self.manager.current = 'check'
 
     def switch_congrats(self, *largs):
         Clock.unschedule(self.check_congrats)
+        Clock.unschedule(self.check_other)
         self.manager.current = 'congrats'
 
     def update_screen2(self, *args):
+        a=App.get_running_app()
+        if a.non_hardware:
+            try:
+                self.ids.boxy.remove_widget(self.lbl2)
+                self.ids.boxy.remove_widget(self.gl)
+            except:
+                print('already removed from sending msg')
+        else:
+            try:
+                self.ids.boxy.remove_widget(self.lbl1)
+            except:
+                print('already removed from sending msg')
         try:
-            self.ids.boxy.remove_widget(self.lbl)
-            self.ids.boxy.remove_widget(self.lbl1)
-            self.ids.boxy.remove_widget(self.lbl2)
             self.ids.boxy.remove_widget(self.lbl3)
-            self.ids.boxy.remove_widget(self.gl)
         except:
-            print('widgets already removed')
+            print('snoozed, so never added to screen')
         self.ids.boxy.add_widget(self.lbl_normal)
 
-    def update_screen(self,*args):
-        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-        playsound(latest_audio)
-        try:
-            self.ids.boxy.remove_widget(self.lbl)
-            self.ids.boxy.remove_widget(self.lbl1)
-            self.ids.boxy.remove_widget(self.lbl2)
-            self.ids.boxy.remove_widget(self.lbl3)
-            self.ids.boxy.remove_widget(self.gl)
-        except:
-            print('widgets already removed')
-        self.ids.boxy.add_widget(self.lbl_normal)
+    def actually_send_msg(self, *largs):
+        a = App.get_running_app()
+        exercise_talk(a.listener.dest_user)
+        Clock.schedule_once(self.update_screen2)
 
     def send_msg(self, *largs):
         a = App.get_running_app()
-        try:
-            self.ids.boxy.remove_widget(self.lbl)
-            self.ids.boxy.remove_widget(self.lbl1)
+        if a.non_hardware:
             self.ids.boxy.remove_widget(self.lbl2)
-            self.ids.boxy.remove_widget(self.lbl3)
-        except:
-            print('end me.')
+            self.ids.boxy.remove_widget(self.gl)
+        else:
+            self.ids.boxy.remove_widget(self.lbl1)
         msg = 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
         self.lbl3 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
-        self.ids.boxy.remove_widget(self.lbl_normal)
         self.ids.boxy.add_widget(self.lbl3)
-        exercise_talk(a.listener.dest_user)
-        Clock.schedule_once(self.update_screen2)
+        Clock.schedule_once(self.actually_send_msg)
+
+    def wait_for_activate(self, *largs):
+        a = App.get_running_app()
+        a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if a.listener.activated:
+                break
+            if a.listener.snoozed:
+                break
+        print(a.listener.activated)
+        if a.listener.activated:
+            Clock.schedule_once(self.send_msg)
+        else:
+            Clock.schedule_once(self.update_screen2)
 
     def check_other(self, *largs):
         a = App.get_running_app()
@@ -216,19 +233,13 @@ class WaitScreen(Screen):
                 msg = 'Your friend ' + a.listener.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
                 self.lbl1 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
                 self.ids.boxy.add_widget(self.lbl1)
+                Clock.schedule_once(self.wait_for_activate)
 
-                a.listener.set_activated(False)
-                t_now = time.time()
-                while time.time() < (t_now +2*60):
-                    if a.listener.activated:
-                        break
-                    if a.listener.snoozed:
-                        break
-                print(a.listener.activated)
-                if a.listener.activated:
-                    Clock.schedule_once(self.send_msg)
-                else:
-                    Clock.schedule_once(self.snooze)
+    def update_screen(self,*args):
+        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
+        playsound(latest_audio)
+        self.ids.boxy.remove_widget(self.lbl_msg)
+        self.ids.boxy.add_widget(self.lbl_normal)
 
     def check_congrats(self, *largs):
         a = App.get_running_app()
@@ -240,9 +251,9 @@ class WaitScreen(Screen):
             msg = f.readline()
             display_msg = 'Your friend said:\n' + msg
             print(display_msg)
-            self.lbl = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+            self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
             self.ids.boxy.remove_widget(self.lbl_normal)
-            self.ids.boxy.add_widget(self.lbl)
+            self.ids.boxy.add_widget(self.lbl_msg)
             Clock.schedule_once(self.update_screen)
 
     def on_pre_enter(self, *args):
@@ -261,7 +272,10 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
-                Clock.schedule_once(self.switch_check, TIME_INTERVAL) #*60) - a.time_elapsed)
+                if debug:
+                    Clock.schedule_once(self.switch_check, TIME_INTERVAL)
+                else:
+                    Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
 
 class CheckScreen(Screen):
     def __init__(self, **kw):
@@ -318,6 +332,8 @@ class TalkScreen(Screen):
         self.gl.add_widget(self.btn_submit)
 
     def switch(self, *largs):
+        self.ids.txtinput.height = '0dp'
+        self.ids.txtinput.text=''
         self.manager.current = 'talk2'
 
     def handle_input(self, *largs):
@@ -328,9 +344,9 @@ class TalkScreen(Screen):
     def get_user(self, *largs):
         self.ids.bl_talk.remove_widget(self.gl)
         self.ids.txtinput.bind(on_text_validate = self.handle_input)
-        self.ids.lbl_talk.size_hint = (1, .7)
+        #self.ids.lbl_talk.size_hint = (1, .7)
         self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\nNote: must use their user ID.'
-        self.ids.txtinput.size_hint = (1, .3)
+        self.ids.txtinput.height =  125
 
     def snooze(self, *args):
         self.ids.bl_talk.remove_widget(self.gl)
@@ -364,20 +380,112 @@ class TalkScreen(Screen):
 class TalkScreen2(Screen):
     def __init__(self, **kw):
         super(TalkScreen2, self).__init__(**kw)
+        self.lbl_speak = Label(text='Say \'start recording\' to send a message!',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_start_recog=Label(text='Start command recognized, get ready to send your message :)',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_start_not_recog=Label(text='Start command not recognized, please try again.',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_recording = Label(text='Send over an audio message! (Max: 10 seconds)',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_save=Label(text='Saving message transcription...',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_send = Label(text='Sending message...',halign='center',font_size=20,color=(0,0,0,1))
 
     def switch_congrats(self, *largs):
         a = App.get_running_app()
+        self.ids.box.remove_widget(self.lbl_send)
         a.completed = True
         self.manager.current = 'wait'
 
-    def activity(self, *largs):
+    def send_msg(self, *largs):
         a = App.get_running_app()
-        exercise_talk(a.dest_user)
+        audio_topic = '/' + a.dest_user + '/audio'
+        txt_topic = '/' + a.dest_user + '/text'
+        audio_path = a.speech_instance.get_audiopath()
+        txt_path = a.speech_instance.get_txtpath()
+        pub = PUB(audio_topic, "hello from audio")
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_file(client, audio_path)
+        client.disconnect()
+
+        pub = PUB(txt_topic, a.dest_user + 'hello from txt')
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_file(client, txt_path)
+        client.disconnect()
         Clock.schedule_once(self.switch_congrats)
+
+    def trans_send(self, *args):
+        self.ids.box.remove_widget(self.lbl_save)
+        self.ids.box.add_widget(self.lbl_send)
+        Clock.schedule_once(self.send_msg)
+
+    def transcribe_msg(self, *largs):
+        a = App.get_running_app()
+        self.ids.box.remove_widget(self.lbl_recording)
+        self.ids.box.add_widget(self.lbl_save)
+        a.speech_instance.transcribe()
+        Clock.schedule_once(self.trans_send)
+
+    def record_msg(self, *largs):
+        a = App.get_running_app()
+        print('recording...')
+        a.speech_instance.record_msg()
+        Clock.schedule_once(self.transcribe_msg)
+
+    def cor_rec(self, *largs):
+        self.ids.box.remove_widget(self.lbl_start_recog)
+        self.ids.box.add_widget(self.lbl_recording)
+        Clock.schedule_once(self.record_msg)
+
+    def correct(self, *largs):
+        print("Start command recognized!")
+        try:
+            self.ids.box.remove_widget(self.lbl_start_not_recog)
+        except:
+            print('got it first try gj')
+        self.ids.box.remove_widget(self.lbl_speak)
+        self.ids.box.add_widget(self.lbl_start_recog)
+        Clock.schedule_once(self.cor_rec, 2)
+
+    def not_correct(self, *largs):
+        self.ids.box.remove_widget(self.lbl_speak)
+        self.ids.box.add_widget(self.lbl_start_not_recog)
+        self.ids.box.add_widget(self.lbl_speech)
+        print("Start command not recognized...")
+        Clock.schedule_once(self.recognize_start, 3)
+
+    def recognize_start(self, *largs):
+        a = App.get_running_app()
+        for j in range(1):
+            print('Speak!')
+            time.sleep(0.5)
+            guess = a.speech_instance.recognize_speech_from_mic()
+            if guess["transcription"]:
+                break
+            if not guess["success"]:
+                break
+            print("I didn't catch that. What did you say?\n")
+            if guess["error"]:
+                print("ERROR: {}".format(guess["error"]))
+                break
+        try:
+            self.ids.box.remove_widget(self.lbl_speech)
+            self.ids.box.add_widget(self.lbl_speak)
+        except:
+            print('first run')
+
+        msg = "You said: {}".format(guess["transcription"])
+        self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+        print(msg)
+
+        if str(guess["transcription"]).find("start recording") != -1:
+            Clock.schedule_once(self.correct)
+        else:
+            Clock.schedule_once(self.not_correct)
 
     def on_enter(self, *args):
         a = App.get_running_app()
-        Clock.schedule_once(self.activity, 1)
+        print("calling talking to friends exercise")
+        self.ids.box.add_widget(self.lbl_speak)
+        Clock.schedule_once(self.recognize_start, .1)
 
 class StretchScreen(Screen):
     def __init__(self, **kw):
@@ -551,6 +659,7 @@ class WAP(App):
     non_hardware = False
 
     listener = Listener()
+    speech_instance = speech('Message')
 
     def build(self):
         return Root()
