@@ -26,7 +26,7 @@ def listen():
         curr_time = curr_time.strftime("%H--%M--%S");
         wav_file = curr_time + ".wav"
         txt_file = curr_time + ".txt"
-        client_instance.subscribe_file(caliente, wav_file)
+        client_instance.subscribe_file(caliente, wav_file, "wav")
         count += 1
         caliente.loop_start()
         received = False
@@ -35,7 +35,7 @@ def listen():
                 time.sleep(10)
                 print("found .wav now save .txt")
                 if not path.exists(txt_file):
-                    client_instance.subscribe_file(caliente, txt_file)
+                    client_instance.subscribe_file(caliente, txt_file, "txt")
                     time.sleep(7)
 
             if path.exists(wav_file) and path.exists(txt_file):
