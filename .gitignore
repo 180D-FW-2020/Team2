@@ -6,3 +6,5 @@ IMU/__pycache__
 ID.txt
 msg.txt
 .idea
+RecAudio/*
+RecTxt/*

@@ -12,16 +12,20 @@ import os
 import os.path
 from os import path
 import sys
+import re
 
 broker = 'mqtt.eclipseprojects.io'
 port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 id_path = os.path.join(os.getcwd(), 'ID.txt')
+user_id = 'michelletan'
 
+'''
 f = open(id_path, 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
+'''
 
 class client_mqtt:
     def __init__(self, *args):
@@ -50,24 +54,22 @@ class client_mqtt:
         client.connect(broker, port)
         return client
 
-    def subscribe_file(self, client: mqtt_client, filename, type):
+    def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
-            if not path.exists(filename):
-                print("Write")
-                f = open(filename, 'wb')
-
-                print(msg.payload)
-                f.write(msg.payload)
-
-                """
-                if(type == "txt"):
-                    f.write(user_id + ":" + msg.payload)
-                else:
+            audio_rec = re.search('audio', msg.topic)
+            text_rec = re.search('text', msg.topic)
+            if audio_rec or text_rec:
+                if not path.exists(filename):
+                    print("Write")
+                    f = open(filename, 'wb')
+                    print(msg.payload)
                     f.write(msg.payload)
-                """
+                    f.close()
+            else:
+                self.message = msg.payload.decode()
+                print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
 
-                f.close()
 
         client.subscribe(self.topic_list)
         client.on_message = on_message
