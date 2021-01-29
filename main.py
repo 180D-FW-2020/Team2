@@ -26,7 +26,7 @@ from Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 1
+debug = 0
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -149,12 +149,19 @@ class WaitScreen(Screen):
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
 
         self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
-        self.btn_submit.bind(on_release=self.send_msg)
+        self.btn_submit.bind(on_release=self.start_msg)
         self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
-        self.btn_snooze.bind(on_release=self.update_screen2)
+        self.btn_snooze.bind(on_release=self.update_screen_snooze)
         self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
         self.gl.add_widget(self.btn_snooze)
         self.gl.add_widget(self.btn_submit)
+
+        self.lbl_speak = Label(text='Say \'start recording\' to send a message!',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_start_recog=Label(text='Start command recognized, get ready to send your message :)',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_start_not_recog=Label(text='Start command not recognized, please try again.',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_recording = Label(text='Send over an audio message! (Max: 10 seconds)',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_save=Label(text='Saving message transcription...',halign='center',font_size=20,color=(0,0,0,1))
+        self.lbl_send = Label(text='Sending message...',halign='center',font_size=20,color=(0,0,0,1))
 
     def switch_check(self, *largs):
         Clock.unschedule(self.check_congrats)
@@ -166,41 +173,14 @@ class WaitScreen(Screen):
         Clock.unschedule(self.check_other)
         self.manager.current = 'congrats'
 
-    def update_screen2(self, *args):
+    def update_screen_snooze(self, *args):
         a=App.get_running_app()
-        if a.non_hardware:
-            try:
-                self.ids.boxy.remove_widget(self.lbl2)
-                self.ids.boxy.remove_widget(self.gl)
-            except:
-                print('already removed from sending msg')
-        else:
-            try:
-                self.ids.boxy.remove_widget(self.lbl1)
-            except:
-                print('already removed from sending msg')
-        try:
-            self.ids.boxy.remove_widget(self.lbl3)
-        except:
-            print('snoozed, so never added to screen')
-        self.ids.boxy.add_widget(self.lbl_normal)
-
-    def actually_send_msg(self, *largs):
-        a = App.get_running_app()
-        exercise_talk(a.listener.dest_user)
-        Clock.schedule_once(self.update_screen2)
-
-    def send_msg(self, *largs):
-        a = App.get_running_app()
         if a.non_hardware:
             self.ids.boxy.remove_widget(self.lbl2)
             self.ids.boxy.remove_widget(self.gl)
         else:
             self.ids.boxy.remove_widget(self.lbl1)
-        msg = 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
-        self.lbl3 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
-        self.ids.boxy.add_widget(self.lbl3)
-        Clock.schedule_once(self.actually_send_msg)
+        self.ids.boxy.add_widget(self.lbl_normal)
 
     def wait_for_activate(self, *largs):
         a = App.get_running_app()
@@ -213,9 +193,112 @@ class WaitScreen(Screen):
                 break
         print(a.listener.activated)
         if a.listener.activated:
-            Clock.schedule_once(self.send_msg)
+            Clock.schedule_once(self.start_msg)
         else:
-            Clock.schedule_once(self.update_screen2)
+            Clock.schedule_once(self.update_screen_snooze)
+
+    def update_screen_completed(self, *largs):
+        self.ids.boxy.remove_widget(self.lbl_send)
+        self.ids.boxy.add_widget(self.lbl_normal)
+
+    def send_msg(self, *largs):
+        a = App.get_running_app()
+        audio_topic = '/' + a.listener.dest_user + '/audio'
+        txt_topic = '/' + a.listener.dest_user + '/text'
+        audio_path = a.speech_instance.get_audiopath()
+        txt_path = a.speech_instance.get_txtpath()
+        pub = PUB(audio_topic, "hello from audio")
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_file(client, audio_path)
+        client.disconnect()
+
+        pub = PUB(txt_topic, a.listener.dest_user + 'hello from txt')
+        client = pub.connect_mqtt()
+        client.loop_start()
+        pub.publish_file(client, txt_path)
+        client.disconnect()
+        Clock.schedule_once(self.update_screen_completed)
+
+    def trans_send(self, *args):
+        self.ids.boxy.remove_widget(self.lbl_save)
+        self.ids.boxy.add_widget(self.lbl_send)
+        Clock.schedule_once(self.send_msg)
+
+    def transcribe_msg(self, *largs):
+        a = App.get_running_app()
+        self.ids.boxy.remove_widget(self.lbl_recording)
+        self.ids.boxy.add_widget(self.lbl_save)
+        a.speech_instance.transcribe()
+        Clock.schedule_once(self.trans_send)
+
+    def record_msg(self, *largs):
+        a = App.get_running_app()
+        print('recording...')
+        a.speech_instance.record_msg()
+        Clock.schedule_once(self.transcribe_msg)
+
+    def cor_rec(self, *largs):
+        self.ids.boxy.remove_widget(self.lbl_start_recog)
+        self.ids.boxy.add_widget(self.lbl_recording)
+        Clock.schedule_once(self.record_msg)
+
+    def correct(self, *largs):
+        print("Start command recognized!")
+        try:
+            self.ids.boxy.remove_widget(self.lbl_start_not_recog)
+        except:
+            print('got it first try gj')
+        self.ids.boxy.remove_widget(self.lbl_speak)
+        self.ids.boxy.add_widget(self.lbl_start_recog)
+        Clock.schedule_once(self.cor_rec, 2)
+
+    def not_correct(self, *largs):
+        self.ids.boxy.remove_widget(self.lbl_speak)
+        self.ids.boxy.add_widget(self.lbl_start_not_recog)
+        self.ids.boxy.add_widget(self.lbl_speech)
+        print("Start command not recognized...")
+        Clock.schedule_once(self.recognize_start, 3)
+
+    def recognize_start(self, *largs):
+        a = App.get_running_app()
+        for j in range(1):
+            print('Speak!')
+            time.sleep(0.5)
+            guess = a.speech_instance.recognize_speech_from_mic()
+            if guess["transcription"]:
+                break
+            if not guess["success"]:
+                break
+            print("I didn't catch that. What did you say?\n")
+            if guess["error"]:
+                print("ERROR: {}".format(guess["error"]))
+                break
+        try:
+            self.ids.boxy.remove_widget(self.lbl_speech)
+            self.ids.boxy.add_widget(self.lbl_speak)
+        except:
+            print('first run')
+
+        msg = "You said: {}".format(guess["transcription"])
+        self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+        print(msg)
+
+        if str(guess["transcription"]).find("start recording") != -1:
+            Clock.schedule_once(self.correct)
+        else:
+            Clock.schedule_once(self.not_correct)
+
+    def start_msg(self, *args):
+        a = App.get_running_app()
+        print("calling talking to friends exercise")
+        if a.non_hardware:
+            self.ids.boxy.remove_widget(self.lbl2)
+            self.ids.boxy.remove_widget(self.gl)
+        else:
+            self.ids.boxy.remove_widget(self.lbl1)
+        self.ids.boxy.add_widget(self.lbl_speak)
+        Clock.schedule_once(self.recognize_start, .1)
 
     def check_other(self, *largs):
         a = App.get_running_app()
@@ -344,7 +427,6 @@ class TalkScreen(Screen):
     def get_user(self, *largs):
         self.ids.bl_talk.remove_widget(self.gl)
         self.ids.txtinput.bind(on_text_validate = self.handle_input)
-        #self.ids.lbl_talk.size_hint = (1, .7)
         self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\nNote: must use their user ID.'
         self.ids.txtinput.height =  125
 
