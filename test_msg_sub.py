@@ -14,6 +14,10 @@ class Listener:
         self.congrats = False
         self.dest_user=''
 
+    def set_activated(self, activated):
+        self.activated = activated
+
+    def listen(self):
         f = open('ID.txt', 'r')
         self.user_id = f.readline().replace('\n', '')
         f.close()
@@ -31,11 +35,6 @@ class Listener:
         if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
             os.mkdir('./RecAudio/')
             os.mkdir('./RecTxt/')
-
-    def set_activated(self, activated):
-        self.activated = activated
-
-    def listen(self):
         count = 1
         while(1):
             print("new while loop iteration")
@@ -66,8 +65,6 @@ class Listener:
                     break
 
                 if time.time() > (t_now + 5):
-                    print('message: ' + self.client_instance.message)
-                    print(self.activated)
                     self.client_instance.set_message('')
                     t_now = time.time() #messages expire after 5s
                 if self.client_instance.message == 'Reminder:VS':
