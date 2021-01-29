@@ -19,14 +19,14 @@ def listen():
     print("listening for finished tasks!")
 
     # MQTT setup for laptop - RPI communication
-    client_instance = client_mqtt(my_topic)
+    client_instance = client_mqtt(my_topic, network)
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
 
     while True:
         if(client_instance.message != ''):
-            #print('message on network:' + client_instance.message)
+            print('message on network:' + client_instance.message)
             task = client_instance.message
             if(((datetime.now() - cur_time).total_seconds()) > 1):
                 if(task == 'reminder'):
