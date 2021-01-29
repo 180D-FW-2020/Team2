@@ -12,10 +12,8 @@ f.close()
 def listen():
     cur_time = datetime.now()
     my_topic = '/' + user_id + '/reminders'
-    # task = ''
     get_user = ''
     network = '/team2/network'
-    #my_topic = '/team2/network'
     get_user = ''
     print("listening for reminders!")
     print("listening for finished tasks!")
@@ -48,31 +46,6 @@ def listen():
             cur_time = datetime.now()
             client_instance.set_message('')
 
-"""
-    while True:
-        if(client_instance.message != ''):
-            #print('message on network:' + client_instance.message)
-            try:
-                get_user = client_instance.message.split(':')[0]
-                task = client_instance.message.split(':')[1]
-            except:
-                print('receiving a file')
-            if(get_user == user_id):
-                if(((datetime.now() - cur_time).total_seconds()) > 1):
-                    if(task == 'reminder'):
-                        print('calling reminder led matrix')
-                        run_reminder()
-                    if(task == 'breathe'):
-                        print('calling breath led program')
-                        run_breathe()
-                cur_time = datetime.now()
-            else:
-                if (task == 'finish'):
-                    print('calling congrats led program')
-                    run_congrats()
-
-            client_instance.set_message('')
-"""
 
 def imu():
     print("starting IMU here!")
