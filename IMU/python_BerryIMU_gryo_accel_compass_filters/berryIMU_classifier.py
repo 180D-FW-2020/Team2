@@ -138,15 +138,6 @@ def reminder_handler():
     client.disconnect()
 
 
-def audio_handler():
-    print('*Voice activation here*')
-    pub=PUB(imu_topic,"Audio message")
-    client = pub.connect_mqtt()
-    client.loop_start()
-    pub.publish_audio(client)
-    client.disconnect()
-
-
 def kalmanFilterY ( accAngle, gyroRate, DT):
     y=0.0
     S=0.0
@@ -557,5 +548,5 @@ def imu_run():
         gyroy_list.clear()
         gyroz_list.clear()
 
-        if classifier_action is "VS":
+        if (classifier_action is "VS") or (classifier_action is "RR"):
             reminder_handler()

@@ -88,11 +88,13 @@ class speech:
     def record_msg(self):
         with self.microphone as source:
             print("Send over an audio message! (Max: 10 seconds)")
-            try:
-                start_time = time.time()
-                audio = self.recognizer.listen(source, listen_limit, msg_limit)
-            except sr.WaitTimeoutError:
-                print("No audio detected...Try again...")
+            while (1):
+                try:
+                    start_time = time.time()
+                    audio = self.recognizer.listen(source, listen_limit, msg_limit)
+                    break
+                except sr.WaitTimeoutError:
+                    print("No audio detected...Try again...")
 
         print("Recording finished!")
 
@@ -115,27 +117,40 @@ class speech:
                 except sr.RequestError as e:
                     print("Could not request results from Google Speech Recognition service; {0}".format(e))
 
-    def msg_flow(self):
-        # Listen for voice command before starting recording
-        for j in range(PROMPT_LIMIT):
-            print('Speak!')
-            time.sleep(0.5)
-            guess = self.recognize_speech_from_mic()
-            if guess["transcription"]:
-                break
-            if not guess["success"]:
-                break
-            print("I didn't catch that. What did you say?\n")
+    def recognize_start(self):
+        recognized = False
+        while not recognized:
+            # Listen for voice command before starting recording
+            for j in range(PROMPT_LIMIT):
+                print('Speak!')
+                time.sleep(0.5)
+                guess = self.recognize_speech_from_mic()
+                if guess["transcription"]:
+                    break
+                if not guess["success"]:
+                    break
+                print("I didn't catch that. What did you say?\n")
 
-            if guess["error"]:
-                print("ERROR: {}".format(guess["error"]))
+                if guess["error"]:
+                    print("ERROR: {}".format(guess["error"]))
+                    break
+
+            # Debug statement
+            print("You said: {}".format(guess["transcription"]))
+
+            if str(guess["transcription"]).find("start recording") != -1:
+                print("Start command recognized!")
+                recognized = True
                 break
+            else:
+                print("Start command not recognized...")
+                recognized = False
 
-        # Debug statement
-        print("You said: {}".format(guess["transcription"]))
+        return recognized
 
+    def main_record(self):
         # "Start recording" voice command recognized!
-        if str(guess["transcription"]).find("start recording") != -1:
+        if self.recognize_start():
             time.sleep(2)
             print('Recording...')
 

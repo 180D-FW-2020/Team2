@@ -19,6 +19,8 @@
         name: 'talk2'
     BreatheScreen:
         name: 'breathe'
+    BallScreen:
+        name: 'ball'
     CongratsScreen:
         name: 'congrats'
 <LoginScreen>:
@@ -220,19 +222,15 @@
                 on_release:
                     root.parent.current='wait'
                     root.parent.transition.direction = 'left'
-
 <WaitScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl1
-        text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+    BoxLayout:
+        id: boxy
+        orientation: 'vertical'
 <CheckScreen>:
     canvas.before:
         Rectangle:
@@ -275,6 +273,12 @@
             halign: 'center'
             font_size: 20
             color: 0, 0, 0, 1
+<BallScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
 <TalkScreen>:
     canvas.before:
         Rectangle:
@@ -302,13 +306,9 @@
             pos: self.pos
             size: self.size
             source: 'UI/holo-01.png'
-    Label:
-        id: lbl_talk
-        text: 'Say \'start recording\', wait 2 seconds, and record your message!\n (max: 10 seconds)'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
-
+    BoxLayout:
+        orientation: 'vertical'
+        id: box
 <CongratsScreen>:
     canvas.before:
         Rectangle:

@@ -28,23 +28,6 @@ def activate():
     client.disconnect()
 
     print("waiting for IMU activation")
-    #imu_topic = '/' + user_id + '/imu'
-    client_instance = client_mqtt(imu_topic)
-    caliente = client_instance.connect_mqtt()
-    client_instance.subscribe_msg(caliente)
-    caliente.loop_start()
-    t_end = time.time() + (2*60) #give them 2 minutes to activate
-    while(client_instance.message == '') and time.time() < t_end:
-        pass
-    try:
-        type = client_instance.message.split(':')[1]
-    except:
-        type = ''
-    caliente.disconnect()
-    if type == 'VS':
-        return True
-        print("activation received!")
-    return False
 
 def exercise_stretch():
         print("calling stretching exercise")
@@ -72,7 +55,7 @@ def exercise_talk(dest_user):
 
         audio_filename = "Message"
         speech_instance = speech(audio_filename)
-        speech_instance.msg_flow()
+        speech_instance.main_record()
         # Send recorded message to specific person
         audio_path = speech_instance.get_audiopath()
         txt_path = speech_instance.get_txtpath()
@@ -97,3 +80,7 @@ def congrats():
     client.loop_start()
     pub.publish_text(client)
     client.disconnect()
+
+
+if __name__ == "__main__":
+    exercise_talk('isabelketner')
