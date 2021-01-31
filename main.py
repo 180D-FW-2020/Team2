@@ -326,8 +326,11 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.wait_for_activate)
 
     def update_screen(self,*args):
-        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-        playsound(latest_audio)
+        try:
+            latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
+            playsound(latest_audio)
+        except:
+            print('ugly mac user pyobjc error :(( ugly ugly ugly we dont stan')
         self.ids.boxy.remove_widget(self.lbl_msg)
         self.ids.boxy.add_widget(self.lbl_normal)
 
@@ -635,7 +638,7 @@ class StretchScreen(Screen):
                     break
             print(a.listener.activated)
             if a.listener.activated:
-                Clock.schedule_once(self.activity)
+                Clock.schedule_once(self.transition)
             else:
                 Clock.schedule_once(self.snooze)
 
