@@ -26,7 +26,7 @@ from Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 0
+debug = 1
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
