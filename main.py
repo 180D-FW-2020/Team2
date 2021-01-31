@@ -259,8 +259,11 @@ class WaitScreen(Screen):
 
     def not_correct(self, *largs):
         self.ids.boxy.remove_widget(self.lbl_speak)
-        self.ids.boxy.add_widget(self.lbl_start_not_recog)
         self.ids.boxy.add_widget(self.lbl_speech)
+        try:
+            self.ids.boxy.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
@@ -539,8 +542,11 @@ class TalkScreen2(Screen):
 
     def not_correct(self, *largs):
         self.ids.box.remove_widget(self.lbl_speak)
-        self.ids.box.add_widget(self.lbl_start_not_recog)
         self.ids.box.add_widget(self.lbl_speech)
+        try:
+            self.ids.box.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
