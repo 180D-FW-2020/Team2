@@ -26,7 +26,11 @@ from Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 0
+debug = 1
+
+#switch demo to 0 if you want to use it normally
+demo = 1
+first_run = 1
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -355,7 +359,13 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
-                if debug:
+                global first_run
+                if demo and first_run:
+                    first_run = 0
+                    Clock.schedule_once(self.switch_check, TIME_INTERVAL)
+                elif demo and not first_run:
+                    print('do nothing its demo time baybee')
+                elif debug:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
