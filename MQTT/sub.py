@@ -19,13 +19,10 @@ port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 id_path = os.path.join(os.getcwd(), 'ID.txt')
-user_id = 'michelletan'
 
-'''
 f = open(id_path, 'r')
 user_id = f.readline().replace('\n', '')
 f.close()
-'''
 
 class client_mqtt:
     def __init__(self, *args):
@@ -38,8 +35,6 @@ class client_mqtt:
 
     def get_topics(self):
         print(self.topic_list)
-        # list format: ['/team2/audiomsg', '/team2/michelletan']
-        # need this:   [('/team2/audiomsg', 1), ('/team2/michelletan', 1)]
 
 
     def connect_mqtt(self) -> mqtt_client:
@@ -91,7 +86,6 @@ class client_mqtt:
 
 def run():
     #sample implementation
-    #client_instance = client_mqtt("/team2/network", "/team2/audiomsg", '/team2/michelletan')
     client_instance = client_mqtt("/team2/audiomsg", "/team2/michelletan")
     client_instance.get_topics()
     caliente = client_instance.connect_mqtt()
