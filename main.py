@@ -22,7 +22,7 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Team2.Speech.audio_msg import speech
+from Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -30,7 +30,7 @@ debug = 1
 
 #switch demo to 0 if you want to use it normally
 demo = 1
-first_run = 1
+run_num = 1
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -365,16 +365,16 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
-                global first_run
-                if demo and first_run:
-                    first_run = 0
+                global run_num
+                if demo and run_num < 4:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
-                elif demo and not first_run:
+                elif demo and run_num >= 4:
                     print('do nothing its demo time baybee')
                 elif debug:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
+                run_num +=1
 
 class CheckScreen(Screen):
     def __init__(self, **kw):

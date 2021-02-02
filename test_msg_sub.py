@@ -69,7 +69,7 @@ class Listener:
                     t_now = time.time() #messages expire after 5s
                 if self.client_instance.message == 'Reminder:VS':
                     self.activated = True
-                elif self.client_instance.message == "Reminder:RR":
+                elif self.client_instance.message == "Reminder:HS":
                     self.snoozed = True
                 elif self.client_instance.message != '':
                     self.dest_user = self.client_instance.message.split(':')[0]
