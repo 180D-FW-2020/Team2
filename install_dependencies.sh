@@ -1,9 +1,9 @@
 #!/bin/bash
 
 command_arr=(dill fire matplotlib psutil pycocotools requests scikit-image scipy slidingwindow tqdm )
-conda create --name WAP --force -y
+conda create --name W --force -y
 eval "$(conda shell.bash hook)"
-conda activate WAP
+conda activate W
 
 echo "Installing python==3.7.6"
 conda install -y python==3.7.6
@@ -22,15 +22,15 @@ do
 	echo "COMMAND: " $i
 	conda install -y --satisfied-skip-solve -c conda-forge $i
 done
-pip install git+https://github.com/ppwwyyxx/tensorpack.git
+pip3 install git+https://github.com/ppwwyyxx/tensorpack.git
 
 conda install -y swig
 cd tf_pose/pafprocess
 swig -python -c++ pafprocess.i && python setup.py build_ext --inplace
 
 echo "Installing opencv"
-pip install opencv-python
-pip install git+https://github.com/adrianc-a/tf-slim.git@remove_contrib
+pip3 install opencv-python
+pip3 install git+https://github.com/adrianc-a/tf-slim.git@remove_contrib
 cd ../../models/graph/cmu
 download.sh
 cd ../../../..
@@ -40,6 +40,8 @@ conda install -y -c conda-forge kivy
 conda install -y -c conda-forge paho-mqtt
 conda install -y -c anaconda pyaudio
 conda install -y -c conda-forge speechrecognition
-pip install google-cloud-speech
-pip install playsound
+conda install -c anaconda paramiko
+pip3 install google-cloud-speech
+pip3 install playsound
+pip install -U PyObjC
 conda deactivate
