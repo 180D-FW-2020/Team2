@@ -27,13 +27,10 @@ from Team2.Speech.audio_msg import speech
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
 debug = 1
-<<<<<<< HEAD
 
 #switch demo to 0 if you want to use it normally
 demo = 1
 first_run = 1
-=======
->>>>>>> a8b528d33e26247f63aaf2d4ddf24a77fa5e32e6
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
