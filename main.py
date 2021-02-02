@@ -22,11 +22,15 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Speech.audio_msg import speech
+from Team2.Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 0
+debug = 1
+
+#switch demo to 0 if you want to use it normally
+demo = 1
+first_run = 1
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -255,8 +259,11 @@ class WaitScreen(Screen):
 
     def not_correct(self, *largs):
         self.ids.boxy.remove_widget(self.lbl_speak)
-        self.ids.boxy.add_widget(self.lbl_start_not_recog)
         self.ids.boxy.add_widget(self.lbl_speech)
+        try:
+            self.ids.boxy.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
@@ -319,8 +326,11 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.wait_for_activate)
 
     def update_screen(self,*args):
-        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-        playsound(latest_audio)
+        try:
+            latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
+            playsound(latest_audio)
+        except:
+            print('ugly mac user pyobjc error :(( ugly ugly ugly we dont stan')
         self.ids.boxy.remove_widget(self.lbl_msg)
         self.ids.boxy.add_widget(self.lbl_normal)
 
@@ -355,7 +365,13 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
-                if debug:
+                global first_run
+                if demo and first_run:
+                    first_run = 0
+                    Clock.schedule_once(self.switch_check, TIME_INTERVAL)
+                elif demo and not first_run:
+                    print('do nothing its demo time baybee')
+                elif debug:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
@@ -529,8 +545,11 @@ class TalkScreen2(Screen):
 
     def not_correct(self, *largs):
         self.ids.box.remove_widget(self.lbl_speak)
-        self.ids.box.add_widget(self.lbl_start_not_recog)
         self.ids.box.add_widget(self.lbl_speech)
+        try:
+            self.ids.box.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
@@ -619,7 +638,7 @@ class StretchScreen(Screen):
                     break
             print(a.listener.activated)
             if a.listener.activated:
-                Clock.schedule_once(self.activity)
+                Clock.schedule_once(self.transition)
             else:
                 Clock.schedule_once(self.snooze)
 
