@@ -548,5 +548,5 @@ def imu_run():
         gyroy_list.clear()
         gyroz_list.clear()
 
-        if (classifier_action is "VS") or (classifier_action is "RR"):
+        if (classifier_action is "VS") or (classifier_action is "HS"):
             reminder_handler()
