@@ -22,7 +22,7 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Speech.audio_msg import speech
+from Team2.Speech.audio_msg import speech
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -259,8 +259,11 @@ class WaitScreen(Screen):
 
     def not_correct(self, *largs):
         self.ids.boxy.remove_widget(self.lbl_speak)
-        self.ids.boxy.add_widget(self.lbl_start_not_recog)
         self.ids.boxy.add_widget(self.lbl_speech)
+        try:
+            self.ids.boxy.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
@@ -323,8 +326,11 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.wait_for_activate)
 
     def update_screen(self,*args):
-        latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-        playsound(latest_audio)
+        try:
+            latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
+            playsound(latest_audio)
+        except:
+            print('ugly mac user pyobjc error :(( ugly ugly ugly we dont stan')
         self.ids.boxy.remove_widget(self.lbl_msg)
         self.ids.boxy.add_widget(self.lbl_normal)
 
@@ -539,8 +545,11 @@ class TalkScreen2(Screen):
 
     def not_correct(self, *largs):
         self.ids.box.remove_widget(self.lbl_speak)
-        self.ids.box.add_widget(self.lbl_start_not_recog)
         self.ids.box.add_widget(self.lbl_speech)
+        try:
+            self.ids.box.add_widget(self.lbl_start_not_recog)
+        except:
+            print('you already messed up once my dude')
         print("Start command not recognized...")
         Clock.schedule_once(self.recognize_start, 3)
 
@@ -629,7 +638,7 @@ class StretchScreen(Screen):
                     break
             print(a.listener.activated)
             if a.listener.activated:
-                Clock.schedule_once(self.activity)
+                Clock.schedule_once(self.transition)
             else:
                 Clock.schedule_once(self.snooze)
 

@@ -43,5 +43,5 @@ conda install -y -c conda-forge speechrecognition
 conda install -c anaconda paramiko
 pip3 install google-cloud-speech
 pip3 install playsound
-pip3 install -U PyObjC
+pip install -U PyObjC
 conda deactivate
