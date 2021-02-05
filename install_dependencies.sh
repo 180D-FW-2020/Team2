@@ -9,7 +9,7 @@ echo "Installing python==3.7.6"
 conda install -y python==3.7.6
 
 echo "Installing git"
-conda install -c -y anaconda git
+conda install -y -c anaconda git
 
 echo "Installing tensorflow"
 conda install -y tensorflow
@@ -38,6 +38,7 @@ cd ../../../..
 echo "Installing kiv"
 conda install -y -c conda-forge kivy
 conda install -y -c conda-forge paho-mqtt
+conda install -y -c anaconda paramiko
 conda install -y -c anaconda pyaudio
 conda install -y -c conda-forge speechrecognition
 conda install -c anaconda paramiko

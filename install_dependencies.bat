@@ -62,6 +62,8 @@ conda create --name WAP --force -y ^
 
 && echo "Installing kivy" ^
 && conda install -y -c conda-forge kivy ^
+&& echo "Installing paramiko" ^
+&& conda install -y -c anaconda paramiko ^
 && echo "Installing paho-mqtt" ^
 && conda install -y -c conda-forge paho-mqtt ^
 && echo "Installing pyaudio" ^

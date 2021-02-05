@@ -27,7 +27,7 @@ from rpi_conn import rpi_conn
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 1
+debug = 0
 
 #switch demo to 0 if you want to use it normally
 demo = 0
