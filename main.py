@@ -23,14 +23,15 @@ import glob
 import os
 from MQTT.pub import PUB
 from Speech.audio_msg import speech
+from rpi_conn import rpi_conn
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
 debug = 1
 
 #switch demo to 0 if you want to use it normally
-demo = 1
-run_num = 1
+demo = 0
+run_num = 3
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -58,11 +59,6 @@ class VersionScreen(Screen):
     def ping(self, type):
         a = App.get_running_app()
         a.non_hardware = type
-
-    def on_pre_enter(self):
-        a = App.get_running_app()
-        x = threading.Thread(target = a.listener.listen, daemon=True)
-        x.start()
 
     def quit(self):
         sys.exit(0)
@@ -137,6 +133,14 @@ class TimeScreen(Screen):
 
         self.widgets[k].append(text_label)
         self.widgets[k].append(box)
+
+    def on_leave(self, *args):
+        a = App.get_running_app()
+        x = threading.Thread(target = a.listener.listen, daemon=True)
+        x.start()
+        if not a.non_hardware:
+            y = threading.Thread(target = a.rpi_conn.run, daemon=True)
+            y.start()
 
     def on_pre_enter(self, *args):
         a = App.get_running_app()
@@ -314,11 +318,18 @@ class WaitScreen(Screen):
             self.ids.boxy.remove_widget(self.lbl_normal)
             print('SOMEBODY FINISHED SMTHG WOWOWOWOW')
             if a.non_hardware:
+                try:
+                    self.ids.boxy.remove_widget(self.lbl2)
+                except:
+                    print('no edge case baybee')
                 print('dear god end my pain')
                 msg = 'Your friend ' + a.listener.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
                 self.lbl2 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
                 self.ids.boxy.add_widget(self.lbl2)
-                self.ids.boxy.add_widget(self.gl)
+                try:
+                    self.ids.boxy.add_widget(self.gl)
+                except:
+                    print('no edge case baybee')
             else:
                 msg = 'Your friend ' + a.listener.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
                 self.lbl1 = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
@@ -366,15 +377,15 @@ class WaitScreen(Screen):
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
                 global run_num
-                if demo and run_num < 4:
+                if demo and run_num > 0:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
-                elif demo and run_num >= 4:
+                elif demo and run_num < 0:
                     print('do nothing its demo time baybee')
                 elif debug:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
-                run_num +=1
+                run_num -=1
 
 class CheckScreen(Screen):
     def __init__(self, **kw):
@@ -455,25 +466,40 @@ class TalkScreen(Screen):
         self.manager.current = 'wait'
         print('reminder snoozed')
 
+    def check_activate(self, *args):
+        a = App.get_running_app()
+        activate()
+        a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if a.listener.activated:
+                break
+            if a.listener.snoozed:
+                break
+        print(a.listener.activated)
+
+    def check_activate2(self, *args):
+        a=App.get_running_app()
+        if not self.t1.isAlive():
+            Clock.unschedule(self.check_activate2)
+            if a.listener.activated:
+                print('activated')
+                Clock.schedule_once(self.get_user)
+            else:
+                print('not activated')
+                Clock.schedule_once(self.snooze)
+
     def on_pre_enter(self, *args):
         a = App.get_running_app()
+        print('entered talk screen')
         if a.non_hardware:
             self.ids.lbl_talk.text='Time to talk to friends!\nActivate sending a message using the buttons below.'
             self.ids.bl_talk.add_widget(self.gl)
         else:
-            activate()
-            a.listener.set_activated(False)
-            t_now = time.time()
-            while time.time() < (t_now +2*60):
-                if a.listener.activated:
-                    break
-                if a.listener.snoozed:
-                    break
-            print(a.listener.activated)
-            if a.listener.activated:
-                Clock.schedule_once(self.get_user)
-            else:
-                Clock.schedule_once(self.snooze)
+            self.ids.lbl_talk.text = 'Time to talk to friends!\nActivate sending a message using the IMU.'
+            self.t1 = threading.Thread(target=self.check_activate)
+            self.t1.start()
+            Clock.schedule_interval(self.check_activate2, .1)
 
 class TalkScreen2(Screen):
     def __init__(self, **kw):
@@ -622,25 +648,38 @@ class StretchScreen(Screen):
         self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
         Clock.schedule_once(self.activity)
 
+    def check_activate2(self, *args):
+        a= App.get_running_app()
+        if not self.t1.isAlive():
+            Clock.unschedule(self.check_activate2)
+            if a.listener.activated:
+                Clock.schedule_once(self.transition)
+            else:
+                Clock.schedule_once(self.snooze)
+
+    def check_activate(self, *args):
+        a = App.get_running_app()
+        activate()
+        a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if a.listener.activated:
+                break
+            if a.listener.snoozed:
+                break
+        print(a.listener.activated)
+
     def on_pre_enter(self, *args):
+        print('entered stretch screen')
         a = App.get_running_app()
         if a.non_hardware:
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the buttons below.'
             self.ids.bl_stretch.add_widget(self.gl)
         else:
-            activate()
-            a.listener.set_activated(False)
-            t_now = time.time()
-            while time.time() < (t_now +2*60):
-                if a.listener.activated:
-                    break
-                if a.listener.snoozed:
-                    break
-            print(a.listener.activated)
-            if a.listener.activated:
-                Clock.schedule_once(self.transition)
-            else:
-                Clock.schedule_once(self.snooze)
+            self.ids.lbl_stretch.text='Time to stretch!\nActivate using the IMU.'
+            self.t1=threading.Thread(target=self.check_activate)
+            self.t1.start()
+            Clock.schedule_interval(self.check_activate2, 0.1)
 
 class BreatheScreen(Screen):
     def __init__(self, **kw):
@@ -680,25 +719,38 @@ class BreatheScreen(Screen):
         exercise_breathe()
         Clock.schedule_once(self.switch_congrats, 30)
 
+    def check_activate(self, *args):
+        a=App.get_running_app()
+        activate()
+        a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if a.listener.activated:
+                break
+            if a.listener.snoozed:
+                break
+        print(a.listener.activated)
+
+    def check_activate2(self, *args):
+        a= App.get_running_app()
+        if not self.t1.isAlive():
+            Clock.unschedule(self.check_activate2)
+            if a.listener.activated:
+                Clock.schedule_once(self.activity)
+            else:
+                Clock.schedule_once(self.snooze)
+
     def on_pre_enter(self, *args):
+        print('entered breathe screen')
         a = App.get_running_app()
         if a.non_hardware:
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the buttons below.'
             self.ids.bl_breathe.add_widget(self.gl)
         else:
-            activate()
-            a.listener.set_activated(False)
-            t_now = time.time()
-            while time.time() < (t_now +2*60):
-                if a.listener.activated:
-                    break
-                if a.listener.snoozed:
-                    break
-            print(a.listener.activated)
-            if a.listener.activated:
-                Clock.schedule_once(self.activity)
-            else:
-                Clock.schedule_once(self.snooze)
+            self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
+            self.t1=threading.Thread(target=self.check_activate)
+            self.t1.start()
+            Clock.schedule_interval(self.check_activate2, 0.1)
 
 class BallScreen(Screen):
     def __init__(self, **kw):
@@ -761,6 +813,8 @@ class WAP(App):
 
     listener = Listener()
     speech_instance = speech('Message')
+
+    rpi_conn = rpi_conn()
 
     def build(self):
         return Root()

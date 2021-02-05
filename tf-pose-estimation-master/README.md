@@ -130,11 +130,7 @@ python run_compare_ref_test_webcam.py --pose=squat,tree
 # To add your own reference pose, you will need to do the following:
 Run script by specifying the pose you want to create a reference for (e.g. squat). This is a requirement**
 1. python timed_capture.py --ref_pose=<pose_name> (e.g. python timed_capture.py --ref_pose=squat)
-<<<<<<< HEAD
 2. To start the timer, press the space bar (you might have to click on the window with the webcam first so it can register the key press)
-=======
-2. To start the timer, press tje spacebar (you might have to click on the window with the webcam first so it can register the key press)
->>>>>>> dce38f330d6e344d7603da621b4973c41c611263
 3. The timer is by default 7 seconds, but you can change it by passing in --timer=<num_seconds> (e.g. python timed_capture.py --ref_pose=squat --timer=10)
 4. Once the timer is done, the reference image will be saved in images/references/<pose_name>_reference.jpg, which can be used to find the joints
 ```
