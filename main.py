@@ -60,6 +60,58 @@ class VersionScreen(Screen):
         a = App.get_running_app()
         a.non_hardware = type
 
+    def switch(self):
+        a = App.get_running_app()
+        self.manager.transition.direction='left'
+        if a.non_hardware:
+            self.manager.current='start'
+        else:
+            self.manager.current='raspberry'
+
+    def quit(self):
+        sys.exit(0)
+
+class RaspberryScreen(Screen):
+    def __init__(self, **kw):
+        super(RaspberryScreen, self).__init__(**kw)
+
+    def update(self):
+        self.ip = self.ids.ip.text
+        self.port = self.ids.port.text
+        self.user = self.ids.user.text
+        self.pw = self.ids.pw.text
+
+        if self.ip == '' or self.port == '' or self.user == '' or self.pw == '':
+            if self.ip =='':
+                self.ids.ip.background_color = (1, 0, 0, .3)
+            if self.port == '':
+                self.ids.port.background_color = (1, 0, 0, .3)
+            if self.user == '':
+                self.ids.user.background_color = (1, 0, 0, .3)
+            if self.pw == '':
+                self.ids.pw.background_color = (1, 0, 0, .3)
+        else:
+            f = open('rpi.txt', 'w')
+            new_info = 'ip=' + self.ip + '\n' + 'port=' + self.port
+            f.write(new_info)
+            f.close()
+            self.manager.current = 'start'
+            self.manager.transition.direction='left'
+
+    def on_pre_enter(self):
+        f = open('rpi.txt', 'r')
+        self.ids.ip.text = f.readline().split('=')[1].replace('\n', '')
+        self.ids.port.text = f.readline().split('=')[1].replace('\n', '')
+        f.close()
+        
+    def on_leave(self):
+        self.ids.ip.background_color = (1, 1, 1, 1)
+        self.ids.port.background_color = (1, 1, 1, 1)
+        self.ids.user.background_color = (1, 1, 1, 1)
+        self.ids.pw.background_color = (1, 1, 1, 1)
+        a = App.get_running_app()
+        a.rpi_conn.set_conn_info(str(self.ip), int(self.port), str(self.user), str(self.pw))
+
     def quit(self):
         sys.exit(0)
 
@@ -70,6 +122,13 @@ class StartScreen(Screen):
         self.e={}
     def ping(self,n, value):
         self.a.big_dict[n][0] = value
+    def switch(self):
+        self.manager.transition.direction='right'
+        if self.a.non_hardware:
+            self.manager.current='version'
+        else:
+            self.manager.current='raspberry'
+
     def quit(self):
         sys.exit(0)
 

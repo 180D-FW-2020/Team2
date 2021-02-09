@@ -3,6 +3,8 @@
         name: 'login'
     VersionScreen:
         name: 'version'
+    RaspberryScreen:
+        name:'raspberry'
     StartScreen:
         name: 'start'
     TimeScreen:
@@ -117,9 +119,104 @@
                 text: "Submit"
                 font_size: 18
                 background_color: .7, .7, 1, 1
-                on_release:
-                    root.parent.current='start'
-                    root.parent.transition.direction = 'left'
+                on_release: root.switch()
+<RaspberryScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        orientation:'vertical'
+        Label:
+            text: "Enter your Raspberry Pi connection information below."
+            color: 0, 0, 0, 1
+            font_size: 20
+            size_hint: (1, .3)
+        GridLayout:
+            cols: 2
+            padding: [10,10,10,10]
+            spacing: 10
+            Label:
+                text: 'IP address'
+                font_size: 18
+                color: 0,0,0,1
+                halign: 'center'
+                size_hint: (.3, 1)
+            TextInput:
+                id: ip
+                write_tab: False
+                focus: True
+                multiline:False
+                font_size: 18
+                size_hint: (.7, 1)
+                on_text_validate: root.update()
+            Label:
+                text: 'Port'
+                font_size: 18
+                color: 0,0,0,1
+                halign: 'center'
+                size_hint: (.3, 1)
+            TextInput:
+                id: port
+                write_tab: False
+                focus: True
+                multiline:False
+                font_size: 18
+                size_hint: (.7, 1)
+                on_text_validate: root.update()
+            Label:
+                text: 'Username'
+                font_size: 18
+                color: 0,0,0,1
+                halign: 'center'
+                size_hint: (.3, 1)
+            TextInput:
+                id: user
+                write_tab: False
+                focus: True
+                multiline:False
+                font_size: 18
+                size_hint: (.7, 1)
+                on_text_validate: root.update()
+            Label:
+                text: 'Password'
+                font_size: 18
+                color: 0,0,0,1
+                halign: 'center'
+                size_hint: (.3, 1)
+            TextInput:
+                id: pw
+                write_tab: False
+                focus: True
+                multiline:False
+                password: True
+                font_size: 18
+                size_hint: (.7, 1)
+                on_text_validate: root.update()
+        GridLayout:
+            cols: 2
+            height: 125
+            size_hint_y: None
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    text: "Go back"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:
+                        root.parent.current='version'
+                        root.parent.transition.direction = 'right'
+                Button:
+                    text: "Exit"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.quit()
+            Button:
+                text: "Submit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release: root.update()
 <StartScreen>:
     canvas.before:
         Rectangle:
@@ -166,9 +263,7 @@
                     text: "Go back"
                     font_size: 18
                     background_color: .7, .7, 1, 1
-                    on_release:
-                        root.parent.current='version'
-                        root.parent.transition.direction = 'right'
+                    on_release: root.switch()
                 Button:
                     text: "Exit"
                     font_size: 18
