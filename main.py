@@ -27,11 +27,8 @@ from rpi_conn import rpi_conn
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 0
+debug = 1
 
-#switch demo to 0 if you want to use it normally
-demo = 0
-run_num = 3
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -103,7 +100,7 @@ class RaspberryScreen(Screen):
         self.ids.ip.text = f.readline().split('=')[1].replace('\n', '')
         self.ids.port.text = f.readline().split('=')[1].replace('\n', '')
         f.close()
-        
+
     def on_leave(self):
         self.ids.ip.background_color = (1, 1, 1, 1)
         self.ids.port.background_color = (1, 1, 1, 1)
@@ -406,7 +403,7 @@ class WaitScreen(Screen):
 
     def check_congrats(self, *largs):
         a = App.get_running_app()
-        if a.listener.received and (time.time() > (self.time_check + 10)):
+        if a.listener.received and not a.listener.sent_from_me and (time.time() > (self.time_check + 10)):
             self.time_check = time.time()
             print('RECEIVED MSG')
             latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
@@ -435,16 +432,11 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_congrats, 1)
                 Clock.schedule_interval(self.check_other, 1)
-                global run_num
-                if demo and run_num > 0:
-                    Clock.schedule_once(self.switch_check, TIME_INTERVAL)
-                elif demo and run_num < 0:
-                    print('do nothing its demo time baybee')
-                elif debug:
+                if debug:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
-                run_num -=1
+
 
 class CheckScreen(Screen):
     def __init__(self, **kw):
@@ -513,7 +505,7 @@ class TalkScreen(Screen):
     def get_user(self, *largs):
         self.ids.bl_talk.remove_widget(self.gl)
         self.ids.txtinput.bind(on_text_validate = self.handle_input)
-        self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\nNote: must use their user ID.'
+        self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\n\nNote: must use their user ID.\nIf you want to send a message to the entire network, enter \'all\''
         self.ids.txtinput.height =  125
 
     def snooze(self, *args):
@@ -578,8 +570,13 @@ class TalkScreen2(Screen):
 
     def send_msg(self, *largs):
         a = App.get_running_app()
-        audio_topic = '/' + a.dest_user + '/audio'
-        txt_topic = '/' + a.dest_user + '/text'
+        if a.dest_user == 'all':
+            audio_topic = '/team2/network/audio'
+            txt_topic = '/team2/network/text'
+            a.listener.set_sent_from_me(True)
+        else:
+            audio_topic = '/' + a.dest_user + '/audio'
+            txt_topic = '/' + a.dest_user + '/text'
         audio_path = a.speech_instance.get_audiopath()
         txt_path = a.speech_instance.get_txtpath()
         pub = PUB(audio_topic, "hello from audio")
