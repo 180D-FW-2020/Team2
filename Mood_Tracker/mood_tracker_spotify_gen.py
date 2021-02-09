@@ -2,10 +2,19 @@ import numpy as np
 import requests
 import json
 
+from selenium import webdriver 
+
 #Dont' change the CLIENT_ID and CLIENT_SECRET. The user will enter their user_id later as an input.
 CLIENT_ID = "1b78b7d9ddc947819403aa0a8b5fde21"
 CLIENT_SECRET = "caba3930090243d19ee50fd30d234a9f"
 user_id = ""
+
+def get_token():
+    browser = webdriver.Chrome()
+    browser.get("https://developer.spotify.com/console/post-playlists/")
+    id_field = browser.find_element_by_name("user_id")
+    id_field.send_keys(user_id)
+    print("finished getting token")
 
 def pretty_string_matrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
@@ -153,6 +162,7 @@ if user_id == "":
     #Just end script if they don't want to make a playlist
     quit()
 else:
+    get_token()
     token = input("If you would like to generate a playlist, go to https://developer.spotify.com/console/post-playlists/ to enter your spotify id and 'Get Token' under the 'OAth Token' tab. Select the scope to be 'playlist-modify-private' and generate the token. Once you have done that, copy and paste the token here ")
     #token= "BQAYsVoec6vo45Pl2vggVWOFY7KA4FLPsgNVqTqNDtgnds6TUYTJxcMzs8gdKdT1xCFQRi4c9p8Xozg2yDMCNcey6DPMwFzdvvxZkYKI591ssnRJlMWAYHAytKn5A-O9633-5WbO0MomJUCG9ouDWm-EemlYfmnjSzmVB3eAvaOklg"
     playlist_id = create_playlist(user_id, token, uris)
