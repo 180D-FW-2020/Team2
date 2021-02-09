@@ -14,8 +14,13 @@ def get_token():
     browser.get("https://developer.spotify.com/console/post-playlists/")
     id_field = browser.find_element_by_name("user_id")
     id_field.send_keys(user_id)
-    print("finished getting token")
 
+    token_id = browser.find_element_by_name("oauth-input")
+    token_val = token_id.get_attribute("value")
+    
+    print("finished getting token")
+    return token_val
+ 
 def pretty_string_matrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
     lens = [max(map(len, col)) for col in zip(*s)]
