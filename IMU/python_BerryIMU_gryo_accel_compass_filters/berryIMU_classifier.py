@@ -517,7 +517,7 @@ def imu_run():
 	        csvwriter.writerows(acc_rows)
 		"""
 
-	      
+
         #################### Main Classifer Logic ###############################
 
         global classifier_action
@@ -548,5 +548,5 @@ def imu_run():
         gyroy_list.clear()
         gyroz_list.clear()
 
-        if (classifier_action is "VS") or (classifier_action is "HS"):
+        if (classifier_action is "VS") or (classifier_action is "LR"):
             reminder_handler()
