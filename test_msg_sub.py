@@ -13,9 +13,12 @@ class Listener:
         self.snoozed = False
         self.congrats = False
         self.dest_user=''
+        self.sent_from_me=False
 
     def set_activated(self, activated):
         self.activated = activated
+    def set_sent_from_me(self, sent):
+        self.sent_from_me=sent
 
     def listen(self):
         f = open('ID.txt', 'r')
@@ -28,8 +31,11 @@ class Listener:
         network_topic = '/team2/network'
         txt_suffix = "txt"
         audio_suffix = "wav"
+        network_text='/team2/network/text'
+        network_audio='/team2/network/audio'
 
-        self.client_instance = client_mqtt(txt_topic, audio_topic, imu_topic, network_topic)
+
+        self.client_instance = client_mqtt(txt_topic, audio_topic, imu_topic, network_topic, network_text, network_audio)
         self.client_instance.get_topics()
         self.caliente = self.client_instance.connect_mqtt()
         if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
@@ -46,6 +52,7 @@ class Listener:
             count += 1
             self.caliente.loop_start()
             self.received = False
+            self.sent_from_me = False
             print(self.received)
             t_now = time.time()
             while(1):
@@ -80,6 +87,7 @@ class Listener:
                     self.activated = False
                     self.snoozed = False
                     self.congrats = False
+
 
 
 if __name__ == "__main__":
