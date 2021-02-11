@@ -732,7 +732,7 @@ class StretchScreen(Screen):
             self.ids.bl_stretch.add_widget(self.gl)
         else:
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the IMU.'
-            self.t1=threading.Thread(target=self.wait_activate)
+            self.t1=threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()
             Clock.schedule_interval(self.check_activate, 0.1)
 
@@ -799,7 +799,7 @@ class BreatheScreen(Screen):
             self.ids.bl_breathe.add_widget(self.gl)
         else:
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
-            self.t1=threading.Thread(target=self.wait_activate)
+            self.t1=threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()
             Clock.schedule_interval(self.check_activate, 0.1)
 
