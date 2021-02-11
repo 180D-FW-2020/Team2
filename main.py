@@ -46,6 +46,7 @@ class LoginScreen(Screen):
         else:
             self.ids.login.background_color = (1, 0, 0, .3)
             print('blank userID')
+
     def quit(self):
         sys.exit(0)
 
@@ -72,12 +73,12 @@ class RaspberryScreen(Screen):
     def __init__(self, **kw):
         super(RaspberryScreen, self).__init__(**kw)
 
-    def update(self):
+    def verify(self, *args):
+        a = App.get_running_app()
         self.ip = self.ids.ip.text
         self.port = self.ids.port.text
         self.user = self.ids.user.text
         self.pw = self.ids.pw.text
-
         if self.ip == '' or self.port == '' or self.user == '' or self.pw == '':
             if self.ip =='':
                 self.ids.ip.background_color = (1, 0, 0, .3)
@@ -92,8 +93,20 @@ class RaspberryScreen(Screen):
             new_info = 'ip=' + self.ip + '\n' + 'port=' + self.port
             f.write(new_info)
             f.close()
-            self.manager.current = 'start'
-            self.manager.transition.direction='left'
+            a.rpi_conn.set_conn_info(str(self.ip), int(self.port), str(self.user), str(self.pw))
+            if a.rpi_conn.connect():
+                self.manager.current = 'start'
+                self.manager.transition.direction='left'
+            else:
+                self.ids.lbl.text = 'Error connecting. Please verify your login information is correct.'
+                self.ids.ip.background_color = (1, 0, 0, .3)
+                self.ids.port.background_color = (1, 0, 0, .3)
+                self.ids.user.background_color = (1, 0, 0, .3)
+                self.ids.pw.background_color = (1, 0, 0, .3)
+
+    def update(self):
+        self.ids.lbl.text='connecting...'
+        Clock.schedule_once(self.verify)
 
     def on_pre_enter(self):
         f = open('rpi.txt', 'r')
@@ -102,12 +115,11 @@ class RaspberryScreen(Screen):
         f.close()
 
     def on_leave(self):
+        self.ids.lbl.text = 'Enter your Raspberry Pi connection information below.'
         self.ids.ip.background_color = (1, 1, 1, 1)
         self.ids.port.background_color = (1, 1, 1, 1)
         self.ids.user.background_color = (1, 1, 1, 1)
         self.ids.pw.background_color = (1, 1, 1, 1)
-        a = App.get_running_app()
-        a.rpi_conn.set_conn_info(str(self.ip), int(self.port), str(self.user), str(self.pw))
 
     def quit(self):
         sys.exit(0)
@@ -325,7 +337,7 @@ class WaitScreen(Screen):
         except:
             print('you already messed up once my dude')
         print("Start command not recognized...")
-        Clock.schedule_once(self.recognize_start, 3)
+        Clock.schedule_once(self.recognize_start, .1)
 
     def recognize_start(self, *largs):
         a = App.get_running_app()
@@ -437,7 +449,6 @@ class WaitScreen(Screen):
                 else:
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - a.time_elapsed)
 
-
 class CheckScreen(Screen):
     def __init__(self, **kw):
         super(CheckScreen, self).__init__(**kw)
@@ -491,22 +502,26 @@ class TalkScreen(Screen):
         self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
         self.gl.add_widget(self.btn_snooze)
         self.gl.add_widget(self.btn_submit)
+        self.txtinput=TextInput(hint_text='Press enter to submit.\nMust use their user ID. If you wish to send to everyone on the network, enter \'all\'.', multiline=False, font_size = 18)
 
     def switch(self, *largs):
-        self.ids.txtinput.height = '0dp'
-        self.ids.txtinput.text=''
+        self.txtinput.text=''
         self.manager.current = 'talk2'
+        self.ids.bl_talk.padding = [0,0,0,0]
+        self.ids.bl_talk.spacing = 0
 
     def handle_input(self, *largs):
         a = App.get_running_app()
-        a.dest_user = self.ids.txtinput.text
+        a.dest_user = self.txtinput.text
         Clock.schedule_once(self.switch)
 
     def get_user(self, *largs):
         self.ids.bl_talk.remove_widget(self.gl)
-        self.ids.txtinput.bind(on_text_validate = self.handle_input)
-        self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!\n\nNote: must use their user ID.\nIf you want to send a message to the entire network, enter \'all\''
-        self.ids.txtinput.height =  125
+        self.ids.bl_talk.padding = [70,70,70,70]
+        self.ids.bl_talk.spacing = 50
+        self.ids.bl_talk.add_widget(self.txtinput)
+        self.txtinput.bind(on_text_validate = self.handle_input)
+        self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!'
 
     def snooze(self, *args):
         self.ids.bl_talk.remove_widget(self.gl)
@@ -633,7 +648,7 @@ class TalkScreen2(Screen):
         except:
             print('you already messed up once my dude')
         print("Start command not recognized...")
-        Clock.schedule_once(self.recognize_start, 3)
+        Clock.schedule_once(self.recognize_start, .1)
 
     def recognize_start(self, *largs):
         a = App.get_running_app()

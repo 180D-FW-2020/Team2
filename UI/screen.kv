@@ -129,6 +129,7 @@
     BoxLayout:
         orientation:'vertical'
         Label:
+            id:lbl
             text: "Enter your Raspberry Pi connection information below."
             color: 0, 0, 0, 1
             font_size: 20
@@ -389,12 +390,6 @@
             halign: 'center'
             font_size: 20
             color: 0, 0, 0, 1
-        TextInput:
-            height: '0dp'
-            size_hint_y: None
-            id: txtinput
-            hint_text: 'Press enter to submit'
-            multiline: False
 <TalkScreen2>:
     canvas.before:
         Rectangle:
