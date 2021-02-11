@@ -11,6 +11,17 @@ class rpi_conn():
         self.user=user
         self.pw=pw
 
+    def connect(self):
+        self.connected = False
+        try:
+            self.ssh = paramiko.SSHClient()
+            self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.ssh.connect(self.ip, self.port, self.user, self.pw)
+        except:
+            self.connected = False
+            return
+        self.connected = True
+
     def get_all_files_in_local_dir(self, local_dir):
       all_files = list()
 
@@ -41,17 +52,6 @@ class rpi_conn():
 
     def run(self):
         self.remote_dir = '/home/pi/Team2'
-
-        #f = open('rpi.txt', 'r')
-        #ip = f.readline().split('=')[1].replace('\n', '')
-        #port = int(f.readline().split('=')[1].replace('\n', ''))
-        #user = f.readline().split('=')[1].replace('\n', '')
-    #    pw = f.readline().split('=')[1].replace('\n', '')
-    #    f.close()
-
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.ssh.connect(self.ip, self.port, self.user, self.pw)
         self.ssh.exec_command('rm -rf ' + self.remote_dir)
         self.ssh.exec_command('mkdir ' + self.remote_dir)
         self.ftp_client = self.ssh.open_sftp()
