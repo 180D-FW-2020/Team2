@@ -3,23 +3,52 @@ import requests
 import json
 
 from selenium import webdriver 
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 #Dont' change the CLIENT_ID and CLIENT_SECRET. The user will enter their user_id later as an input.
 CLIENT_ID = "1b78b7d9ddc947819403aa0a8b5fde21"
 CLIENT_SECRET = "caba3930090243d19ee50fd30d234a9f"
 user_id = ""
+playlist_name = ""
 
 def get_token():
-    browser = webdriver.Chrome()
+    #browser = webdriver.Chrome()
+    options = webdriver.ChromeOptions()
+    options.add_argument("--user-data-dir=/Users/michelletan 1/Library/Application Support/Google/Chrome/Default")
+    options.add_argument('--profile-directory=Profile 1')
+    browser = webdriver.Chrome(executable_path="/usr/local/bin/chromedriver", options=options)
     browser.get("https://developer.spotify.com/console/post-playlists/")
+    
     id_field = browser.find_element_by_name("user_id")
     id_field.send_keys(user_id)
 
-    token_id = browser.find_element_by_name("oauth-input")
+    token_id = browser.find_element_by_id("oauth-input")
     token_val = token_id.get_attribute("value")
+
+    enter_button = browser.find_element_by_class_name("btn-green")
+    enter_button.click()
+
+    scope_button = browser.find_element_by_xpath("//*[contains(text(), 'playlist-modify-private')]") # locate the dropdown elem
+    browser.implicitly_wait(30)
+    scope_button.click()
+
+    request_button = browser.find_element_by_class_name("btn-primary")
+    browser.implicitly_wait(10)
+    request_button.click()
     
-    print("finished getting token")
-    return token_val
+    try:
+        element_present = EC.presence_of_element_located((By.ID, 'oauth-input'))
+        WebDriverWait(browser, 20).until(element_present)
+        token_field = browser.find_element_by_id("oauth-input")
+        token = token_field.get_attribute("value")
+    except:
+        print("timed out waiting for token")
+
+    return token
+
+
  
 def pretty_string_matrix(matrix):
     s = [[str(e) for e in row] for row in matrix]
@@ -115,7 +144,7 @@ def create_playlist(user_id, token, uris):
     endpoint_url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
 
     request_body = json.dumps({
-              "name": "Generated playlist",
+              "name": playlist_name,
               "description": "My first programmatic playlist, yooo!",
               "public": False
             })
@@ -167,7 +196,8 @@ if user_id == "":
     #Just end script if they don't want to make a playlist
     quit()
 else:
-    get_token()
-    token = input("If you would like to generate a playlist, go to https://developer.spotify.com/console/post-playlists/ to enter your spotify id and 'Get Token' under the 'OAth Token' tab. Select the scope to be 'playlist-modify-private' and generate the token. Once you have done that, copy and paste the token here ")
+    playlist_name = input("Enter the playlist name =>")
+    token = get_token()
+    #token = input("If you would like to generate a playlist, go to https://developer.spotify.com/console/post-playlists/ to enter your spotify id and 'Get Token' under the 'OAth Token' tab. Select the scope to be 'playlist-modify-private' and generate the token. Once you have done that, copy and paste the token here ")
     #token= "BQAYsVoec6vo45Pl2vggVWOFY7KA4FLPsgNVqTqNDtgnds6TUYTJxcMzs8gdKdT1xCFQRi4c9p8Xozg2yDMCNcey6DPMwFzdvvxZkYKI591ssnRJlMWAYHAytKn5A-O9633-5WbO0MomJUCG9ouDWm-EemlYfmnjSzmVB3eAvaOklg"
     playlist_id = create_playlist(user_id, token, uris)
