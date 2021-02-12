@@ -28,13 +28,14 @@ from rpi_conn import rpi_conn
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
 debug = 1
-limited = 1
+limited = 0
 run_num = 1
 
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
         super(LoginScreen, self).__init__(**kw)
+        self.a = App.get_running_app()
 
     def update(self):
         userID = self.ids.login.text
@@ -42,6 +43,7 @@ class LoginScreen(Screen):
             id = open('ID.txt', 'w')
             id.write(userID)
             id.close()
+            self.a.userID = userID
             self.ids.login.background_color = (1, 1, 1, 1)
             self.manager.current = 'version'
             self.manager.transition.direction = 'left'
@@ -253,6 +255,7 @@ class WaitScreen(Screen):
 
     def update_screen_snooze(self, *args):
         if self.a.non_hardware:
+            Clock.unschedule(self.update_screen_snooze)
             self.ids.boxy.remove_widget(self.lbl_friend_finished)
             self.ids.boxy.remove_widget(self.gl)
         else:
@@ -281,8 +284,8 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.update_screen_snooze)
 
     def send_msg(self, *args):
-        audio_topic = '/' + self.a.listener.dest_user + '/audio'
-        txt_topic = '/' + self.a.listener.dest_user + '/text'
+        audio_topic = '/' + self.a.listener.dest_user + '/audio/' + self.a.userID
+        txt_topic = '/' + self.a.listener.dest_user + '/text/' + self.a.userID
         audio_path = self.a.speech_instance.get_audiopath()
         txt_path = self.a.speech_instance.get_txtpath()
         pub = PUB(audio_topic, "hello from audio")
@@ -535,6 +538,7 @@ class TalkScreen(Screen):
 
     def snooze(self, *args):
         if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
             self.ids.bl_talk.remove_widget(self.gl)
         self.a.index = 'stretch'
         self.a.immediate = False
@@ -596,8 +600,8 @@ class TalkScreen2(Screen):
             txt_topic = '/team2/network/text'
             self.a.listener.set_sent_from_me(True)
         else:
-            audio_topic = '/' + self.a.dest_user + '/audio'
-            txt_topic = '/' + self.a.dest_user + '/text'
+            audio_topic = '/' + self.a.dest_user + '/audio/' + self.a.userID
+            txt_topic = '/' + self.a.dest_user + '/text/' + self.a.userID
         audio_path = self.a.speech_instance.get_audiopath()
         txt_path = self.a.speech_instance.get_txtpath()
         pub = PUB(audio_topic, "hello from audio")
@@ -709,6 +713,7 @@ class StretchScreen(Screen):
 
     def snooze(self, *args):
         if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
         self.a.index = 'stretch'
         self.a.immediate = False
@@ -771,6 +776,7 @@ class BreatheScreen(Screen):
 
     def snooze(self, *args):
         if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
             self.ids.bl_breathe.remove_widget(self.gl)
         self.a.index = 'stretch'
         self.a.immediate = False
@@ -879,6 +885,7 @@ class WAP(App):
     cur_time = TIME_INTERVAL
     time_elapsed = 0
 
+    userID = ''
     dest_user = ''
     non_hardware = False
     first_run = True

@@ -52,12 +52,24 @@ class client_mqtt:
     def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
+            #look at sender based on user id????
             audio_rec = re.search('audio', msg.topic)
             text_rec = re.search('text', msg.topic)
-            if audio_rec or text_rec:
-                if not path.exists(filename):
+            audio_file = filename + '.wav'
+            text_file = filename + '.txt'
+            print(audio_file)
+            print(text_file)
+            if audio_rec:
+                if not path.exists(audio_file):
                     print("Write")
-                    f = open(filename, 'wb')
+                    f = open(audio_file, 'wb')
+                    print(msg.payload)
+                    f.write(msg.payload)
+                    f.close()
+            elif text_rec:
+                if not path.exists(text_file):
+                    print("Write")
+                    f = open(text_file, 'wb')
                     print(msg.payload)
                     f.write(msg.payload)
                     f.close()

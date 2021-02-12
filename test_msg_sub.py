@@ -25,17 +25,15 @@ class Listener:
         self.user_id = f.readline().replace('\n', '')
         f.close()
         topic = '/' + self.user_id + '/messages'
-        audio_topic = '/' + self.user_id + '/audio'
-        txt_topic = '/' + self.user_id + '/text'
+        audio_topic = '/' + self.user_id + '/audio/#'
+        txt_topic = '/' + self.user_id + '/text/#'
         imu_topic = '/' + self.user_id + '/imu'
-        network_topic = '/team2/network'
+        network_topic = '/team2/#'
         txt_suffix = "txt"
         audio_suffix = "wav"
-        network_text='/team2/network/text'
-        network_audio='/team2/network/audio'
 
 
-        self.client_instance = client_mqtt(txt_topic, audio_topic, imu_topic, network_topic, network_text, network_audio)
+        self.client_instance = client_mqtt(txt_topic, audio_topic, imu_topic, network_topic)
         self.client_instance.get_topics()
         self.caliente = self.client_instance.connect_mqtt()
         if not (path.exists('./RecAudio') and path.exists('./RecTxt')):
@@ -48,7 +46,7 @@ class Listener:
             curr_time = curr_time.strftime("%H--%M--%S");
             wav_file = curr_time + ".wav"
             txt_file = curr_time + ".txt"
-            self.client_instance.subscribe_file(self.caliente, wav_file)
+            self.client_instance.subscribe_file(self.caliente, curr_time)
             count += 1
             self.caliente.loop_start()
             self.received = False
@@ -60,8 +58,8 @@ class Listener:
                     time.sleep(10)
                     print("found .wav now save .txt")
                     if not path.exists(txt_file):
-                        self.client_instance.subscribe_file(self.caliente, txt_file)
-                        time.sleep(7)
+                        self.client_instance.subscribe_file(self.caliente, curr_time)
+                        time.sleep(10)
 
                 if path.exists(wav_file) and path.exists(txt_file):
                     self.received = True
