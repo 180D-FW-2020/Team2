@@ -4,6 +4,24 @@ import os
 
 class rpi_conn():
  # Find all the directories you want to upload already in files.
+
+    def set_conn_info(self, ip, port, user, pw):
+        self.port=port
+        self.ip=ip
+        self.user=user
+        self.pw=pw
+
+    def connect(self):
+        self.connected = False
+        try:
+            self.ssh = paramiko.SSHClient()
+            self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.ssh.connect(self.ip, self.port, self.user, self.pw)
+        except:
+            self.connected = False
+            return
+        self.connected = True
+
     def get_all_files_in_local_dir(self, local_dir):
       all_files = list()
 
@@ -28,22 +46,12 @@ class rpi_conn():
             path = remote_file.replace('\\', '/')
             stdin, stdout, stderr = self.ssh.exec_command('mkdir -p ' + path)
             print(stderr.read())
+            print(u'Put files...' + filename)
             remote_filename = path + '/' + filename
             self.ftp_client.put(x, remote_filename)
 
     def run(self):
         self.remote_dir = '/home/pi/Team2'
-
-        f = open('rpi.txt', 'r')
-        ip = f.readline().split('=')[1].replace('\n', '')
-        port = int(f.readline().split('=')[1].replace('\n', ''))
-        user = f.readline().split('=')[1].replace('\n', '')
-        pw = f.readline().split('=')[1].replace('\n', '')
-        f.close()
-
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.ssh.connect(ip, port, user, pw)
         self.ssh.exec_command('rm -rf ' + self.remote_dir)
         self.ssh.exec_command('mkdir ' + self.remote_dir)
         self.ftp_client = self.ssh.open_sftp()
