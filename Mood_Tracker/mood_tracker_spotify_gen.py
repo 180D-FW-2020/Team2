@@ -14,11 +14,7 @@ user_id = ""
 playlist_name = ""
 
 def get_token():
-    #browser = webdriver.Chrome()
-    options = webdriver.ChromeOptions()
-    options.add_argument("--user-data-dir=/Users/michelletan 1/Library/Application Support/Google/Chrome/Default")
-    options.add_argument('--profile-directory=Profile 1')
-    browser = webdriver.Chrome(executable_path="/usr/local/bin/chromedriver", options=options)
+    browser = webdriver.Chrome()
     browser.get("https://developer.spotify.com/console/post-playlists/")
     
     id_field = browser.find_element_by_name("user_id")
