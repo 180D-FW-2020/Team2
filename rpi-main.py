@@ -4,8 +4,9 @@ from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import i
 from Matrix.matrix_functions import *
 from datetime import datetime
 
-f = open('ID.txt', 'r')
-user_id = f.readline().replace('\n', '')
+f = open('config.txt', 'r')
+f.readline()
+user_id = f.readline().split('=')[1].replace('\n', '')
 f.close()
 
 

@@ -27,10 +27,6 @@ from rpi_conn import rpi_conn
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
-debug = 1
-limited = 0
-run_num = 1
-
 
 class LoginScreen(Screen):
     def __init__(self, **kw):
@@ -39,11 +35,20 @@ class LoginScreen(Screen):
 
     def update(self):
         userID = self.ids.login.text
+        if os.path.exists('config.txt'):
+            config = open('config.txt', 'r')
+            self.a.mode = config.readline().split('=')[1].replace('\n', '')
+            self.a.userID = config.readline().split('=')[1].replace('\n', '')
+            self.a.ip = config.readline().split('=')[1].replace('\n', '')
+            self.a.port = config.readline().split('=')[1].replace('\n', '')
+            config.close()
+
         if(userID !=''):
-            id = open('ID.txt', 'w')
-            id.write(userID)
-            id.close()
             self.a.userID = userID
+            config = open('config.txt', 'w')
+            config_txt = 'mode=' + self.a.mode + '\n' + 'ID=' + self.a.userID + '\n' + 'ip=' + self.a.ip + '\n' + 'port=' + self.a.port
+            config.write(config_txt)
+            config.close()
             self.ids.login.background_color = (1, 1, 1, 1)
             self.manager.current = 'version'
             self.manager.transition.direction = 'left'
@@ -92,11 +97,11 @@ class RaspberryScreen(Screen):
 
     def update(self):
         self.ids.lbl.text='connecting...'
-        self.ip = self.ids.ip.text
-        self.port = self.ids.port.text
+        self.a.ip = self.ids.ip.text
+        self.a.port = self.ids.port.text
         self.user = self.ids.user.text
         self.pw = self.ids.pw.text
-        if self.ip == '' or self.port == '' or self.user == '' or self.pw == '':
+        if self.a.ip == '' or self.a.port == '' or self.user == '' or self.pw == '':
             if self.ip =='':
                 self.ids.ip.background_color = (1, 0, 0, .3)
             if self.port == '':
@@ -106,20 +111,18 @@ class RaspberryScreen(Screen):
             if self.pw == '':
                 self.ids.pw.background_color = (1, 0, 0, .3)
         else:
-            f = open('rpi.txt', 'w')
-            new_info = 'ip=' + self.ip + '\n' + 'port=' + self.port
-            f.write(new_info)
+            f = open('config.txt', 'w')
+            config_txt = 'mode=' + self.a.mode + '\n' + 'ID=' + self.a.userID + '\n' + 'ip=' + self.a.ip + '\n' + 'port=' + self.a.port
+            f.write(config_txt)
             f.close()
-            self.a.rpi_conn.set_conn_info(str(self.ip), int(self.port), str(self.user), str(self.pw))
+            self.a.rpi_conn.set_conn_info(str(self.a.ip), int(self.a.port), str(self.user), str(self.pw))
             self.t1 = threading.Thread(target=self.a.rpi_conn.connect, daemon=True)
             self.t1.start()
             Clock.schedule_interval(self.connect, .1)
 
     def on_pre_enter(self):
-        f = open('rpi.txt', 'r')
-        self.ids.ip.text = f.readline().split('=')[1].replace('\n', '')
-        self.ids.port.text = f.readline().split('=')[1].replace('\n', '')
-        f.close()
+        self.ids.ip.text = self.a.ip
+        self.ids.port.text = self.a.port
 
     def on_leave(self):
         self.ids.lbl.text = 'Enter your Raspberry Pi connection information below.'
@@ -223,6 +226,7 @@ class WaitScreen(Screen):
         self.time_check_congrats = time.time()
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
         self.a = App.get_running_app()
+
         self.make_activation_widget()
         self.make_recording_labels()
 
@@ -433,7 +437,6 @@ class WaitScreen(Screen):
 
     def on_pre_enter(self, *args):
         print('entered wait')
-
         try:
             self.ids.boxy.add_widget(self.lbl_normal)
         except:
@@ -446,6 +449,14 @@ class WaitScreen(Screen):
             if not self.a.non_hardware:
                 y = threading.Thread(target = self.a.rpi_conn.run, daemon=True)
                 y.start()
+            if self.a.mode.find('limited') != -1:
+                self.mode = self.a.mode.split(',')[0]
+                self.run_num = int(self.a.mode.split(',')[1])
+            elif self.a.mode.find('debug') != -1:
+                self.mode = self.a.mode.split(',')[0]
+                self.debug_mode = self.a.mode.split(',')[1]
+            else:
+                self.mode = self.a.mode
 
         if self.a.immediate:
             Clock.schedule_once(self.switch_check)
@@ -456,16 +467,22 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_interval(self.check_for_messages, 1)
                 Clock.schedule_interval(self.check_others_finished, 1)
-                if debug:
-                    global run_num
-                    if limited and run_num > 0:
+                if self.mode == 'limited':
+                    print('entered limited')
+                    if self.run_num > 0:
                         Clock.schedule_once(self.switch_check, TIME_INTERVAL)
-                    elif limited and run_num == 0:
-                        print('waitscreen forever')
                     else:
+                        print('waitscreen forever')
+                    self.run_num -=1
+                elif self.mode == 'debug':
+                    if self.debug_mode == 'seconds':
+                        print('entered debug seconds')
                         Clock.schedule_once(self.switch_check, TIME_INTERVAL)
-                    run_num -=1
+                    else:
+                        print('entered debug minutes')
+                        Clock.schedule_once(self.switch_check, TIME_INTERVAL*6)
                 else:
+                    print('entered reg')
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - self.a.time_elapsed)
 
 class CheckScreen(Screen):
@@ -547,7 +564,7 @@ class TalkScreen(Screen):
         print('reminder snoozed')
 
     def wait_activate(self, *args):
-        activate()
+        activate(self.a.userID)
         self.a.listener.set_activated(False)
         t_now = time.time()
         while time.time() < (t_now +2*60):
@@ -737,7 +754,7 @@ class StretchScreen(Screen):
                 Clock.schedule_once(self.snooze)
 
     def wait_activate(self, *args):
-        activate()
+        activate(self.a.userID)
         self.a.listener.set_activated(False)
         t_now = time.time()
         while time.time() < (t_now +2*60):
@@ -796,11 +813,11 @@ class BreatheScreen(Screen):
 
     def activity(self, *args):
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
-        exercise_breathe()
+        exercise_breathe(self.a.userID)
         Clock.schedule_once(self.switch_congrats, 30)
 
     def wait_activate(self, *args):
-        activate()
+        activate(self.a.userID)
         self.a.listener.set_activated(False)
         t_now = time.time()
         while time.time() < (t_now +2*60):
@@ -864,12 +881,13 @@ class BallScreen(Screen):
 class CongratsScreen(Screen):
     def __init__(self, **kw):
         super(CongratsScreen, self).__init__(**kw)
+        self.a = App.get_running_app()
 
     def switch_screen(self, *args):
         self.manager.current = 'wait'
 
     def on_enter(self, *args):
-        congrats()
+        congrats(self.a.userID)
         Clock.schedule_once(self.switch_screen, 5)
 
 class Root(ScreenManager):
@@ -886,6 +904,9 @@ class WAP(App):
     time_elapsed = 0
 
     userID = ''
+    mode = ''
+    ip=''
+    port = ''
     dest_user = ''
     non_hardware = False
     first_run = True

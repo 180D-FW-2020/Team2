@@ -85,8 +85,9 @@ KFangleX = 0.0
 KFangleY = 0.0
 
 
-f = open('ID.txt', 'r')
-user_id = f.readline().replace('\n', '')
+f = open('config.txt', 'r')
+f.readline()
+user_id = f.readline().split('=')[1].replace('\n', '')
 f.close()
 
 imu_topic = '/' + user_id + '/imu'

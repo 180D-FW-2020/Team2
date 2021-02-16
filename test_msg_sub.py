@@ -21,8 +21,9 @@ class Listener:
         self.sent_from_me=sent
 
     def listen(self):
-        f = open('ID.txt', 'r')
-        self.user_id = f.readline().replace('\n', '')
+        f = open('config.txt', 'r')
+        f.readline()
+        self.user_id = f.readline().split('=')[1].replace('\n', '')
         f.close()
         topic = '/' + self.user_id + '/messages'
         audio_topic = '/' + self.user_id + '/audio/#'
@@ -85,8 +86,6 @@ class Listener:
                     self.activated = False
                     self.snoozed = False
                     self.congrats = False
-
-
 
 if __name__ == "__main__":
     os.mkdir('./RecAudio/')

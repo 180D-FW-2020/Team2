@@ -1,9 +1,11 @@
 # wellness and productivity (WAP)
 Michelle Lam, Michelle Tan, Jackie Lam, & Isabel Ketner
 
-## overview
-WAP is a device that aims to improve one's physical and mental health via personalized wellness exercises the user can be reminded to complete throughout the day.
+## user manual
+[link] (https://docs.google.com/document/d/1SdeEpSudTallBMvt7lm1ykPYXnIb84JsA82q6huSv1o/edit?usp=sharing)
 
-## how to run
-on your laptop, enter the command `python main.py` \
-on your rpi, enter the command `python rpi-main.py`
+###config.txt
+options for mode are [(debug,seconds), (debug,minutes) regular, (limited,#)]
+debug - choose between 30s, 60s, 90s intervals, or 3min, 6min, 9min intervals
+regular - as expected on selection screen
+limited - only runs activities for certain amount of time intervals (in seconds) specified by #, then sits in wait screen forever

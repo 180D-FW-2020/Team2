@@ -18,17 +18,11 @@ broker = 'mqtt.eclipseprojects.io'
 port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
-id_path = os.path.join(os.getcwd(), 'ID.txt')
-
-
 
 class client_mqtt:
     def __init__(self, *args):
         self.topic_list = []
         self.message = ''
-        f = open(id_path, 'r')
-        self.user_id = f.readline().replace('\n', '')
-        f.close()
         for arg in args:
             self.topic_tuple = (arg, 0)
             self.topic_list.append(self.topic_tuple)
