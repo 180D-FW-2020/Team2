@@ -24,9 +24,8 @@ def listen():
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
-
+    run_clear()
     while True:
-        run_clear()
         if(client_instance.message != ''):
             print('message on network:' + client_instance.message)
             task = client_instance.message
