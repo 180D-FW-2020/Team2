@@ -104,6 +104,7 @@ class matrix:
         self.device.cleanup()
 
 def run_clear():
+	device = matrix(args.cascaded, args.block_orientation, args.rotate, args.reverse_order)
 	device.erase()
 
 def run_breathe():
