@@ -25,6 +25,7 @@ def listen():
     caliente.loop_start()
 
     while True:
+        run_clear()
         if(client_instance.message != ''):
             print('message on network:' + client_instance.message)
             task = client_instance.message
