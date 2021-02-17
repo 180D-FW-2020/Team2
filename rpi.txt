@@ -1,2 +1,5 @@
-ip=192.168.4.70
+ip =192.168.1.23
 port=22
+user=pi
+pw=raspberry
+
