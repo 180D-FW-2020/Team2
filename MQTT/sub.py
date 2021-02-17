@@ -20,14 +20,15 @@ port = 1883
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 id_path = os.path.join(os.getcwd(), 'ID.txt')
 
-f = open(id_path, 'r')
-user_id = f.readline().replace('\n', '')
-f.close()
+
 
 class client_mqtt:
     def __init__(self, *args):
         self.topic_list = []
         self.message = ''
+        f = open(id_path, 'r')
+        self.user_id = f.readline().replace('\n', '')
+        f.close()
         for arg in args:
             self.topic_tuple = (arg, 0)
             self.topic_list.append(self.topic_tuple)
@@ -52,12 +53,24 @@ class client_mqtt:
     def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
+            #look at sender based on user id????
             audio_rec = re.search('audio', msg.topic)
             text_rec = re.search('text', msg.topic)
-            if audio_rec or text_rec:
-                if not path.exists(filename):
+            audio_file = filename + '.wav'
+            text_file = filename + '.txt'
+            print(audio_file)
+            print(text_file)
+            if audio_rec:
+                if not path.exists(audio_file):
                     print("Write")
-                    f = open(filename, 'wb')
+                    f = open(audio_file, 'wb')
+                    print(msg.payload)
+                    f.write(msg.payload)
+                    f.close()
+            elif text_rec:
+                if not path.exists(text_file):
+                    print("Write")
+                    f = open(text_file, 'wb')
                     print(msg.payload)
                     f.write(msg.payload)
                     f.close()
