@@ -412,27 +412,35 @@ class WaitScreen(Screen):
                 self.t1.start()
                 Clock.schedule_interval(self.check_hardware_activate, .1)
 
+
     def update_screen(self,*args):
+        latest_audio = max(glob.iglob('./RecAudio/'+self.sender+'*'), key=os.path.getctime)
         try:
-            latest_audio = max(glob.iglob('./RecAudio/*'), key=os.path.getctime)
-            playsound(latest_audio)
+            print(f'playing ... `{latest_audio}`' )
+            playsound(latest_audio, True)
         except:
             print('error: audio could not play')
         self.ids.boxy.remove_widget(self.lbl_msg)
         self.ids.boxy.add_widget(self.lbl_normal)
+        Clock.schedule_interval(self.check_for_messages, 1)
 
     def check_for_messages(self, *args):
-        if self.a.listener.received and not self.a.listener.sent_from_me and (time.time() > (self.time_check_msg + 10)):
-            self.time_check_msg = time.time()
-            print('RECEIVED MSG')
+        if os.listdir('./RecTxt'):
+            Clock.unschedule(self.check_for_messages)
             latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
+            self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
+            print(f'received msg from `{self.sender}`')
             f = open(latest_txt)
             msg = f.readline()
-            display_msg = 'Your friend said:\n' + msg
+            display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
             print(display_msg)
             self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
             self.ids.boxy.remove_widget(self.lbl_normal)
             self.ids.boxy.add_widget(self.lbl_msg)
+            file_path = './RecTxt/' + self.sender + '*'
+            remaining_files = glob.glob(file_path)
+            for f in remaining_files:
+                os.remove(f)
             Clock.schedule_once(self.update_screen)
 
     def on_pre_enter(self, *args):
@@ -583,11 +591,15 @@ class TalkScreen(Screen):
                 print('not activated')
                 Clock.schedule_once(self.snooze)
 
+
     def on_pre_enter(self, *args):
         print('entered talk screen')
         if self.a.non_hardware:
             self.ids.lbl_talk.text='Time to talk to friends!\nActivate sending a message using the buttons below.'
-            self.ids.bl_talk.add_widget(self.gl)
+            try:
+                self.ids.bl_talk.add_widget(self.gl)
+            except:
+                pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
             self.ids.lbl_talk.text = 'Time to talk to friends!\nActivate sending a message using the IMU.'
@@ -767,7 +779,10 @@ class StretchScreen(Screen):
         print('entered stretch screen')
         if self.a.non_hardware:
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the buttons below.'
-            self.ids.bl_stretch.add_widget(self.gl)
+            try:
+                self.ids.bl_stretch.add_widget(self.gl)
+            except:
+                pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the IMU.'
@@ -838,7 +853,10 @@ class BreatheScreen(Screen):
         print('entered breathe screen')
         if self.a.non_hardware:
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the buttons below.'
-            self.ids.bl_breathe.add_widget(self.gl)
+            try:
+                self.ids.bl_breathe.add_widget(self.gl)
+            except:
+                pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
