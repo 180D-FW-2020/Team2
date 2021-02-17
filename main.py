@@ -269,7 +269,7 @@ class WaitScreen(Screen):
         self.time_check_congrats = time.time()
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
         self.a = App.get_running_app()
-
+        self.time_elapsed = time.time()
         self.make_activation_widget()
         self.make_recording_labels()
 
@@ -300,6 +300,25 @@ class WaitScreen(Screen):
         Clock.unschedule(self.check_for_messages)
         Clock.unschedule(self.check_others_finished)
 
+    def reschedule_activity(self, *args):
+        if self.mode == 'limited':
+            print('entered limited')
+            if self.run_num > 0:
+                Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL - self.time_elapsed)))
+            else:
+                print('waitscreen forever')
+            self.run_num -=1
+        elif self.mode == 'debug':
+            if self.debug_mode == 'seconds':
+                print('entered debug seconds')
+                Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL - self.time_elapsed)))
+            else:
+                print('entered debug minutes')
+                Clock.schedule_once(self.switch_check,max(0, (TIME_INTERVAL*6 - self.time_elapsed)))
+        else:
+            print('entered reg')
+            Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL*60 - self.a.time_elapsed - self.time_elapsed)))
+
     def update_screen_snooze(self, *args):
         if self.a.non_hardware:
             Clock.unschedule(self.update_screen_snooze)
@@ -310,12 +329,16 @@ class WaitScreen(Screen):
         self.ids.boxy.add_widget(self.lbl_normal)
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
+        self.time_elapsed = time.time() - self.time_elapsed
+        Clock.schedule_once(self.reschedule_activity)
 
     def update_screen_completed(self, *args):
         self.ids.boxy.remove_widget(self.lbl_send)
         self.ids.boxy.add_widget(self.lbl_normal)
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
+        self.time_elapsed = time.time() - self.time_elapsed
+        Clock.schedule_once(self.reschedule_activity)
 
     def wait_for_activate(self, *args):
         self.a.listener.set_activated(False)
@@ -435,6 +458,7 @@ class WaitScreen(Screen):
         if self.a.listener.congrats and (time.time() > (self.time_check_congrats + 10)):
             Clock.unschedule(self.check_for_messages)
             Clock.unschedule(self.check_others_finished)
+            Clock.unschedule(self.switch_check)
             self.a.listener.set_congrats(False)
             self.time_check_congrats = time.time()
             self.ids.boxy.remove_widget(self.lbl_normal)
@@ -524,11 +548,14 @@ class WaitScreen(Screen):
             Clock.schedule_once(self.switch_check)
         else:
             if self.a.completed:
+                self.time_elapsed = time.time() - self.time_elapsed
+                print(self.time_elapsed)
                 Clock.schedule_once(self.switch_congrats)
                 self.a.completed = False
             else:
                 Clock.schedule_interval(self.check_for_messages, 1)
                 Clock.schedule_interval(self.check_others_finished, 1)
+                self.time_elapsed = time.time()
                 if self.mode == 'limited':
                     print('entered limited')
                     if self.run_num > 0:
