@@ -142,6 +142,10 @@ class speech:
                 print("Start command recognized!")
                 recognized = True
                 break
+            elif str(guess["transcription"]).find("recording") != -1:
+                print("Start command recognized!")
+                recognized = True
+                break
             else:
                 print("Start command not recognized...")
                 recognized = False
