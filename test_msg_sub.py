@@ -22,6 +22,8 @@ class Listener:
         self.activated = activated
     def set_sent_from_me(self, sent):
         self.sent_from_me=sent
+    def set_congrats(self, congrats):
+        self.congrats = congrats
 
     def listen(self):
         f = open('config.txt', 'r')
@@ -94,7 +96,7 @@ class Listener:
                 else:
                     self.activated = False
                     self.snoozed = False
-                    self.congrats = False
+                    #self.congrats = False
 
 if __name__ == "__main__":
     os.mkdir('./RecAudio/')
