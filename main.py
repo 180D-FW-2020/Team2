@@ -16,6 +16,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Ellipse
+from kivy.uix.image import Image
 from test_msg_sub import Listener
 import threading
 from playsound import playsound
@@ -172,6 +173,14 @@ class TimeScreen(Screen):
         self.manager.current = 'start'
         self.manager.transition.direction='right'
 
+    def switch_forward(self, *args):
+        if self.a.big_dict['stretch'][0]:
+            self.manager.current = 'config'
+            self.manager.transition.direction='left'
+        else:
+            self.manager.current = 'wait'
+            self.manager.transition.direction='left'
+
     def quit(self):
         sys.exit(0)
 
@@ -218,6 +227,41 @@ class TimeScreen(Screen):
             if v[0]:
                 self.ids.gl.add_widget(self.widgets[k][0])
                 self.ids.gl.add_widget(self.widgets[k][1])
+
+class ConfigScreen(Screen):
+    def __init__(self, **kw):
+        super(ConfigScreen, self).__init__(**kw)
+        self.config = False
+        self.img = Image(source = './UI/guidance.png')
+
+    def quit(self):
+        sys.exit(0)
+
+    def switch_back(self, *args):
+        self.manager.current = 'time'
+        self.manager.transition.direction='right'
+
+    def calibrate(self, *args):
+        config_stretch()
+        Clock.schedule_once(self.switch_forward)
+
+    def ping(self, type):
+        self.config = type
+
+    def pre_calibrate(self, *args):
+        if self.config:
+            self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
+            self.ids.bl.remove_widget(self.ids.small_lbl)
+            self.ids.bl.remove_widget(self.ids.activation_gl)
+            self.ids.bl.remove_widget(self.ids.check_gl)
+            self.ids.bl.add_widget(self.img)
+            Clock.schedule_once(self.calibrate)
+        else:
+            Clock.schedule_once(self.switch_forward)
+
+    def switch_forward(self, *args):
+        self.manager.current = 'wait'
+        self.manager.transition.direction='left'
 
 class WaitScreen(Screen):
     def __init__(self, **kw):
