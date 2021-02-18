@@ -77,10 +77,7 @@ class Listener:
                         time.sleep(10)
 
                 if path.exists(self.audio_file) and path.exists(self.text_file):
-                    #self.received = True
-                    #shutil.move(self.audio_file, "./RecAudio/" + self.audio_file)
-                    #shutil.move(self.text_file, "./RecTxt/" + self.text_file)
-                    #time.sleep(10)
+                    time.sleep(10)
                     break
 
                 if time.time() > (t_now + 5):
@@ -98,7 +95,7 @@ class Listener:
                 else:
                     self.activated = False
                     self.snoozed = False
-                    #self.congrats = False
+                    self.congrats = False
 
 if __name__ == "__main__":
     os.mkdir('./RecAudio/')
