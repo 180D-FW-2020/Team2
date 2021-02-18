@@ -1,0 +1,4 @@
+mode=debug,seconds
+ID=isabelketner
+ip=192.168.4.70
+port=22

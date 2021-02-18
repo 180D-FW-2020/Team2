@@ -9,10 +9,7 @@ network_topic = '/team2/network'
 
 ### HELPER FUNCTIONS ###
 
-def activate():
-    f = open('ID.txt', 'r')
-    user_id = f.readline().replace('\n', '')
-    f.close()
+def activate(user_id):
     reminder_topic = '/' + user_id + '/reminders'
     print("send message to LED Matrix")
     pub = PUB(reminder_topic, 'reminder')
@@ -23,6 +20,14 @@ def activate():
 
     print("waiting for IMU activation")
 
+def config_stretch():
+    print("calling stretching exercise")
+    os.chdir('tf-pose-estimation-master')
+    cmd = 'python timed_capture.py --ref_pose=tree,squat,warrior'
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    out, err = p.communicate()
+    os.chdir('..')
+
 def exercise_stretch():
         print("calling stretching exercise")
         os.chdir('tf-pose-estimation-master')
@@ -31,10 +36,7 @@ def exercise_stretch():
         out, err = p.communicate()
         os.chdir('..')
 
-def exercise_breathe():
-        f = open('ID.txt', 'r')
-        user_id = f.readline().replace('\n', '')
-        f.close()
+def exercise_breathe(user_id):
         reminder_topic = '/' + user_id + '/reminders'
         print("calling breathing exercise")
         pub = PUB(reminder_topic, 'breathe')
@@ -43,10 +45,7 @@ def exercise_breathe():
         pub.publish_text(client)
         client.disconnect()
 
-def congrats():
-    f = open('ID.txt', 'r')
-    user_id = f.readline().replace('\n', '')
-    f.close()
+def congrats(user_id):
     print("letting friends know you finished an activity")
     pub = PUB(network_topic, user_id + ":" + 'finish')
     client = pub.connect_mqtt()

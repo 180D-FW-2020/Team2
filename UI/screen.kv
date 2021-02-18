@@ -9,6 +9,8 @@
         name: 'start'
     TimeScreen:
         name: 'time'
+    ConfigScreen:
+        name: 'config'
     WaitScreen:
         name: 'wait'
     CheckScreen:
@@ -315,9 +317,67 @@
                 text: "Submit"
                 font_size: 18
                 background_color: .7, .7, 1, 1
-                on_release:
-                    root.parent.current='wait'
-                    root.parent.transition.direction = 'left'
+                on_release: root.switch_forward()
+<ConfigScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    BoxLayout:
+        id: bl
+        orientation: 'vertical'
+        Label:
+            id: big_lbl
+            text: "Do you wish to calibrate stretching?"
+            color: 0, 0, 0, 1
+            font_size: 20
+        Label:
+            id: small_lbl
+            text: "Note: you MUST complete this step if this is your first time running the program, ever"
+            color: 0, 0, 0, 1
+            font_size: 16
+        GridLayout:
+            id: check_gl
+            cols: 2
+            CheckBox:
+                group: 'config'
+                color: 0,0,0,1
+                on_active:root.ping(True)
+            Label:
+                text: "I need to calibrate"
+                color: 0,0,0,1
+                font_size: 18
+            CheckBox
+                group: 'config'
+                color: 0, 0, 0, 1
+                on_active:root.ping(False)
+            Label:
+                text: "I already calibrated!"
+                color: 0,0,0,1
+                font_size: 18
+        GridLayout:
+            id: activation_gl
+            cols: 2
+            height: 125
+            size_hint_y: None
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    text: "Go back"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.switch_back()
+                Button:
+                    text: "Exit"
+                    font_size: 18
+                    background_color: .7, .7, 1, 1
+                    on_release:root.quit()
+            Button:
+                text: "Submit"
+                font_size: 18
+                background_color: .7, .7, 1, 1
+                on_release: root.pre_calibrate()
 <WaitScreen>:
     canvas.before:
         Rectangle:
