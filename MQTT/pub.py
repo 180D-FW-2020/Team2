@@ -51,23 +51,43 @@ class PUB:
 
     def publish_file(self, client, file_path):
          msg_count = 0
-         for i in range(1, 10):
-             time.sleep(1)
-             #msg = f"messages: {msg_count}"
-             f = open(file_path, "rb")
-             filestr = f.read()
-             f.close()
-             msg = bytearray(filestr)
-             result = client.publish(self.topic, msg)
-             #result = client.publish(self.topic, self.msg)
-             # result: [0, 1]
-             status = result[0]
-             if status == 0:
-                 # print(f"Send `{msg}` to topic `{topic}`")
-                 print(f"Sent message to topic `{self.topic}`")
-             else:
-                 print(f"Failed to send message to topic {self.topic}")
-         # msg_count += 1
+         print(file_path)
+         if file_path.rsplit('.',1)[1] == 'wav':
+              for i in range(1, 10):
+                  time.sleep(1)
+                  #msg = f"messages: {msg_count}"
+                  f = open(file_path, "rb")
+                  filestr = f.read()
+                  f.close()
+                  msg = bytearray(filestr)
+                  result = client.publish(self.topic, msg)
+                  #result = client.publish(self.topic, self.msg)
+                  # result: [0, 1]
+                  status = result[0]
+                  if status == 0:
+                      # print(f"Send `{msg}` to topic `{topic}`")
+                      print(f"Sent message to topic `{self.topic}`")
+                  else:
+                      print(f"Failed to send message to topic {self.topic}")
+         else:
+            for i in range(1, 5):
+                time.sleep(1)
+                #msg = f"messages: {msg_count}"
+                f = open(file_path, "rb")
+                filestr = f.read()
+                f.close()
+                msg = bytearray(filestr)
+                result = client.publish(self.topic, msg)
+                #result = client.publish(self.topic, self.msg)
+                # result: [0, 1]
+                status = result[0]
+                if status == 0:
+                    # print(f"Send `{msg}` to topic `{topic}`")
+                    print(f"Sent message to topic `{self.topic}`")
+                else:
+                    print(f"Failed to send message to topic {self.topic}")
+
+             # msg_count += 1
 
 
 def run():
