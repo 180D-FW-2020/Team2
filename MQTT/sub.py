@@ -18,17 +18,15 @@ broker = 'mqtt.eclipseprojects.io'
 port = 1883
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
-id_path = os.path.join(os.getcwd(), 'ID.txt')
-
-
 
 class client_mqtt:
     def __init__(self, *args):
         self.topic_list = []
         self.message = ''
-        f = open(id_path, 'r')
-        self.user_id = f.readline().replace('\n', '')
-        f.close()
+        random_file = 'one_direction_has_my_heart.txt'
+        self.audio_file=random_file
+        self.text_file=random_file
+        self.first_received = False
         for arg in args:
             self.topic_tuple = (arg, 0)
             self.topic_list.append(self.topic_tuple)
@@ -54,30 +52,32 @@ class client_mqtt:
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
             #look at sender based on user id????
+            self.first_received = False
             audio_rec = re.search('audio', msg.topic)
             text_rec = re.search('text', msg.topic)
-            audio_file = filename + '.wav'
-            text_file = filename + '.txt'
-            print(audio_file)
-            print(text_file)
+            sender = msg.topic.split('/')[-1]
+            self.audio_file = sender + '_' + filename + '.wav'
+            self.text_file = sender + '_' + filename + '.txt'
+            print(f'received something from `{msg.topic}`')
             if audio_rec:
-                if not path.exists(audio_file):
+                if not path.exists(self.audio_file):
+                    self.first_received = True
                     print("Write")
-                    f = open(audio_file, 'wb')
+                    f = open(self.audio_file, 'wb')
                     print(msg.payload)
                     f.write(msg.payload)
                     f.close()
             elif text_rec:
-                if not path.exists(text_file):
+                if not path.exists(self.text_file):
+                    self.first_received = True
                     print("Write")
-                    f = open(text_file, 'wb')
+                    f = open(self.text_file, 'wb')
                     print(msg.payload)
                     f.write(msg.payload)
                     f.close()
             else:
                 self.message = msg.payload.decode()
                 print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-
 
         client.subscribe(self.topic_list)
         client.on_message = on_message

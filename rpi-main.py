@@ -4,8 +4,9 @@ from IMU.python_BerryIMU_gryo_accel_compass_filters.berryIMU_classifier import i
 from Matrix.matrix_functions import *
 from datetime import datetime
 
-f = open('ID.txt', 'r')
-user_id = f.readline().replace('\n', '')
+f = open('config.txt', 'r')
+f.readline()
+user_id = f.readline().split('=')[1].replace('\n', '')
 f.close()
 
 
@@ -23,9 +24,8 @@ def listen():
     caliente = client_instance.connect_mqtt()
     client_instance.subscribe_msg(caliente)
     caliente.loop_start()
-
+    run_clear()
     while True:
-        run_clear()
         if(client_instance.message != ''):
             print('message on network:' + client_instance.message)
             task = client_instance.message
