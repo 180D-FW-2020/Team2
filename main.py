@@ -327,7 +327,7 @@ class WaitScreen(Screen):
         else:
             self.ids.boxy.remove_widget(self.lbl_friend_finished_hardware)
         self.ids.boxy.add_widget(self.lbl_normal)
-        self.a.listener.set_congrats(False)
+        #self.a.listener.set_congrats(False)
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
         self.time_elapsed = time.time() - self.time_elapsed
@@ -460,7 +460,7 @@ class WaitScreen(Screen):
             Clock.unschedule(self.check_for_messages)
             Clock.unschedule(self.check_others_finished)
             Clock.unschedule(self.switch_check)
-            self.a.listener.set_congrats(False)
+            #self.a.listener.set_congrats(False)
             self.time_check_congrats = time.time()
             self.ids.boxy.remove_widget(self.lbl_normal)
             print('SOMEBODY FINISHED SMTHG WOWOWOWOW')
@@ -499,6 +499,10 @@ class WaitScreen(Screen):
             self.ids.boxy.add_widget(self.lbl_normal)
         except:
             pass
+        file_path = './RecTxt/' + self.sender + '*'
+        remaining_files = glob.glob(file_path)
+        for f in remaining_files:
+            os.remove(f)
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
 
@@ -506,7 +510,7 @@ class WaitScreen(Screen):
         if os.listdir('./RecTxt'):
             Clock.unschedule(self.check_for_messages)
             Clock.unschedule(self.check_others_finished)
-            time.sleep(5)
+            #time.sleep(5)
             try:
                 latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
                 self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
@@ -518,10 +522,6 @@ class WaitScreen(Screen):
                 self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
                 self.ids.boxy.remove_widget(self.lbl_normal)
                 self.ids.boxy.add_widget(self.lbl_msg)
-                file_path = './RecTxt/' + self.sender + '*'
-                remaining_files = glob.glob(file_path)
-                for f in remaining_files:
-                    os.remove(f)
             except:
                 pass
             Clock.schedule_once(self.update_screen)

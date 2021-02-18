@@ -70,7 +70,7 @@ class PUB:
                   else:
                       print(f"Failed to send message to topic {self.topic}")
          else:
-            for i in range(1, 5):
+            for i in range(1, 3):
                 time.sleep(1)
                 #msg = f"messages: {msg_count}"
                 f = open(file_path, "rb")
