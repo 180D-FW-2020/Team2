@@ -45,6 +45,7 @@ class Listener:
             os.mkdir('./RecAudio/')
             os.mkdir('./RecTxt/')
         while(1):
+            '''
             remaining_files = glob.glob('*.txt')
             for f in remaining_files:
                 if f != 'config.txt':
@@ -54,11 +55,12 @@ class Listener:
             for f in remaining_files:
                 print(f'moving... `{f}`')
                 shutil.move(f, "./RecAudio/" + f)
+            '''
             print("new while loop iteration")
             curr_time = datetime.now()
             curr_time = curr_time.strftime("%H--%M--%S");
-            wav_file = curr_time + ".wav"
-            txt_file = curr_time + ".txt"
+            wav_file = "./RecAudio/" + curr_time + ".wav"
+            txt_file = "./RecTxt/" +curr_time + ".txt"
             self.client_instance.subscribe_file(self.caliente, curr_time)
             self.caliente.loop_start()
             #self.received = False

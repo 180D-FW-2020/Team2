@@ -56,8 +56,8 @@ class client_mqtt:
             audio_rec = re.search('audio', msg.topic)
             text_rec = re.search('text', msg.topic)
             sender = msg.topic.split('/')[-1]
-            self.audio_file = sender + '_' + filename + '.wav'
-            self.text_file = sender + '_' + filename + '.txt'
+            self.audio_file = './RecAudio/' + sender + '_' + filename + '.wav'
+            self.text_file = './RecTxt/' +sender + '_' + filename + '.txt'
             print(f'received something from `{msg.topic}`')
             if audio_rec:
                 if not path.exists(self.audio_file):
