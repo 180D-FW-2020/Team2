@@ -1,9 +1,9 @@
 #!/bin/bash
 
 command_arr=(dill fire matplotlib psutil pycocotools requests scikit-image scipy slidingwindow tqdm )
-conda create --name W --force -y
+conda create --name WAP --force -y
 eval "$(conda shell.bash hook)"
-conda activate W
+conda activate WAP
 
 echo "Installing python==3.7.6"
 conda install -y python==3.7.6
