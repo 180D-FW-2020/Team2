@@ -3,23 +3,28 @@ from datetime import datetime
 import json
 #pip install git+https://github.com/ozgur/python-firebase
 
-user_id = 'jackielam'
+#user_id = 'jackielam'
 db_name = 'team2-4ffc1/stats/'
-
 firebase = firebase.FirebaseApplication("https://team2-4ffc1-default-rtdb.firebaseio.com/", None)
-tasks = ['stretching', 'breathing', 'talking to friends']
+STRETCHING = 0
+BREATHING = 1
+TALKING_TO_FRIENDS = 2
+RECEIVED = 3
+SENT = 4
+
+tasks = {STRETCHING: 'stretching', BREATHING: 'breathing', TALKING_TO_FRIENDS: 'talking to friends', RECEIVED: 'Received', SENT: 'Sent'}
 
 class userStats:
-    def __init__(self, user_id, firebase, db_name):
+    def __init__(self, user_id = '', firebase = firebase, db_name = db_name):
         self.user_id = user_id
         self.firebase = firebase
         self.db_name = db_name
         self.initial_data = { 
 
             'Tasks': {
-                tasks[0]: 0,
-                tasks[1]: 0,
-                tasks[2]: 0
+                tasks[STRETCHING]: 0,
+                tasks[BREATHING]: 0,
+                tasks[TALKING_TO_FRIENDS]: 0
             },
             'Messages': {
                 'Sent' : {
@@ -58,13 +63,14 @@ class userStats:
     
     def addMessage(self, sent_received, person, message):
         data, key, current_date = self.retEntryDate()
-        if sent_received == 'Sent':
+        sent_received_string = tasks[sent_received]
+        if sent_received_string == 'Sent':
             if data['Messages']['Sent'].__contains__(person):
                 data['Messages']['Sent'][person].append(message)
             else:
                 data['Messages']['Sent'][person] = [message]
 
-        elif sent_received == 'Received':
+        elif sent_received_string == 'Received':
             if data['Messages']['Received'].__contains__(person):
                 data['Messages']['Received'][person].append(message)
             else:
@@ -86,7 +92,8 @@ class userStats:
     def addTask(self, tasks_complete_list):
         data, key, current_date = self.retEntryDate()
         for task in tasks_complete_list:
-            data['Tasks'][task]+=1
+            task_string = tasks[task]
+            data['Tasks'][task_string]+=1
 
         update = self.firebase.put(self.db_name + self.user_id + '/' + current_date, key, data)
         print("Added Task:", update)
@@ -96,12 +103,11 @@ class userStats:
         retrieve = self.firebase.get(self.db_name + self.user_id, current_date)
         print("Retrieved:", retrieve)
         return retrieve
-        
+
 #Should create user stat at start up
 '''
 jackie = userStats(user_id, firebase, db_name)
 '''
-
 #Whenever a task is completed
 '''
 jackie.addTask([tasks[0], tasks[1], tasks[2]])
