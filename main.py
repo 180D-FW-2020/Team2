@@ -655,9 +655,9 @@ class TalkScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_talk.remove_widget(self.gl)
-        self.a.index = 'stretch'
-        self.a.immediate = False
-        self.a.cur_time += TIME_INTERVAL
+        #self.a.index = 'stretch'
+        #self.a.immediate = False
+        #self.a.cur_time += TIME_INTERVAL
         self.manager.current = 'wait'
         print('reminder snoozed')
 
@@ -836,9 +836,9 @@ class StretchScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
-        self.a.index = 'stretch'
-        self.a.immediate = False
-        self.a.cur_time += TIME_INTERVAL
+        #self.a.index = 'stretch'
+        #self.a.immediate = False
+        #self.a.cur_time += TIME_INTERVAL
         self.manager.current = 'wait'
         print('reminder snoozed')
 
@@ -902,9 +902,9 @@ class BreatheScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_breathe.remove_widget(self.gl)
-        self.a.index = 'stretch'
-        self.a.immediate = False
-        self.a.cur_time += TIME_INTERVAL
+        #self.a.index = 'stretch'
+    #    self.a.immediate = False
+    #    self.a.cur_time += TIME_INTERVAL
         self.manager.current = 'wait'
         print('reminder snoozed')
 
