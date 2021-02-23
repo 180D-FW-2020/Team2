@@ -960,9 +960,15 @@ class BallScreen(Screen):
         self.size_ball_x = 101
         self.size_ball_y = 101
         self.inc = True
+        self.time = 0
+        self.time2 = 30
+        self.cnt = 0
         self.a= App.get_running_app()
 
     def switch_congrats(self, *args):
+        self.cnt = 0
+        self.time = 0
+        self.time2 = 30
         self.canvas.clear()
         Clock.unschedule(self.ball)
         self.a.completed = True
@@ -970,17 +976,26 @@ class BallScreen(Screen):
 
     def ball(self, *args):
         self.canvas.clear()
+        self.cnt += 1
         with self.canvas:
             Color(.7,.7,1,1)
             Ellipse(pos= (self.center_x - (self.size_ball_x/2), self.center_y - (self.size_ball_y/2)), size=(self.size_ball_x,self.size_ball_y))
+            #Label(text=str(self.time),pos= (self.center_x - (101/2), self.center_y - (101/2)), font_size=24, color = (0,0,0,1))
+            #Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
         if self.size_ball_x == 200 or self.size_ball_x == 100:
             self.inc = not self.inc
-        if self.inc:
+        if not self.inc:
             self.size_ball_x += 1
             self.size_ball_y += 1
         else:
             self.size_ball_x -= 1
             self.size_ball_y -= 1
+        if self.cnt % 20 == 0:
+            self.time2 -= 1
+            if self.inc:
+                self.time -= 1
+            else:
+                self.time += 1
 
     def on_enter(self):
         Clock.schedule_interval(self.ball, .05)
