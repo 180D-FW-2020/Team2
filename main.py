@@ -175,6 +175,10 @@ class TimeScreen(Screen):
 
     def switch_forward(self, *args):
         if self.a.big_dict['stretch'][0]:
+            for k,v in self.a.big_dict.items():
+                if v[0]:
+                    self.ids.gl.remove_widget(self.widgets[k][0])
+                    self.ids.gl.remove_widget(self.widgets[k][1])
             self.manager.current = 'config'
             self.manager.transition.direction='left'
         else:
@@ -327,7 +331,6 @@ class WaitScreen(Screen):
         else:
             self.ids.boxy.remove_widget(self.lbl_friend_finished_hardware)
         self.ids.boxy.add_widget(self.lbl_normal)
-        #self.a.listener.set_congrats(False)
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
         self.time_elapsed = time.time() - self.time_elapsed
