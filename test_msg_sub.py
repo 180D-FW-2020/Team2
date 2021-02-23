@@ -20,6 +20,8 @@ class Listener:
 
     def set_activated(self, activated):
         self.activated = activated
+    def set_snoozed(self, snoozed):
+        self.snoozed = snoozed
     def set_sent_from_me(self, sent):
         self.sent_from_me=sent
     def set_congrats(self, congrats):
@@ -83,19 +85,26 @@ class Listener:
                 if time.time() > (t_now + 5):
                     self.client_instance.set_message('')
                     t_now = time.time() #messages expire after 5s
+                    self.activated = False
+                    self.snoozed = False
+                    self.congrats = False
                 if self.client_instance.message == 'Reminder:VS':
                     self.activated = True
+                    self.client_instance.message = ''
                 elif self.client_instance.message == "Reminder:LR":
                     self.snoozed = True
+                    self.client_instance.message = ''
                 elif self.client_instance.message != '':
                     self.dest_user = self.client_instance.message.split(':')[0]
                     task = self.client_instance.message.split(':')[1]
                     if(self.dest_user != self.user_id):
                         self.congrats = True
+                '''
                 else:
                     self.activated = False
                     self.snoozed = False
                     self.congrats = False
+                '''
 
 if __name__ == "__main__":
     os.mkdir('./RecAudio/')

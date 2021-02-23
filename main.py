@@ -658,7 +658,7 @@ class TalkScreen(Screen):
         #self.a.index = 'stretch'
         #self.a.immediate = False
         #self.a.cur_time += TIME_INTERVAL
-        self.manager.current = 'wait'
+        self.manager.current = 'snooze'
         print('reminder snoozed')
 
     def wait_activate(self, *args):
@@ -673,13 +673,13 @@ class TalkScreen(Screen):
 
     def check_activate(self, *args):
         if not self.t1.isAlive():
-            Clock.unschedule(self.snooze)
+            Clock.unschedule(self.check_activate)
             if self.a.listener.activated:
-                print('activated')
                 Clock.schedule_once(self.get_user)
+                self.a.listener.set_activated(False)
             else:
-                print('not activated')
                 Clock.schedule_once(self.snooze)
+                self.a.listener.set_snoozed(False)
 
     def on_leave(self, *args):
         self.ids.bl_talk.remove_widget(self.txtinput)
@@ -839,7 +839,7 @@ class StretchScreen(Screen):
         #self.a.index = 'stretch'
         #self.a.immediate = False
         #self.a.cur_time += TIME_INTERVAL
-        self.manager.current = 'wait'
+        self.manager.current = 'snooze'
         print('reminder snoozed')
 
     def transition(self, *args):
@@ -854,8 +854,10 @@ class StretchScreen(Screen):
             Clock.unschedule(self.check_activate)
             if self.a.listener.activated:
                 Clock.schedule_once(self.transition)
+                self.a.listener.set_activated(False)
             else:
                 Clock.schedule_once(self.snooze)
+                self.a.listener.set_snoozed(False)
 
     def wait_activate(self, *args):
         activate(self.a.userID)
@@ -905,7 +907,7 @@ class BreatheScreen(Screen):
         #self.a.index = 'stretch'
     #    self.a.immediate = False
     #    self.a.cur_time += TIME_INTERVAL
-        self.manager.current = 'wait'
+        self.manager.current = 'snooze'
         print('reminder snoozed')
 
     def activity_software2 (self, *args):
@@ -938,8 +940,10 @@ class BreatheScreen(Screen):
             Clock.unschedule(self.check_activate)
             if self.a.listener.activated:
                 Clock.schedule_once(self.activity)
+                self.a.listener.set_activated(False)
             else:
                 Clock.schedule_once(self.snooze)
+                self.a.listener.set_snoozed(False)
 
     def on_pre_enter(self, *args):
         print('entered breathe screen')
@@ -1014,6 +1018,16 @@ class CongratsScreen(Screen):
     def on_enter(self, *args):
         congrats(self.a.userID)
         Clock.schedule_once(self.switch_screen, 5)
+
+class SnoozeScreen(Screen):
+    def __init__(self, **kw):
+        super(SnoozeScreen, self).__init__(**kw)
+
+    def switch_screen(self, *args):
+        self.manager.current = 'wait'
+
+    def on_enter(self, *args):
+        Clock.schedule_once(self.switch_screen, 3)
 
 class Root(ScreenManager):
     pass

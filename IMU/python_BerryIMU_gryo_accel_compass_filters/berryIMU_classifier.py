@@ -493,9 +493,9 @@ def imu_run():
         max_gyrox = max(gyrox_list[5:len(gyrox_list)])
         min_gyrox = min(gyrox_list[5:len(gyrox_list)])
 
-        print('max acc_x difference: %d', max_accx - min_accx)
-        print('max acc_y difference: %d', max_accy - min_accy)
-        print('max gyro_x difference: %d', max_gyrox - min_gyrox)
+        #print('max acc_x difference: %d', max_accx - min_accx)
+        #print('max acc_y difference: %d', max_accy - min_accy)
+        #print('max gyro_x difference: %d', max_gyrox - min_gyrox)
 
         max_accx_diff = int(max_accx - min_accx)
         max_accy_diff = int(max_accy - min_accy)
@@ -540,8 +540,8 @@ def imu_run():
                 #print('Horizontal shake was too soft')
             #else:
                 #print('Lift up higher')
-
-        print("Classifier action:", classifier_action)
+        if classifier_action != 'none':
+            print("Classifier action:", classifier_action)
 
         accx_list.clear()
         accy_list.clear()

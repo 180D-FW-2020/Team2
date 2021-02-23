@@ -27,6 +27,8 @@
         name: 'ball'
     CongratsScreen:
         name: 'congrats'
+    SnoozeScreen:
+        name: 'snooze'
 <LoginScreen>:
     canvas.before:
         Rectangle:
@@ -468,6 +470,17 @@
     Label:
         id: lbl_congrats
         text: 'Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day.'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
+<SnoozeScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/holo-01.png'
+    Label:
+        text: 'The reminder was snoozed!'
         halign: 'center'
         font_size: 20
         color: 0, 0, 0, 1
