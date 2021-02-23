@@ -510,7 +510,6 @@ class WaitScreen(Screen):
         if os.listdir('./RecTxt'):
             Clock.unschedule(self.check_for_messages)
             Clock.unschedule(self.check_others_finished)
-            #time.sleep(5)
             try:
                 latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
                 self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
