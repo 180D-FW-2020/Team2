@@ -255,10 +255,12 @@ class ConfigScreen(Screen):
     def pre_calibrate(self, *args):
         if self.config:
             self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
+            self.ids.small_lbl.text = 'Note: it may take a few seconds for the separate calibration window to pop up.'
             self.ids.bl.remove_widget(self.ids.small_lbl)
             self.ids.bl.remove_widget(self.ids.activation_gl)
             self.ids.bl.remove_widget(self.ids.check_gl)
             self.ids.bl.add_widget(self.img)
+            self.ids.bl.add_widget(self.ids.small_lbl)
             Clock.schedule_once(self.calibrate)
         else:
             Clock.schedule_once(self.switch_forward)
@@ -844,7 +846,7 @@ class StretchScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
-        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
+        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready, and then a separate window will pop up to stretch.\nMake sure your entire body is in clear view of your webcam.'
         Clock.schedule_once(self.activity)
 
     def check_activate(self, *args):
