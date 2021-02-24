@@ -9,10 +9,9 @@ import glob
 
 class Listener:
     def __init__(self, *args):
-        #self.received = False
         self.activated = False
         self.snoozed = False
-        self.congrats = False
+        self.congrats_ppl = []
         self.dest_user=''
         self.audio_file = 'one_direction_has_my_heart.txt'
         self.text_file = 'one_direction_has_my_heart.txt'
@@ -67,9 +66,9 @@ class Listener:
                     self.client_instance.set_message('')
                 elif self.client_instance.message != '':
                     self.dest_user = self.client_instance.message.split(':')[0]
-                    task = self.client_instance.message.split(':')[1]
                     if(self.dest_user != self.user_id):
-                        self.congrats = True
+                        self.congrats_ppl.append(self.dest_user)
+                        print(self.congrats_ppl)
                     self.client_instance.set_message('')
 
 if __name__ == "__main__":

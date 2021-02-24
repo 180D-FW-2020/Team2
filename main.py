@@ -272,7 +272,6 @@ class ConfigScreen(Screen):
 class WaitScreen(Screen):
     def __init__(self, **kw):
         super(WaitScreen, self).__init__(**kw)
-        self.time_check_congrats = time.time()
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
         self.a = App.get_running_app()
         self.time_elapsed = time.time()
@@ -364,8 +363,8 @@ class WaitScreen(Screen):
                 Clock.schedule_once(self.update_screen_snooze)
 
     def send_msg(self, *args):
-        audio_topic = '/' + self.a.listener.dest_user + '/audio/' + self.a.userID
-        txt_topic = '/' + self.a.listener.dest_user + '/text/' + self.a.userID
+        audio_topic = '/' + self.a.dest_user + '/audio/' + self.a.userID
+        txt_topic = '/' + self.a.dest_user + '/text/' + self.a.userID
         audio_path = self.a.speech_instance.get_audiopath()
         txt_path = self.a.speech_instance.get_txtpath()
         pub = PUB(audio_topic, "hello from audio")
@@ -374,7 +373,7 @@ class WaitScreen(Screen):
         pub.publish_file(client, audio_path)
         client.disconnect()
 
-        pub = PUB(txt_topic, self.a.listener.dest_user + 'hello from txt')
+        pub = PUB(txt_topic, self.a.dest_user + 'hello from txt')
         client = pub.connect_mqtt()
         client.loop_start()
         pub.publish_file(client, txt_path)
@@ -461,12 +460,13 @@ class WaitScreen(Screen):
         Clock.schedule_once(self.recognize_start, .1)
 
     def check_others_finished(self, *args):
-        if self.a.listener.congrats and (time.time() > (self.time_check_congrats + 10)):
+        if len(self.a.listener.congrats_ppl) > 0:
             Clock.unschedule(self.check_for_messages)
             Clock.unschedule(self.check_others_finished)
             Clock.unschedule(self.switch_check)
-            #self.a.listener.set_congrats(False)
-            self.time_check_congrats = time.time()
+            self.a.dest_user = self.a.listener.congrats_ppl[0]
+            print(self.a.dest_user)
+            self.a.listener.congrats_ppl.pop(0)
             self.ids.boxy.remove_widget(self.lbl_normal)
             print('SOMEBODY FINISHED SMTHG WOWOWOWOW')
             if self.a.non_hardware:
@@ -475,7 +475,7 @@ class WaitScreen(Screen):
                     self.ids.boxy.remove_widget(self.lbl_friend_finished)
                 except:
                     pass
-                msg = 'Your friend ' + self.a.listener.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
+                msg = 'Your friend ' + self.a.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
                 self.lbl_friend_finished = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
                 self.ids.boxy.add_widget(self.lbl_friend_finished)
                 Clock.schedule_once(self.update_screen_snooze, 2*60)
@@ -485,7 +485,7 @@ class WaitScreen(Screen):
                     pass
             else:
                 print('entered hardware')
-                msg = 'Your friend ' + self.a.listener.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
+                msg = 'Your friend ' + self.a.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
                 self.lbl_friend_finished_hardware = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
                 self.ids.boxy.add_widget(self.lbl_friend_finished_hardware)
                 self.t1 = threading.Thread(target=self.wait_for_activate, daemon=True)
