@@ -296,6 +296,7 @@ class WaitScreen(Screen):
         self.gl.add_widget(self.btn_submit)
 
     def switch_check(self, *args):
+        self.manager.transition = NoTransition()
         self.manager.current = 'check'
         Clock.unschedule(self.check_for_messages)
         Clock.unschedule(self.check_others_finished)
@@ -595,6 +596,7 @@ class CheckScreen(Screen):
         self.a = App.get_running_app()
 
     def switch_screen(self, activity, *largs):
+        self.manager.transition = SlideTransition()
         self.manager.current = activity
 
     def switch_wait(self, *largs):
