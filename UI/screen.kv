@@ -32,7 +32,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -41,19 +41,18 @@
             color: 0,0,0,1
         GridLayout:
             cols: 2
-            padding: [10,70,50,70]
-            spacing: 50
+            padding: [10,70,70,70]
             Label:
                 text: 'Enter your User ID'
                 font_size: 18
                 color: 0,0,0,1
                 halign: 'center'
-                size_hint: (.3, 1)
+                size_hint: (.3, None)
             TextInput:
                 id: login
                 multiline:False
                 font_size: 18
-                size_hint: (.7, 1)
+                size_hint: (.7, None)
                 on_text_validate: root.update()
         GridLayout:
             cols: 2
@@ -74,7 +73,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -83,6 +82,7 @@
             font_size: 20
         GridLayout:
             cols: 2
+            padding: [10,0,70,100]
             CheckBox:
                 group: 'version'
                 color: 0,0,0,1
@@ -127,7 +127,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation:'vertical'
         Label:
@@ -225,16 +225,16 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation:'vertical'
         Label:
             text: "Select what you want to focus on today!"
             color: 0, 0, 0, 1
             font_size: 20
-            size_hint: (1, .3)
         GridLayout:
             cols: 2
+            padding: [100,0,0,100]
             Label:
                 text: "I want to work on stretching more"
                 font_size: 18
@@ -284,7 +284,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation:'vertical'
         Label:
@@ -296,7 +296,7 @@
             id: gl
             cols: 2
             size_hint: (1, .8)
-            padding: (1, 0)
+            padding: [0,0,100,50]
         GridLayout:
             cols: 2
             height: 125
@@ -323,7 +323,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         id: bl
         orientation: 'vertical'
@@ -383,79 +383,119 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
+    Image:
+        source: 'UI/face.png'
     BoxLayout:
         id: boxy
         orientation: 'vertical'
+        padding: [0, 300, 0, 0]
+
 <CheckScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
-    Label:
-        id: lbl1
-        text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+            source: 'UI/g-holo.png'
+    Image:
+        source: 'UI/face.png'
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl1
+        padding: [0, 300, 0, 0]
+        Label:
+            id: lbl1
+            text: 'Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1
 <StretchScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation: 'vertical'
         id: bl_stretch
-        Label:
-            id: lbl_stretch
-            text: 'Time to stretch!\nActivate the exercise using the IMU.'
-            halign: 'center'
-            font_size: 20
-            color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [0, 0, 0, 350]
+            Image:
+                source: 'UI/clock.png'
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
+            Label:
+                id: lbl_stretch
+                text: 'Time to stretch!\nActivate the exercise using the IMU.'
+                halign: 'center'
+                font_size: 20
+                color: 0, 0, 0, 1
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
 <BreatheScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
+    # FIX THIS PART
     BoxLayout:
         orientation: 'vertical'
         id: bl_breathe
-        Label:
-            id: lbl_breathe
-            text: 'Time to breathe!\nActivate the exercise using the IMU.'
-            halign: 'center'
-            font_size: 20
-            color: 0, 0, 0, 1
+        BoxLayout:
+            id: bl2_breathe
+            orientation: 'vertical'
+            padding: [0, 0, 0, 350]
+            Image:
+                id: img_breathe
+                source: 'UI/clock.png'
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
+            Label:
+                id: lbl_breathe
+                text: 'Time to breathe!\nActivate the exercise using the IMU.'
+                font_size: 20
+                halign: 'center'
+                color: 0, 0, 0, 1
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
 <BallScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
 <TalkScreen>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         id: bl_talk
         orientation:'vertical'
-        Label:
-            id: lbl_talk
-            text: 'Time to talk to friends!\nActivate sending a message using the IMU.'
-            halign: 'center'
-            font_size: 20
-            color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            padding: [0, 0, 0, 350]
+            Image:
+                source: 'UI/clock.png'
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
+            Label:
+                id: lbl_talk
+                text: 'Time to talk to friends!\nActivate sending a message using the IMU.'
+                halign: 'center'
+                font_size: 20
+                color: 0, 0, 0, 1
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
 <TalkScreen2>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
+            source: 'UI/g-holo.png'
     BoxLayout:
         orientation: 'vertical'
         id: box
@@ -464,10 +504,16 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'UI/holo-01.png'
-    Label:
-        id: lbl_congrats
-        text: 'Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day.'
-        halign: 'center'
-        font_size: 20
-        color: 0, 0, 0, 1
+            source: 'UI/g-holo.png'
+    Image:
+        source: 'UI/congrat.png'
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_breathe
+        padding: [0, 300, 0, 0]
+        Label:
+            id: lbl_congrats
+            text: 'Congrats on completing a task!\nYou will be reminded to complete more tasks throughout the day.'
+            halign: 'center'
+            font_size: 20
+            color: 0, 0, 0, 1

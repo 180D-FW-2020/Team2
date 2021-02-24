@@ -23,7 +23,7 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Speech.audio_msg import speech
+from Team2.Speech.audio_msg import speech
 from rpi_conn import rpi_conn
 
 Builder.load_file('./UI/screen.kv')
@@ -906,12 +906,17 @@ class BreatheScreen(Screen):
 
     def activity_software2 (self, *args):
         self.manager.current = 'ball'
+        self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
+        self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
+        self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
 
     def activity_software(self, *args):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_breathe.remove_widget(self.gl)
+        self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
+        self.ids.lbl_breathe.size_hint = (1, 0.5)
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
