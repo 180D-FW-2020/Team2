@@ -518,17 +518,23 @@ class WaitScreen(Screen):
             try:
                 latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
                 self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
-                print(f'received msg from `{self.sender}`')
-                f = open(latest_txt)
-                msg = f.readline()
-                display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
-                print(display_msg)
-                self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
-                self.ids.boxy.remove_widget(self.lbl_normal)
-                self.ids.boxy.add_widget(self.lbl_msg)
+                if self.sender != self.a.userID:
+                    print(f'received msg from `{self.sender}`')
+                    f = open(latest_txt)
+                    msg = f.readline()
+                    display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
+                    print(display_msg)
+                    self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+                    self.ids.boxy.remove_widget(self.lbl_normal)
+                    self.ids.boxy.add_widget(self.lbl_msg)
+                    Clock.schedule_once(self.update_screen)
+                else:
+                    file_path = './RecTxt/' + self.sender + '*'
+                    remaining_files = glob.glob(file_path)
+                    for f in remaining_files:
+                        os.remove(f)
             except:
                 pass
-            Clock.schedule_once(self.update_screen)
 
     def on_pre_enter(self, *args):
         print('entered wait')
@@ -717,9 +723,8 @@ class TalkScreen2(Screen):
 
     def send_msg(self, *args):
         if self.a.dest_user == 'all':
-            audio_topic = '/team2/network/audio'
-            txt_topic = '/team2/network/text'
-            self.a.listener.set_sent_from_me(True)
+            audio_topic = '/team2/network/audio/' + self.a.userID
+            txt_topic = '/team2/network/text/' + self.a.userID
         else:
             audio_topic = '/' + self.a.dest_user + '/audio/' + self.a.userID
             txt_topic = '/' + self.a.dest_user + '/text/' + self.a.userID
