@@ -916,7 +916,6 @@ class BreatheScreen(Screen):
             self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
-        self.ids.lbl_breathe.size_hint = (1, 0.5)
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
