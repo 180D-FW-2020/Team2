@@ -472,6 +472,9 @@ class WaitScreen(Screen):
                     pass
                 msg = 'Your friend ' + self.a.listener.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
                 self.lbl_friend_finished = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+                # Ahg
+                # self.ids.img_check.source = 'UI/speech.png'
+                # Ahg
                 self.ids.boxy.add_widget(self.lbl_friend_finished)
                 Clock.schedule_once(self.update_screen_snooze, 2*60)
                 try:
@@ -916,6 +919,8 @@ class BreatheScreen(Screen):
             self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
+        self.ids.lbl_breathe.size_hint = (1, 1)
+        self.ids.bl2_breathe.padding = [0,0,0,0]
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
