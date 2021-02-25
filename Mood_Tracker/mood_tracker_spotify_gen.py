@@ -33,12 +33,13 @@ class moodTracker:
         self.song_dict = {}
         self.mood_list = []
 
-    def get_token(self):
+    def get_token(self, user_id):
+        token = ""
         browser = webdriver.Chrome()
         browser.get("https://developer.spotify.com/console/post-playlists/")
         
         id_field = browser.find_element_by_name("user_id")
-        id_field.send_keys(self.spotify_user_id)
+        id_field.send_keys(user_id)
 
         token_id = browser.find_element_by_id("oauth-input")
         token_val = token_id.get_attribute("value")
@@ -56,15 +57,13 @@ class moodTracker:
         
         try:
             element_present = EC.presence_of_element_located((By.ID, 'oauth-input'))
-            WebDriverWait(browser, 20).until(element_present)
+            WebDriverWait(browser, 60).until(element_present)
             token_field = browser.find_element_by_id("oauth-input")
-            self.token = token_field.get_attribute("value")
+            token = token_field.get_attribute("value")
         except:
             print("timed out waiting for token")
 
-        return self.token
-
-
+        return token
     
     def pretty_string_matrix(self, matrix):
         s = [[str(e) for e in row] for row in matrix]
@@ -177,8 +176,8 @@ class moodTracker:
         return uris, song_dict
         #print(f"{i+1}) \"{j['name']}\" by {j['artists'][0]['name']} {j['external_urls']['spotify']}")
 
-    def create_playlist(self, spotify_user_id, token, uris):
-        endpoint_url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+    def create_playlist(self, spotify_user_id, token, uris, playlist_name):
+        endpoint_url = f"https://api.spotify.com/v1/users/{spotify_user_id}/playlists"
 
         request_body = json.dumps({
                 "name": playlist_name,
@@ -238,11 +237,11 @@ class moodTracker:
             return
         else:
             self.playlist_name = input("Enter the playlist name =>")
-            self.token = self.get_token()
-            self.playlist_id = self.create_playlist(self.spotify_user_id, self.token, self.uris)
+            self.token = self.get_token(self.spotify_user_id)
+            self.playlist_id = self.create_playlist(self.spotify_user_id, self.token, self.uris, self.playlist_name)
 
         
 '''Run program by just calling run_task()'''
-# moodTracker = moodTracker()
-# moodTracker.run_task()
+moodTracker = moodTracker()
+moodTracker.run_task()
 
