@@ -515,6 +515,8 @@ class WaitScreen(Screen):
             playsound(latest_audio, True)
         except:
             print('error: audio could not play')
+            e = sys.exc_info()[0]
+            print(f'error msg: {e}')
         self.ids.boxy.remove_widget(self.lbl_msg)
         try:
             self.ids.boxy.add_widget(self.lbl_normal)
@@ -529,34 +531,35 @@ class WaitScreen(Screen):
 
     #received
     def check_for_messages(self, *args):
-        if os.listdir('./RecTxt'):
-            Clock.unschedule(self.check_for_messages)
-            Clock.unschedule(self.check_others_finished)
-            try:
-                latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
-                self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
-                if self.sender != self.a.userID:
-                    print(f'received msg from `{self.sender}`')
-                    f = open(latest_txt)
-                    msg = f.readline()
-                    display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
-                    print(display_msg)
+        if os.path.exists('./RecTxt'):
+            if os.listdir('./RecTxt'):
+                Clock.unschedule(self.check_for_messages)
+                Clock.unschedule(self.check_others_finished)
+                try:
+                    latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
+                    self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
+                    if self.sender != self.a.userID:
+                        print(f'received msg from `{self.sender}`')
+                        f = open(latest_txt)
+                        msg = f.readline()
+                        display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
+                        print(display_msg)
 
-                    #Received a message
-                    self.a.user_stat.addMessage(RECEIVED, self.sender, msg)
+                        #Received a message
+                        self.a.user_stat.addMessage(RECEIVED, self.sender, msg)
 
-                    self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
-                    self.ids.boxy.remove_widget(self.lbl_normal)
-                    self.ids.boxy.add_widget(self.lbl_msg)
-                    Clock.schedule_once(self.update_screen)
-                else:
-                    file_path = './RecTxt/' + self.sender + '*'
-                    remaining_files = glob.glob(file_path)
-                    for f in remaining_files:
-                        os.remove(f)
-
-            except:
-                pass
+                        self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+                        self.ids.boxy.remove_widget(self.lbl_normal)
+                        self.ids.boxy.add_widget(self.lbl_msg)
+                        Clock.schedule_once(self.update_screen)
+                    else:
+                        file_path = './RecTxt/' + self.sender + '*'
+                        remaining_files = glob.glob(file_path)
+                        for f in remaining_files:
+                            os.remove(f)
+                except:
+                    pass
+>>>>>>> 82df0de36d69b9aa8b4d1215243286f18b26a03d
 
     def on_pre_enter(self, *args):
         try:
@@ -1028,7 +1031,7 @@ class BallScreen(Screen):
             Color(.7,.7,1,1)
             Ellipse(pos= (self.center_x - (self.size_ball_x/2), self.center_y - (self.size_ball_y/2)), size=(self.size_ball_x,self.size_ball_y))
             #Label(text=str(self.time),pos= (self.center_x - (101/2), self.center_y - (101/2)), font_size=24, color = (0,0,0,1))
-            #Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
+            Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
         if self.size_ball_x == 200 or self.size_ball_x == 100:
             self.inc = not self.inc
         if not self.inc:
