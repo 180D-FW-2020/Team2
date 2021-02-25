@@ -14,6 +14,7 @@ user_id = ""
 playlist_name = ""
 
 def get_token():
+    token = ""
     browser = webdriver.Chrome()
     browser.get("https://developer.spotify.com/console/post-playlists/")
     
@@ -36,7 +37,7 @@ def get_token():
     
     try:
         element_present = EC.presence_of_element_located((By.ID, 'oauth-input'))
-        WebDriverWait(browser, 20).until(element_present)
+        WebDriverWait(browser, 60).until(element_present)
         token_field = browser.find_element_by_id("oauth-input")
         token = token_field.get_attribute("value")
     except:
@@ -148,6 +149,7 @@ def create_playlist(user_id, token, uris):
                             "Authorization":f"Bearer {token}"})
 
     if response.status_code != 201:
+        print("token:", token)
         print(str(response.status_code) + ": Could not create playlist. Invalid generated token or username")
         return
     url = response.json()['external_urls']['spotify']
