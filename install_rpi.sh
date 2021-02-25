@@ -4,11 +4,11 @@ echo "Activating conda environment"
 conda create --name WAP --force -y
 conda config --set report_errors false
 eval "$(conda shell.bash hook)"
-conda activate WAP
+source activate WAP
 
 echo "install IMU packages"
 sudo apt-get install -y git i2c-tools libi2c-dev
-conda install -y -c conda-forge smbus2 
+conda install -y -c conda-forge smbus2
 sudo usermod -a -G spi,gpio pi
 
 echo "Installing python==3.6.1"
