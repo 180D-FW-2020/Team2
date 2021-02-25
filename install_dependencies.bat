@@ -10,7 +10,7 @@ conda create --name WAP --force -y ^
 && conda install -y -c anaconda git ^
 
 && echo "Installing tensorflow" ^
-&& conda install -y tensorflow ^
+&& call pip install tensorflow ^
 
 && echo "cloning repo" ^
 && call git clone https://github.com/180D-FW-2020/Team2.git ^
