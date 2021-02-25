@@ -275,6 +275,7 @@ class WaitScreen(Screen):
         self.lbl_normal=Label(text='Thank you for selecting your wellness actions!\nYou will be reminded to focus on these throughout the day.',halign='center',font_size=20,color=(0,0,0,1))
         self.a = App.get_running_app()
         self.time_elapsed = time.time()
+        self.sender = ''
         self.make_activation_widget()
         self.make_recording_labels()
 
@@ -308,22 +309,30 @@ class WaitScreen(Screen):
 
     def reschedule_activity(self, *args):
         if self.mode == 'limited':
-            print('entered limited')
+            print(f'entered limited, run num: {self.run_num}')
             if self.run_num > 0:
                 Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL - self.time_elapsed)))
+                print(f'time elapsed from last activity: {self.time_elapsed}')
+                print(f'time remaining: {TIME_INTERVAL - self.time_elapsed}')
             else:
                 print('waitscreen forever')
             self.run_num -=1
         elif self.mode == 'debug':
             if self.debug_mode == 'seconds':
-                print('entered debug seconds')
+                print('entered waitscreen debug seconds')
                 Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL - self.time_elapsed)))
+                print(f'time elapsed from last activity: {self.time_elapsed}')
+                print(f'time remaining: {TIME_INTERVAL - self.time_elapsed}')
             else:
-                print('entered debug minutes')
+                print('entered waitscreen debug minutes')
                 Clock.schedule_once(self.switch_check,max(0, (TIME_INTERVAL*6 - self.time_elapsed)))
+                print(f'time elapsed from last activity: {self.time_elapsed}')
+                print(f'time remaining: {TIME_INTERVAL*6 - self.time_elapsed}')
         else:
-            print('entered reg')
+            print('entered watiscreen reg')
             Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL*60 - self.a.time_elapsed - self.time_elapsed)))
+            print(f'time elapsed from last activity: {self.time_elapsed}')
+            print(f'time remaining: {TIME_INTERVAL*60 - self.time_elapsed-self.a.time_elapsed}')
 
     def update_screen_snooze(self, *args):
         if self.a.non_hardware:
@@ -538,7 +547,6 @@ class WaitScreen(Screen):
                 pass
 
     def on_pre_enter(self, *args):
-        print('entered wait')
         try:
             self.ids.boxy.add_widget(self.lbl_normal)
         except:
@@ -565,7 +573,6 @@ class WaitScreen(Screen):
         else:
             if self.a.completed:
                 self.time_elapsed = time.time() - self.time_elapsed
-                print(self.time_elapsed)
                 Clock.schedule_once(self.switch_congrats)
                 self.a.completed = False
             else:
@@ -573,7 +580,7 @@ class WaitScreen(Screen):
                 Clock.schedule_interval(self.check_others_finished, 1)
                 self.time_elapsed = time.time()
                 if self.mode == 'limited':
-                    print('entered limited')
+                    print(f'entered limited, run num: {self.run_num}')
                     if self.run_num > 0:
                         Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                     else:
@@ -581,13 +588,13 @@ class WaitScreen(Screen):
                     self.run_num -=1
                 elif self.mode == 'debug':
                     if self.debug_mode == 'seconds':
-                        print('entered debug seconds')
+                        print('entered waitscreen debug seconds')
                         Clock.schedule_once(self.switch_check, TIME_INTERVAL)
                     else:
-                        print('entered debug minutes')
+                        print('entered waitscreen debug minutes')
                         Clock.schedule_once(self.switch_check, TIME_INTERVAL*6)
                 else:
-                    print('entered reg')
+                    print('entered waitscreen regular')
                     Clock.schedule_once(self.switch_check, TIME_INTERVAL*60 - self.a.time_elapsed)
 
 class CheckScreen(Screen):
