@@ -26,7 +26,6 @@ class client_mqtt:
         random_file = 'one_direction_has_my_heart.txt'
         self.audio_file=random_file
         self.text_file=random_file
-        self.first_received = False
         for arg in args:
             self.topic_tuple = (arg, 0)
             self.topic_list.append(self.topic_tuple)
@@ -51,25 +50,19 @@ class client_mqtt:
     def subscribe_file(self, client: mqtt_client, filename):
         def on_message(client, userdata, msg):
             # Added this because subscriber kept overwriting files with "self.msg" parameters
-            #look at sender based on user id????
-            self.first_received = False
             audio_rec = re.search('audio', msg.topic)
             text_rec = re.search('text', msg.topic)
             sender = msg.topic.split('/')[-1]
             self.audio_file = './RecAudio/' + sender + '_' + filename + '.wav'
             self.text_file = './RecTxt/' +sender + '_' + filename + '.txt'
-            print(f'received something from `{msg.topic}`')
             if audio_rec:
                 if not path.exists(self.audio_file):
-                    self.first_received = True
-                    print("Write")
+                    print("received audio msg")
                     f = open(self.audio_file, 'wb')
-                    print(msg.payload)
                     f.write(msg.payload)
                     f.close()
             elif text_rec:
-                if not path.exists(self.text_file):
-                    self.first_received = True
+                if not path.exists('./RecTxt/' + sender + '*'):
                     print("Write")
                     f = open(self.text_file, 'wb')
                     print(msg.payload)

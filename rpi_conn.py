@@ -65,9 +65,7 @@ class rpi_conn():
         self.ftp_client.put(os.path.abspath('./rpi-main.py'), self.remote_dir + '/rpi-main.py')
         self.ftp_client.put(os.path.abspath('./config.txt'), self.remote_dir + '/config.txt')
         self.ftp_client.close()
-        stdin,stdout,stderr=self.ssh.exec_command('cd Team2 && python3 rpi-main.py', get_pty=True)
+        stdin,stdout,stderr=self.ssh.exec_command('source berryconda3/bin/activate WAP && cd Team2 && python3 rpi-main.py', get_pty=True)
         for line in iter(stdout.readline, ""):
             print(line, end="")
         self.ssh.close()
-
-#conda install -c anaconda paramiko
