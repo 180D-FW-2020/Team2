@@ -516,7 +516,7 @@ class WaitScreen(Screen):
             self.ids.boxy.add_widget(self.lbl_normal)
         except:
             pass
-        file_path = 'Txt/' + self.sender + '*'
+        file_path = './RecTxt/' + self.sender + '*'
         remaining_files = glob.glob(file_path)
         for f in remaining_files:
             os.remove(f)
