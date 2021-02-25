@@ -38,9 +38,7 @@ class userStats:
             'Mood' : {
 
                 'Moods' : ['mood1'], #list of moods all lowercase
-                'Songs' : {
-                    'song by artist' : 'spotify link'
-                }
+                'Songs' : ['song by artist']
             } 
         }
 
@@ -81,11 +79,25 @@ class userStats:
     #should overwrite
     def addMood(self, moods_list, song_dict):
         data, key, current_date = self.retEntryDate()
+        
+        if song_dict != []:
+            song_list = []
+            for song_key, value in song_dict.items():
+                song_list.append(song_key + ',' + value)
+            data['Mood']['Songs'] = song_list
+
+            # data['Mood']['Songs'] = song_dict
+            # for song_key,value in song_dict.items():
+            #     data['Mood']['Songs'][song_key] = value
+            #     print("DATA", song_key, value)
+            #     update = self.firebase.put(self.db_name + self.user_id + '/' + current_date + '/' + key + '/' + "Mood" , "Songs", {song_key:value})
+            update = self.firebase.put(self.db_name + self.user_id + '/' + current_date, key, data)
+
+
         if moods_list != []:
             data['Mood']['Moods'] = moods_list
-        if song_dict != {}:
-            data['Mood']['Songs'] = song_dict
-        update = self.firebase.put(self.db_name + self.user_id + '/' + current_date, key, data)
+            update = self.firebase.put(self.db_name + self.user_id + '/' + current_date, key, data)
+
         print("Added Mood:",update)
 
     #Tasks
@@ -105,9 +117,20 @@ class userStats:
         return retrieve
 
 #Should create user stat at start up
-'''
-jackie = userStats(user_id, firebase, db_name)
-'''
+
+# jackie = userStats('jackielam')
+# jackie.addMood(['angry', 'sad'], ['Sail - Unlimited Gravity Remix by AWOLNATION', 
+# 'Sugar High by Approaching Nirvana', 
+# 'Crystallize by Lindsey Stirling', 
+# 'Need Your Heart (feat. Kai) by Adventure Club', 
+# 'Rabbit Whore - Original Mix by Savant',
+# 'Bullet Train (feat. Joni Fatora) by Stephen Swartz',
+# 'One Day (Vandaag) - Radio Edit by Bakermat',
+# 'You - Tiësto vs. Twoloud Radio Edit by Galantis',
+# 'Staying (DotEXE Remix) by Koda',
+# 'Finale (feat. Nicholas Petricca) by Madeon'
+# ])
+
 #Whenever a task is completed
 '''
 jackie.addTask([tasks[0], tasks[1], tasks[2]])
