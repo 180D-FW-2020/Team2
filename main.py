@@ -509,6 +509,8 @@ class WaitScreen(Screen):
             playsound(latest_audio, True)
         except:
             print('error: audio could not play')
+            e = sys.exc_info()[0]
+            print(f'error msg: {e}')
         self.ids.boxy.remove_widget(self.lbl_msg)
         try:
             self.ids.boxy.add_widget(self.lbl_normal)
