@@ -516,7 +516,7 @@ class WaitScreen(Screen):
             self.ids.boxy.add_widget(self.lbl_normal)
         except:
             pass
-        file_path = './RecTxt/' + self.sender + '*'
+        file_path = 'Txt/' + self.sender + '*'
         remaining_files = glob.glob(file_path)
         for f in remaining_files:
             os.remove(f)
@@ -524,29 +524,30 @@ class WaitScreen(Screen):
         Clock.schedule_interval(self.check_others_finished, 1)
 
     def check_for_messages(self, *args):
-        if os.listdir('./RecTxt'):
-            Clock.unschedule(self.check_for_messages)
-            Clock.unschedule(self.check_others_finished)
-            try:
-                latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
-                self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
-                if self.sender != self.a.userID:
-                    print(f'received msg from `{self.sender}`')
-                    f = open(latest_txt)
-                    msg = f.readline()
-                    display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
-                    print(display_msg)
-                    self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
-                    self.ids.boxy.remove_widget(self.lbl_normal)
-                    self.ids.boxy.add_widget(self.lbl_msg)
-                    Clock.schedule_once(self.update_screen)
-                else:
-                    file_path = './RecTxt/' + self.sender + '*'
-                    remaining_files = glob.glob(file_path)
-                    for f in remaining_files:
-                        os.remove(f)
-            except:
-                pass
+        if os.path.exists('./RecTxt'):
+            if os.listdir('./RecTxt'):
+                Clock.unschedule(self.check_for_messages)
+                Clock.unschedule(self.check_others_finished)
+                try:
+                    latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
+                    self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
+                    if self.sender != self.a.userID:
+                        print(f'received msg from `{self.sender}`')
+                        f = open(latest_txt)
+                        msg = f.readline()
+                        display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
+                        print(display_msg)
+                        self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+                        self.ids.boxy.remove_widget(self.lbl_normal)
+                        self.ids.boxy.add_widget(self.lbl_msg)
+                        Clock.schedule_once(self.update_screen)
+                    else:
+                        file_path = './RecTxt/' + self.sender + '*'
+                        remaining_files = glob.glob(file_path)
+                        for f in remaining_files:
+                            os.remove(f)
+                except:
+                    pass
 
     def on_pre_enter(self, *args):
         try:
