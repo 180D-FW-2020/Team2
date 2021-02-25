@@ -1001,7 +1001,7 @@ class BallScreen(Screen):
             Color(.7,.7,1,1)
             Ellipse(pos= (self.center_x - (self.size_ball_x/2), self.center_y - (self.size_ball_y/2)), size=(self.size_ball_x,self.size_ball_y))
             #Label(text=str(self.time),pos= (self.center_x - (101/2), self.center_y - (101/2)), font_size=24, color = (0,0,0,1))
-            #Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
+            Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
         if self.size_ball_x == 200 or self.size_ball_x == 100:
             self.inc = not self.inc
         if not self.inc:
