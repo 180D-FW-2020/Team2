@@ -69,16 +69,19 @@ class VersionScreen(Screen):
     def __init__(self, **kw):
         super(VersionScreen, self).__init__(**kw)
         self.a = App.get_running_app()
+        self.selected = False
 
     def ping(self, type):
+        self.selected = True
         self.a.non_hardware = type
 
     def switch(self):
-        self.manager.transition.direction='left'
-        if self.a.non_hardware:
-            self.manager.current='start'
-        else:
-            self.manager.current='raspberry'
+        if self.selected:
+            self.manager.transition.direction='left'
+            if self.a.non_hardware:
+                self.manager.current='start'
+            else:
+                self.manager.current='raspberry'
 
     def quit(self):
         sys.exit(0)
