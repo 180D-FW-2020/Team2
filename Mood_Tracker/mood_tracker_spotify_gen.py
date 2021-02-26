@@ -244,4 +244,3 @@ class moodTracker:
 '''Run program by just calling run_task()'''
 moodTracker = moodTracker()
 moodTracker.run_task()
-
