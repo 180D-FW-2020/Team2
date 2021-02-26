@@ -2,8 +2,9 @@
 
 echo "Activating conda environment"
 conda create --name WAP --force -y
+echo "set report errors"
 conda config --set report_errors false
-eval "$(conda shell.bash hook)"
+echo "activate WAP"
 source activate WAP
 
 echo "install IMU packages"
