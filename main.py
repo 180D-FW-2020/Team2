@@ -559,7 +559,6 @@ class WaitScreen(Screen):
                             os.remove(f)
                 except:
                     pass
->>>>>>> 82df0de36d69b9aa8b4d1215243286f18b26a03d
 
     def on_pre_enter(self, *args):
         try:
