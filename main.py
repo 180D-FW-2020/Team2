@@ -472,9 +472,7 @@ class WaitScreen(Screen):
                     pass
                 msg = 'Your friend ' + self.a.listener.dest_user + ' just completed a task!\n Activate using the buttons if you want to send a message to them.'
                 self.lbl_friend_finished = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
-                # Ahg
-                # self.ids.img_check.source = 'UI/speech.png'
-                # Ahg
+                self.ids.img_wait.source = 'UI/speech.png'
                 self.ids.boxy.add_widget(self.lbl_friend_finished)
                 Clock.schedule_once(self.update_screen_snooze, 2*60)
                 try:
@@ -485,6 +483,7 @@ class WaitScreen(Screen):
                 print('entered hardware')
                 msg = 'Your friend ' + self.a.listener.dest_user + ' just completed a task!\n Activate using the IMU if you want to send a message to them.'
                 self.lbl_friend_finished_hardware = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
+                self.ids.img_wait.source = 'UI/speech.png'
                 self.ids.boxy.add_widget(self.lbl_friend_finished_hardware)
                 self.t1 = threading.Thread(target=self.wait_for_activate, daemon=True)
                 self.t1.start()
@@ -896,6 +895,7 @@ class BreatheScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
+        self.ids.img_breathe.source = 'UI/clock.png'
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -924,6 +924,8 @@ class BreatheScreen(Screen):
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
+        self.ids.bl2_breathe.padding = [0,0,0,500]
+        self.ids.img_breathe.source = 'UI/matrix.png'
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe(self.a.userID)
         Clock.schedule_once(self.switch_congrats, 30)
@@ -956,6 +958,11 @@ class BreatheScreen(Screen):
                 pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
+            self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
+            self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
+            self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
+            self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
+            self.ids.bl2_breathe.padding = [0,0,0,500]
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
             self.t1=threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()
