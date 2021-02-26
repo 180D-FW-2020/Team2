@@ -48,6 +48,9 @@ conda create --name WAP --force -y ^
 && echo "Installing tensorpack" ^
 && call pip install git+https://github.com/ppwwyyxx/tensorpack.git ^
 
+&& echo "Installing firebase" ^
+&& call pip install git+https://github.com/ozgur/python-firebase ^
+
 && echo "installing swig" ^
 && conda install -y swig ^
 && echo "cding" ^
