@@ -110,8 +110,10 @@ class speech:
             with open(self.txt_file, "w") as f:
                 try:
                     print('Saving message transcription...')
-                    f.write(self.recognizer.recognize_google(audio))
+                    transcribed_msg = self.recognizer.recognize_google(audio)
+                    f.write(transcribed_msg)
                     f.close()
+                    return transcribed_msg
                 except sr.UnknownValueError:
                     print("Google Speech Recognition could not understand audio")
                 except sr.RequestError as e:

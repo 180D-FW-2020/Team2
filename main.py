@@ -26,6 +26,8 @@ from MQTT.pub import PUB
 from Speech.audio_msg import speech
 from rpi_conn import rpi_conn
 
+from Stats.stats import *
+
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
 
@@ -56,6 +58,9 @@ class LoginScreen(Screen):
         else:
             self.ids.login.background_color = (1, 0, 0, .3)
             print('blank userID')
+
+        #update user stat id
+        self.a.user_stat.user_id = self.a.userID
 
     def quit(self):
         sys.exit(0)
@@ -372,6 +377,7 @@ class WaitScreen(Screen):
             else:
                 Clock.schedule_once(self.update_screen_snooze)
 
+    #a.listener.dest_user
     def send_msg(self, *args):
         audio_topic = '/' + self.a.dest_user + '/audio/' + self.a.userID
         txt_topic = '/' + self.a.dest_user + '/text/' + self.a.userID
@@ -509,6 +515,8 @@ class WaitScreen(Screen):
             playsound(latest_audio, True)
         except:
             print('error: audio could not play')
+            e = sys.exc_info()[0]
+            print(f'error msg: {e}')
         self.ids.boxy.remove_widget(self.lbl_msg)
         try:
             self.ids.boxy.add_widget(self.lbl_normal)
@@ -521,30 +529,36 @@ class WaitScreen(Screen):
         Clock.schedule_interval(self.check_for_messages, 1)
         Clock.schedule_interval(self.check_others_finished, 1)
 
+    #received
     def check_for_messages(self, *args):
-        if os.listdir('./RecTxt'):
-            Clock.unschedule(self.check_for_messages)
-            Clock.unschedule(self.check_others_finished)
-            try:
-                latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
-                self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
-                if self.sender != self.a.userID:
-                    print(f'received msg from `{self.sender}`')
-                    f = open(latest_txt)
-                    msg = f.readline()
-                    display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
-                    print(display_msg)
-                    self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
-                    self.ids.boxy.remove_widget(self.lbl_normal)
-                    self.ids.boxy.add_widget(self.lbl_msg)
-                    Clock.schedule_once(self.update_screen)
-                else:
-                    file_path = './RecTxt/' + self.sender + '*'
-                    remaining_files = glob.glob(file_path)
-                    for f in remaining_files:
-                        os.remove(f)
-            except:
-                pass
+        if os.path.exists('./RecTxt'):
+            if os.listdir('./RecTxt'):
+                Clock.unschedule(self.check_for_messages)
+                Clock.unschedule(self.check_others_finished)
+                try:
+                    latest_txt = max(glob.iglob('./RecTxt/*'), key=os.path.getctime)
+                    self.sender = str(os.path.split(latest_txt)[1].split('_')[0])
+                    if self.sender != self.a.userID:
+                        print(f'received msg from `{self.sender}`')
+                        f = open(latest_txt)
+                        msg = f.readline()
+                        display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
+                        print(display_msg)
+
+                        #Received a message
+                        self.a.user_stat.addMessage(RECEIVED, self.sender, msg)
+
+                        self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+                        self.ids.boxy.remove_widget(self.lbl_normal)
+                        self.ids.boxy.add_widget(self.lbl_msg)
+                        Clock.schedule_once(self.update_screen)
+                    else:
+                        file_path = './RecTxt/' + self.sender + '*'
+                        remaining_files = glob.glob(file_path)
+                        for f in remaining_files:
+                            os.remove(f)
+                except:
+                    pass
 
     def on_pre_enter(self, *args):
         try:
@@ -729,7 +743,9 @@ class TalkScreen2(Screen):
         self.ids.box.remove_widget(self.lbl_send)
         self.a.completed = True
         self.manager.current = 'wait'
+        
 
+    #Sent a message
     def send_msg(self, *args):
         if self.a.dest_user == 'all':
             audio_topic = '/team2/network/audio/' + self.a.userID
@@ -752,16 +768,23 @@ class TalkScreen2(Screen):
         client.disconnect()
         Clock.schedule_once(self.switch_congrats)
 
+
     def trans_send(self, *args):
         self.ids.box.remove_widget(self.lbl_save)
         self.ids.box.add_widget(self.lbl_send)
         Clock.schedule_once(self.send_msg)
 
+        #Sent message
+
     def transcribe_msg(self, *args):
         self.ids.box.remove_widget(self.lbl_recording)
         self.ids.box.add_widget(self.lbl_save)
-        self.a.speech_instance.transcribe()
+
+        transcribed_msg = self.a.speech_instance.transcribe()
+        self.a.user_stat.addMessage(SENT, self.a.dest_user, transcribed_msg)
+        self.a.user_stat.addTask([TALKING_TO_FRIENDS])
         Clock.schedule_once(self.trans_send)
+
 
     def record_msg(self, *args):
         print('recording...')
@@ -841,6 +864,8 @@ class StretchScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
+        #Ends stretching
+        self.a.user_stat.addTask([STRETCHING])
 
     def activity(self, *args):
         exercise_stretch()
@@ -913,6 +938,7 @@ class BreatheScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
+    
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -932,11 +958,14 @@ class BreatheScreen(Screen):
             Clock.unschedule(self.snooze)
             self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
+        #finished breathing
+        self.a.user_stat.addTask([BREATHING])
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe(self.a.userID)
+        
         Clock.schedule_once(self.switch_congrats, 30)
 
     def wait_activate(self, *args):
@@ -1001,7 +1030,7 @@ class BallScreen(Screen):
             Color(.7,.7,1,1)
             Ellipse(pos= (self.center_x - (self.size_ball_x/2), self.center_y - (self.size_ball_y/2)), size=(self.size_ball_x,self.size_ball_y))
             #Label(text=str(self.time),pos= (self.center_x - (101/2), self.center_y - (101/2)), font_size=24, color = (0,0,0,1))
-            #Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
+            Label(text = str(self.time2), pos= (10,10), font_size=24, color = (0,0,0,1))
         if self.size_ball_x == 200 or self.size_ball_x == 100:
             self.inc = not self.inc
         if not self.inc:
@@ -1066,6 +1095,8 @@ class WAP(App):
 
     listener = Listener()
     speech_instance = speech('Message')
+
+    user_stat = userStats()
     rpi_conn = rpi_conn()
 
     def build(self):
