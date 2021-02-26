@@ -180,15 +180,27 @@ class TimeScreen(Screen):
 
     def switch_forward(self, *args):
         if self.a.big_dict['stretch'][0]:
+            switch = True
             for k,v in self.a.big_dict.items():
                 if v[0]:
-                    self.ids.gl.remove_widget(self.widgets[k][0])
-                    self.ids.gl.remove_widget(self.widgets[k][1])
-            self.manager.current = 'config'
-            self.manager.transition.direction='left'
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                for k,v in self.a.big_dict.items():
+                    if v[0]:
+                        self.ids.gl.remove_widget(self.widgets[k][0])
+                        self.ids.gl.remove_widget(self.widgets[k][1])
+                self.manager.current = 'config'
+                self.manager.transition.direction='left'
         else:
-            self.manager.current = 'wait'
-            self.manager.transition.direction='left'
+            switch = True
+            for k,v in self.a.big_dict.items():
+                if v[0]:
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                self.manager.current = 'wait'
+                self.manager.transition.direction='left'
 
     def quit(self):
         sys.exit(0)
@@ -743,7 +755,7 @@ class TalkScreen2(Screen):
         self.ids.box.remove_widget(self.lbl_send)
         self.a.completed = True
         self.manager.current = 'wait'
-        
+
 
     #Sent a message
     def send_msg(self, *args):
@@ -938,7 +950,7 @@ class BreatheScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
-    
+
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -965,7 +977,7 @@ class BreatheScreen(Screen):
     def activity(self, *args):
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe(self.a.userID)
-        
+
         Clock.schedule_once(self.switch_congrats, 30)
 
     def wait_activate(self, *args):
