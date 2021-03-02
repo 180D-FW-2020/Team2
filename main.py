@@ -266,9 +266,16 @@ class ConfigScreen(Screen):
         self.manager.current = 'time'
         self.manager.transition.direction='right'
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_forward)
+
     def calibrate(self, *args):
-        config_stretch()
-        Clock.schedule_once(self.switch_forward)
+        self.t =threading.Thread(target=config_stretch)
+        self.t.start()
+        #config_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def ping(self, type):
         self.selected = True
@@ -478,7 +485,7 @@ class WaitScreen(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -857,7 +864,7 @@ class TalkScreen2(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -885,9 +892,16 @@ class StretchScreen(Screen):
         #Ends stretching
         self.a.user_stat.addTask([STRETCHING])
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_congrats)
+
     def activity(self, *args):
-        exercise_stretch()
-        Clock.schedule_once(self.switch_congrats)
+        self.t = threading.Thread(target = exercise_stretch)
+        self.t.start()
+        #exercise_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -903,7 +917,7 @@ class StretchScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
-        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready, and then a separate window will pop up to stretch.\nMake sure your entire body is in clear view of your webcam.'
+        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
         Clock.schedule_once(self.activity)
 
     def check_activate(self, *args):

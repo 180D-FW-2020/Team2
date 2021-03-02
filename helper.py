@@ -21,7 +21,7 @@ def activate(user_id):
     print("waiting for IMU activation")
 
 def config_stretch():
-    print("calling stretching exercise")
+    print("calling stretching config")
     os.chdir('tf-pose-estimation-master')
     cmd = 'python timed_capture.py --ref_pose=tree,squat,warrior'
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
