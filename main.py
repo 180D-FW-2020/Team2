@@ -404,9 +404,11 @@ class WaitScreen(Screen):
     def transcribe_msg(self, *args):
         self.ids.boxy.remove_widget(self.lbl_recording)
         self.ids.boxy.add_widget(self.lbl_save)
-        self.a.speech_instance.transcribe()
+        transcribed_msg = self.a.speech_instance.transcribe()
+        self.a.user_stat.addMessage(SENT, self.a.dest_user, transcribed_msg)
+        self.a.user_stat.addTask([TALKING_TO_FRIENDS])
         Clock.schedule_once(self.trans_send)
-
+        
     def record_msg(self, *args):
         print('recording...')
         self.a.speech_instance.record_msg()
