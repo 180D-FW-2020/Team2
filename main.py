@@ -419,12 +419,18 @@ class WaitScreen(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.update_screen_completed)
+    #    Clock.schedule_once(self.update_screen_completed)
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.update_screen_completed)
 
     def trans_send(self, *args):
         self.ids.boxy.remove_widget(self.lbl_save)
         self.ids.boxy.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
     def transcribe_msg(self, *args):
         self.ids.boxy.remove_widget(self.lbl_recording)
@@ -791,13 +797,19 @@ class TalkScreen2(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.switch_congrats)
+        #Clock.schedule_once(self.switch_congrats)
 
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.switch_congrats)
 
     def trans_send(self, *args):
         self.ids.box.remove_widget(self.lbl_save)
         self.ids.box.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
         #Sent message
 
