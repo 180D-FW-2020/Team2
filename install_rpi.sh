@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo "Activating conda environment"
+echo "Creating conda environment"
 conda create --name WAP --force -y
+echo "set report errors"
 conda config --set report_errors false
-eval "$(conda shell.bash hook)"
-source activate WAP
+echo "activate conda environment"
+conda activate WAP
 
 echo "install IMU packages"
 sudo apt-get install -y git i2c-tools libi2c-dev
