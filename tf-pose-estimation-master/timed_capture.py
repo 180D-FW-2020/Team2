@@ -156,13 +156,18 @@ def timer_img_capture(cap, pose):
                         
                         #Coordinates of the joints
                         ref_joint_array = get_tuple_array(skeleton)
-
-                        cv2.putText(img, "Skeleton joint count: " + str(len(ref_joint_array)) + '/' + str(18),
+                        num_joints = len(ref_joint_array)
+                        cv2.putText(img, "Skeleton joint count: " + str(num_joints) + '/' + str(18),
                             (20, 30), font,
                             1, (0, 255, 255),
                             2, cv2.LINE_AA)
                         cv2.imshow('a', skeleton_human_overlay_img)
                         cv2.waitKey(2000)
+
+                        if num_joints != 18:
+                            return False
+                        else:
+                            return True
                         
 
                 # exit loop
@@ -175,7 +180,9 @@ def timer_img_capture(cap, pose):
 
 for pose in ref_pose:
     print("Pose",pose)
-    timer_img_capture(cap, pose)
+    
+    while(timer_img_capture(cap, pose) == False):
+        pass
 
 # close the camera
 cap.release()
