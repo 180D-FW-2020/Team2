@@ -10,6 +10,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.properties import DictProperty
 from kivy.clock import Clock
+from kivy.core.window import Window
 from helper import *
 from functools import partial
 from kivy.uix.textinput import TextInput
@@ -320,6 +321,7 @@ class WaitScreen(Screen):
             Clock.schedule_once(self.switch_check, max(0, (TIME_INTERVAL*60 - self.a.time_elapsed - self.time_elapsed)))
 
     def update_screen_snooze(self, *args):
+        self.ids.img_wait.source = 'UI/face.png'
         if self.a.non_hardware:
             Clock.unschedule(self.update_screen_snooze)
             self.ids.boxy.remove_widget(self.lbl_friend_finished)
@@ -334,6 +336,7 @@ class WaitScreen(Screen):
         Clock.schedule_once(self.reschedule_activity)
 
     def update_screen_completed(self, *args):
+        self.ids.img_wait.source = 'UI/face.png'
         self.ids.boxy.remove_widget(self.lbl_send)
         self.ids.boxy.add_widget(self.lbl_normal)
         Clock.schedule_interval(self.check_for_messages, 1)
@@ -408,6 +411,7 @@ class WaitScreen(Screen):
         Clock.schedule_once(self.cor_rec, 2)
 
     def not_correct(self, *args):
+        # self.ids.boxy2.remove_widget(self.ids.img_wait)
         self.ids.boxy.remove_widget(self.lbl_speak)
         self.ids.boxy.add_widget(self.lbl_speech)
         try:
@@ -490,6 +494,7 @@ class WaitScreen(Screen):
                 Clock.schedule_interval(self.check_hardware_activate, .1)
 
     def update_screen(self,*args):
+        self.ids.img_wait.source = 'UI/face.png'
         try:
             latest_audio = max(glob.iglob('./RecAudio/'+self.sender+'*'), key=os.path.getctime)
             print(f'playing ... `{latest_audio}`' )
@@ -522,6 +527,7 @@ class WaitScreen(Screen):
                 display_msg = 'Your friend ' + self.sender + ' said:\n' + msg
                 print(display_msg)
                 self.lbl_msg = Label(text=display_msg,halign='center',font_size=20,color=(0,0,0,1))
+                self.ids.img_wait.source = 'UI/speech.png'
                 self.ids.boxy.remove_widget(self.lbl_normal)
                 self.ids.boxy.add_widget(self.lbl_msg)
             except:
@@ -647,6 +653,7 @@ class TalkScreen(Screen):
         self.ids.bl_talk.spacing = 50
         self.ids.bl_talk.add_widget(self.txtinput)
         self.txtinput.bind(on_text_validate = self.handle_input)
+        self.ids.bl2_talk.remove_widget(self.ids.img_talk)
         self.ids.lbl_talk.text = 'Tell us which friend you want to send a message to!'
 
     def snooze(self, *args):
@@ -684,14 +691,25 @@ class TalkScreen(Screen):
 
     def on_pre_enter(self, *args):
         print('entered talk screen')
+        win_width, win_height = Window.size
         if self.a.non_hardware:
+            self.ids.bl2_talk.remove_widget(self.ids.img_talk)
+            self.ids.bl2_talk.add_widget(self.ids.img_talk)
+            self.ids.bl2_talk.remove_widget(self.ids.lbl_talk)
+            self.ids.bl2_talk.add_widget(self.ids.lbl_talk)
             self.ids.lbl_talk.text='Time to talk to friends!\nActivate sending a message using the buttons below.'
             try:
+                self.ids.bl2_talk.padding = [0,0,0,win_height/4]
                 self.ids.bl_talk.add_widget(self.gl)
             except:
                 pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
+            self.ids.bl2_talk.remove_widget(self.ids.img_talk)
+            self.ids.bl2_talk.remove_widget(self.ids.lbl_talk)
+            self.ids.bl2_talk.add_widget(self.ids.img_talk)
+            self.ids.bl2_talk.add_widget(self.ids.lbl_talk)
+            self.ids.bl2_talk.padding = [0,0,0,win_height/3]
             self.ids.lbl_talk.text = 'Time to talk to friends!\nActivate sending a message using the IMU.'
             self.t1 = threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()
@@ -841,10 +859,13 @@ class StretchScreen(Screen):
         print('reminder snoozed')
 
     def transition(self, *args):
+        win_width, win_height = Window.size
+        self.ids.bl2_stretch.remove_widget(self.ids.img_stretch)
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
         self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
+        self.ids.bl2_stretch.padding = [0,0,0,win_height/3]
         Clock.schedule_once(self.activity)
 
     def check_activate(self, *args):
@@ -867,14 +888,25 @@ class StretchScreen(Screen):
 
     def on_pre_enter(self, *args):
         print('entered stretch screen')
+        win_width, win_height = Window.size
         if self.a.non_hardware:
+            self.ids.bl2_stretch.remove_widget(self.ids.img_stretch)
+            self.ids.bl2_stretch.remove_widget(self.ids.lbl_stretch)
+            self.ids.bl2_stretch.add_widget(self.ids.img_stretch)
+            self.ids.bl2_stretch.add_widget(self.ids.lbl_stretch)
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the buttons below.'
             try:
+                self.ids.bl2_stretch.padding = [0,0,0,win_height/4]
                 self.ids.bl_stretch.add_widget(self.gl)
             except:
                 pass
             Clock.schedule_once(self.snooze, 2*60)
         else:
+            self.ids.bl2_stretch.remove_widget(self.ids.img_stretch)
+            self.ids.bl2_stretch.remove_widget(self.ids.lbl_stretch)
+            self.ids.bl2_stretch.add_widget(self.ids.img_stretch)
+            self.ids.bl2_stretch.add_widget(self.ids.lbl_stretch)
+            self.ids.bl2_stretch.padding = [0,0,0,win_height/3]
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the IMU.'
             self.t1=threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()
@@ -909,9 +941,13 @@ class BreatheScreen(Screen):
 
     def activity_software2 (self, *args):
         self.manager.current = 'ball'
+        # Fix: Looks kind of weird still
+        win_width, win_height = Window.size
         self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
         self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
         self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
+        # self.ids.bl_breathe.remove_widget(self.ids.bl2_breathe)
+        # self.ids.bl_breathe.add_widget(self.ids.bl2_breathe)
 
     def activity_software(self, *args):
         if self.a.non_hardware:
@@ -919,12 +955,13 @@ class BreatheScreen(Screen):
             self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
-        self.ids.lbl_breathe.size_hint = (1, 1)
-        self.ids.bl2_breathe.padding = [0,0,0,0]
+        # self.ids.lbl_breathe.size_hint = (1, 1)
+        # self.ids.bl2_breathe.padding = [0,0,0,0]
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
-        self.ids.bl2_breathe.padding = [0,0,0,500]
+        win_width, win_height = Window.size
+        self.ids.bl2_breathe.padding = [0,0,0,win_height/3]
         self.ids.img_breathe.source = 'UI/matrix.png'
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe(self.a.userID)
@@ -950,9 +987,15 @@ class BreatheScreen(Screen):
 
     def on_pre_enter(self, *args):
         print('entered breathe screen')
+        win_width, win_height = Window.size
         if self.a.non_hardware:
+            self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
+            self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
+            self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
+            self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the buttons below.'
             try:
+                self.ids.bl2_breathe.padding = [0,0,0,win_height/4]
                 self.ids.bl_breathe.add_widget(self.gl)
             except:
                 pass
@@ -962,7 +1005,7 @@ class BreatheScreen(Screen):
             self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
             self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
             self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
-            self.ids.bl2_breathe.padding = [0,0,0,500]
+            self.ids.bl2_breathe.padding = [0,0,0,win_height/3]
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
             self.t1=threading.Thread(target=self.wait_activate, daemon=True)
             self.t1.start()

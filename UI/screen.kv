@@ -332,14 +332,17 @@
             text: "Do you wish to calibrate stretching?"
             color: 0, 0, 0, 1
             font_size: 20
+            size_hint: (1, None)
         Label:
             id: small_lbl
             text: "Note: you MUST complete this step if this is your first time running the program, ever"
             color: 0, 0, 0, 1
             font_size: 16
+            size_hint: (1, None)
         GridLayout:
             id: check_gl
             cols: 2
+            padding: [0,0,0,30]
             CheckBox:
                 group: 'config'
                 color: 0,0,0,1
@@ -384,9 +387,12 @@
             pos: self.pos
             size: self.size
             source: 'UI/g-holo.png'
-    Image:
-        id: img_wait
-        source: 'UI/face.png'
+    BoxLayout:
+        id: boxy2
+        orientation: 'vertical'
+        Image:
+            id: img_wait
+            source: 'UI/face.png'
     BoxLayout:
         id: boxy
         orientation: 'vertical'
@@ -421,9 +427,11 @@
         orientation: 'vertical'
         id: bl_stretch
         BoxLayout:
+            id: bl2_stretch
             orientation: 'vertical'
-            padding: [0, 0, 0, 350]
+            # padding: [0, 0, 0, 350]
             Image:
+                id: img_stretch
                 source: 'UI/clock.png'
                 pos_hint: {'center_x': .5}
                 size_hint: (.5, None)
@@ -447,7 +455,6 @@
         BoxLayout:
             id: bl2_breathe
             orientation: 'vertical'
-            padding: [0, 0, 0, 350]
             Image:
                 id: img_breathe
                 source: 'UI/clock.png'
@@ -477,9 +484,10 @@
         id: bl_talk
         orientation:'vertical'
         BoxLayout:
+            id: bl2_talk
             orientation: 'vertical'
-            padding: [0, 0, 0, 350]
             Image:
+                id: img_talk
                 source: 'UI/clock.png'
                 pos_hint: {'center_x': .5}
                 size_hint: (.5, None)
