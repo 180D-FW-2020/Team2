@@ -45,4 +45,5 @@ conda install -c anaconda paramiko
 pip3 install google-cloud-speech
 pip3 install playsound
 pip install -U PyObjC
+pip install git+https://github.com/ozgur/python-firebase
 conda deactivate
