@@ -528,3 +528,14 @@
             halign: 'center'
             font_size: 20
             color: 0, 0, 0, 1
+<SnoozeScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/g-holo.png'
+    Label:
+        text: 'The reminder was snoozed!'
+        halign: 'center'
+        font_size: 20
+        color: 0, 0, 0, 1
