@@ -73,16 +73,19 @@ class VersionScreen(Screen):
     def __init__(self, **kw):
         super(VersionScreen, self).__init__(**kw)
         self.a = App.get_running_app()
+        self.selected = False
 
     def ping(self, type):
+        self.selected = True
         self.a.non_hardware = type
 
     def switch(self):
-        self.manager.transition.direction='left'
-        if self.a.non_hardware:
-            self.manager.current='start'
-        else:
-            self.manager.current='raspberry'
+        if self.selected:
+            self.manager.transition.direction='left'
+            if self.a.non_hardware:
+                self.manager.current='start'
+            else:
+                self.manager.current='raspberry'
 
     def quit(self):
         sys.exit(0)
@@ -167,7 +170,7 @@ class TimeScreen(Screen):
     def __init__(self, **kw):
         super(TimeScreen, self).__init__(**kw)
         self.a = App.get_running_app()
-        self.widgets = {'stretch': [], 'breathe': [], 'talk': []}
+        self.widgets = {'stretch': [], 'breathe': [], 'talk': [], 'mood' : []}
         for k, v in self.widgets.items():
             self.make_selection(k)
 
@@ -184,15 +187,27 @@ class TimeScreen(Screen):
 
     def switch_forward(self, *args):
         if self.a.big_dict['stretch'][0]:
+            switch = True
             for k,v in self.a.big_dict.items():
                 if v[0]:
-                    self.ids.gl.remove_widget(self.widgets[k][0])
-                    self.ids.gl.remove_widget(self.widgets[k][1])
-            self.manager.current = 'config'
-            self.manager.transition.direction='left'
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                for k,v in self.a.big_dict.items():
+                    if v[0]:
+                        self.ids.gl.remove_widget(self.widgets[k][0])
+                        self.ids.gl.remove_widget(self.widgets[k][1])
+                self.manager.current = 'config'
+                self.manager.transition.direction='left'
         else:
-            self.manager.current = 'wait'
-            self.manager.transition.direction='left'
+            switch = True
+            for k,v in self.a.big_dict.items():
+                if v[0]:
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                self.manager.current = 'wait'
+                self.manager.transition.direction='left'
 
     def quit(self):
         sys.exit(0)
@@ -204,6 +219,8 @@ class TimeScreen(Screen):
             title = 'Breathing'
         if k == 'talk':
             title = "Talking to friends"
+        if k == 'mood':
+            title = "Monitoring my mood"
 
         ck30 = CheckBox(color=(0,0,0,1), group=k)
         ck30.bind(active=partial(self.ping, k, 30))
@@ -246,6 +263,7 @@ class ConfigScreen(Screen):
         super(ConfigScreen, self).__init__(**kw)
         self.config = False
         self.img = Image(source = './UI/guidance.png')
+        self.selected = False
 
     def quit(self):
         sys.exit(0)
@@ -254,25 +272,34 @@ class ConfigScreen(Screen):
         self.manager.current = 'time'
         self.manager.transition.direction='right'
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_forward)
+
     def calibrate(self, *args):
-        config_stretch()
-        Clock.schedule_once(self.switch_forward)
+        self.t =threading.Thread(target=config_stretch)
+        self.t.start()
+        #config_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def ping(self, type):
+        self.selected = True
         self.config = type
 
     def pre_calibrate(self, *args):
-        if self.config:
-            self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
-            self.ids.small_lbl.text = 'Note: it may take a few seconds for the separate calibration window to pop up.'
-            self.ids.bl.remove_widget(self.ids.small_lbl)
-            self.ids.bl.remove_widget(self.ids.activation_gl)
-            self.ids.bl.remove_widget(self.ids.check_gl)
-            self.ids.bl.add_widget(self.img)
-            self.ids.bl.add_widget(self.ids.small_lbl)
-            Clock.schedule_once(self.calibrate)
-        else:
-            Clock.schedule_once(self.switch_forward)
+        if self.selected:
+            if self.config:
+                self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
+                self.ids.small_lbl.text = 'Note: it may take a few seconds for the separate calibration window to pop up.'
+                self.ids.bl.remove_widget(self.ids.small_lbl)
+                self.ids.bl.remove_widget(self.ids.activation_gl)
+                self.ids.bl.remove_widget(self.ids.check_gl)
+                self.ids.bl.add_widget(self.img)
+                self.ids.bl.add_widget(self.ids.small_lbl)
+                Clock.schedule_once(self.calibrate)
+            else:
+                Clock.schedule_once(self.switch_forward)
 
     def switch_forward(self, *args):
         self.manager.current = 'wait'
@@ -400,12 +427,18 @@ class WaitScreen(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.update_screen_completed)
+    #    Clock.schedule_once(self.update_screen_completed)
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.update_screen_completed)
 
     def trans_send(self, *args):
         self.ids.boxy.remove_widget(self.lbl_save)
         self.ids.boxy.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
     def transcribe_msg(self, *args):
         self.ids.boxy.remove_widget(self.lbl_recording)
@@ -469,7 +502,7 @@ class WaitScreen(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -647,6 +680,8 @@ class CheckScreen(Screen):
         elif self.a.index == 'breathe':
             self.a.index = 'talk'
         elif self.a.index == 'talk':
+            self.a.index = 'mood'
+        elif self.a.index == 'mood':
             self.a.index = 'stretch'
             self.a.immediate = False
             self.a.cur_time += TIME_INTERVAL
@@ -658,6 +693,87 @@ class CheckScreen(Screen):
                 Clock.schedule_once(self.switch_wait)
         else:
             Clock.schedule_once(self.switch_wait)
+
+class MoodScreen(Screen):
+    def __init__(self, **kw):
+        super(MoodScreen, self).__init__(**kw)
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.activity)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.snooze)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
+        self.a = App.get_running_app()
+
+    def switch_congrats(self, *args):
+        self.a.completed = True
+        self.manager.current = 'wait'
+        self.ids.img_mood.source = 'UI/clock.png'
+
+    def snooze(self, *args):
+        if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
+            self.ids.bl_mood.remove_widget(self.gl)
+        #self.a.index = 'stretch'
+    #    self.a.immediate = False
+    #    self.a.cur_time += TIME_INTERVAL
+        self.manager.current = 'snooze'
+        print('reminder snoozed')
+
+    def activity(self, *args):
+        if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
+            self.ids.bl_mood.remove_widget(self.gl)
+        self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+        self.ids.lbl_mood.text = 'spotify activity here!'
+        Clock.schedule_once(self.switch_congrats, 5)
+
+    def wait_activate(self, *args):
+        activate(self.a.userID)
+        self.a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if self.a.listener.activated:
+                break
+            if self.a.listener.snoozed:
+                break
+
+    def check_activate(self, *args):
+        if not self.t1.isAlive():
+            Clock.unschedule(self.check_activate)
+            if self.a.listener.activated:
+                Clock.schedule_once(self.activity)
+                self.a.listener.set_activated(False)
+            else:
+                Clock.schedule_once(self.snooze)
+                self.a.listener.set_snoozed(False)
+
+    def on_pre_enter(self, *args):
+        print('entered mood screen')
+        win_width, win_height = Window.size
+        if self.a.non_hardware:
+            self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+            self.ids.bl2_mood.add_widget(self.ids.img_mood)
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+            self.ids.lbl_mood.text='Time to input your mood!\nActivate using the buttons below.'
+            try:
+                self.ids.bl2_mood.padding = [0,0,0,win_height/4]
+                self.ids.bl_mood.add_widget(self.gl)
+            except:
+                pass
+            Clock.schedule_once(self.snooze, 2*60)
+        else:
+            self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.add_widget(self.ids.img_mood)
+            self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.padding = [0,0,0,win_height/3]
+            self.ids.lbl_mood.text='Time to input your mood!\nActivate using the IMU.'
+            self.t1=threading.Thread(target=self.wait_activate, daemon=True)
+            self.t1.start()
+            Clock.schedule_interval(self.check_activate, 0.1)
 
 class TalkScreen(Screen):
     def __init__(self, **kw):
@@ -791,13 +907,19 @@ class TalkScreen2(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.switch_congrats)
+        #Clock.schedule_once(self.switch_congrats)
 
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.switch_congrats)
 
     def trans_send(self, *args):
         self.ids.box.remove_widget(self.lbl_save)
         self.ids.box.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
         #Sent message
 
@@ -864,7 +986,7 @@ class TalkScreen2(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -892,9 +1014,16 @@ class StretchScreen(Screen):
         #Ends stretching
         self.a.user_stat.addTask([STRETCHING])
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_congrats)
+
     def activity(self, *args):
-        exercise_stretch()
-        Clock.schedule_once(self.switch_congrats)
+        self.t = threading.Thread(target = exercise_stretch)
+        self.t.start()
+        #exercise_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -1159,7 +1288,7 @@ class Root(ScreenManager):
     pass
 
 class WAP(App):
-    big_dict=DictProperty({'stretch':[False, 0],'breathe':[False, 0],'talk':[False,0]})
+    big_dict=DictProperty({'stretch':[False, 0],'breathe':[False, 0],'talk':[False,0], 'mood': [False, 0]})
 
     #for iterating through dict at set intervals
     immediate = False
