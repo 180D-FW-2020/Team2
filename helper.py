@@ -1,6 +1,9 @@
 from MQTT.sub import client_mqtt
 from MQTT.pub import PUB
-from Speech.audio_msg import speech
+try:
+    from Speech.audio_msg import speech
+except:
+    from Team2.Speech.audio_msg import speech
 import subprocess
 import os
 import time

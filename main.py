@@ -24,7 +24,10 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Speech.audio_msg import speech
+try:
+    from Speech.audio_msg import speech
+except:
+    from Team2.Speech.audio_msg import speech
 from rpi_conn import rpi_conn
 
 from Stats.stats import *
@@ -411,7 +414,7 @@ class WaitScreen(Screen):
         self.a.user_stat.addMessage(SENT, self.a.dest_user, transcribed_msg)
         self.a.user_stat.addTask([TALKING_TO_FRIENDS])
         Clock.schedule_once(self.trans_send)
-        
+
     def record_msg(self, *args):
         print('recording...')
         self.a.speech_instance.record_msg()
@@ -764,7 +767,7 @@ class TalkScreen2(Screen):
         self.ids.box.remove_widget(self.lbl_send)
         self.a.completed = True
         self.manager.current = 'wait'
-        
+
 
     #Sent a message
     def send_msg(self, *args):
@@ -1013,7 +1016,7 @@ class BreatheScreen(Screen):
         self.ids.img_breathe.source = 'UI/matrix.png'
         self.ids.lbl_breathe.text = 'Follow along with the breathing exercise on the matrix!'
         exercise_breathe(self.a.userID)
-        
+
         Clock.schedule_once(self.switch_congrats, 30)
 
     def wait_activate(self, *args):
