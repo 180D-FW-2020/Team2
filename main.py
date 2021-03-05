@@ -908,12 +908,8 @@ class StretchScreen(Screen):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_stretch.remove_widget(self.gl)
-<<<<<<< HEAD
-        self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready, and then a separate window will pop up to stretch.\nMake sure your entire body is in clear view of your webcam.'
-=======
         self.ids.lbl_stretch.text = 'Stretching activated!\n\nYou have around 30 seconds to get your area ready.\nMake sure your entire body is in clear view of your webcam.'
         self.ids.bl2_stretch.padding = [0,0,0,win_height/3]
->>>>>>> 2749ce8227ddc18be466f4daa5450a75fd6f65b7
         Clock.schedule_once(self.activity)
 
     def check_activate(self, *args):
@@ -977,11 +973,7 @@ class BreatheScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
-<<<<<<< HEAD
-    
-=======
         self.ids.img_breathe.source = 'UI/clock.png'
->>>>>>> 2749ce8227ddc18be466f4daa5450a75fd6f65b7
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -1009,13 +1001,10 @@ class BreatheScreen(Screen):
             self.ids.bl_breathe.remove_widget(self.gl)
         self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
         self.ids.lbl_breathe.text = 'Breathe with the ball on the screen.'
-<<<<<<< HEAD
         #finished breathing
         self.a.user_stat.addTask([BREATHING])
-=======
         # self.ids.lbl_breathe.size_hint = (1, 1)
         # self.ids.bl2_breathe.padding = [0,0,0,0]
->>>>>>> 2749ce8227ddc18be466f4daa5450a75fd6f65b7
         Clock.schedule_once(self.activity_software2, 3.5)
 
     def activity(self, *args):
