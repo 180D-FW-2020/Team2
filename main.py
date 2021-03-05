@@ -24,7 +24,7 @@ from playsound import playsound
 import glob
 import os
 from MQTT.pub import PUB
-from Team2.Speech.audio_msg import speech
+from Speech.audio_msg import speech
 from rpi_conn import rpi_conn
 
 from Stats.stats import *
