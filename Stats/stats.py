@@ -116,6 +116,17 @@ class userStats:
         print("Retrieved:", retrieve)
         return retrieve
 
+    def retrieveStatsDict(self, target_date):
+        retrieve = self.firebase.get(self.db_name + self.user_id, target_date)
+        if(retrieve != None):
+            key = list(retrieve.keys())[0]
+            print("Received all of user stats:", retrieve[key])
+            return retrieve[key]
+        else:
+            return None
+
+    
+
 #Should create user stat at start up
 
 # jackie = userStats('jackielam')
@@ -138,3 +149,7 @@ jackie.addMood(['angry', 'sad'], {'Never gonna give u up by rick astley': 'some 
 jackie.addMessage('Sent', 'P2', 'wassuppp')
 '''
 
+'''
+jackie = userStats('jackielam')
+print(jackie.retrieveStatsDict('03-04-2021')['Tasks'][tasks[BREATHING]])
+'''

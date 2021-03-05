@@ -1113,6 +1113,7 @@ class BallScreen(Screen):
         Clock.schedule_once(self.switch_congrats, 30)
 
 class CongratsScreen(Screen):
+
     def __init__(self, **kw):
         super(CongratsScreen, self).__init__(**kw)
         self.a = App.get_running_app()
@@ -1123,6 +1124,23 @@ class CongratsScreen(Screen):
     def on_enter(self, *args):
         congrats(self.a.userID)
         Clock.schedule_once(self.switch_screen, 5)
+
+    #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
+    def get_tasks(self,date):
+        self.ret_entry_date_dict = self.a.user_stat.retrieveStatsDict(date)
+
+        #Returns None if there is no entry or nothing was done
+        if(ret_entry_date_dict != None):
+            #The number of each task completed for given date
+            self.num_breathing = self.ret_entry_date_dict['Tasks'][tasks[BREATHING]]
+            self.num_stretching = self.ret_entry_date_dict['Tasks'][tasks[STRETCHING]]
+            self.num_talking_friends = self.ret_entry_date_dict['Tasks'][tasks[TALKING_TO_FRIENDS]]
+        #Did nothing on that day
+        else:
+            self.num_breathing = 0
+            self.num_stretching = 0
+            self.num_talking_friends = 0
+
 
 class SnoozeScreen(Screen):
     def __init__(self, **kw):
