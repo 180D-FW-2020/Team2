@@ -799,11 +799,11 @@ class TalkScreen(Screen):
         self.ids.bl_talk.spacing = 0
 
     def get_user(self, *args):
+        win_width, win_height = Window.size
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_talk.remove_widget(self.gl)
-        self.ids.bl_talk.padding = [70,70,70,70]
-        self.ids.bl_talk.spacing = 50
+        self.ids.bl_talk.padding = [70,win_height/4,70,win_height/4]
         self.ids.bl_talk.add_widget(self.txtinput)
         self.txtinput.bind(on_text_validate = self.handle_input)
         self.ids.bl2_talk.remove_widget(self.ids.img_talk)
@@ -861,6 +861,7 @@ class TalkScreen(Screen):
             self.ids.bl2_talk.remove_widget(self.ids.img_talk)
             self.ids.bl2_talk.remove_widget(self.ids.lbl_talk)
             self.ids.bl2_talk.add_widget(self.ids.img_talk)
+            self.ids.img_talk.source = 'UI/imu.png'
             self.ids.bl2_talk.add_widget(self.ids.lbl_talk)
             self.ids.bl2_talk.padding = [0,0,0,win_height/3]
             self.ids.lbl_talk.text = 'Time to talk to friends!\nActivate sending a message using the IMU.'
@@ -1083,6 +1084,7 @@ class StretchScreen(Screen):
             self.ids.bl2_stretch.remove_widget(self.ids.img_stretch)
             self.ids.bl2_stretch.remove_widget(self.ids.lbl_stretch)
             self.ids.bl2_stretch.add_widget(self.ids.img_stretch)
+            self.ids.img_stretch.source = 'UI/imu.png'
             self.ids.bl2_stretch.add_widget(self.ids.lbl_stretch)
             self.ids.bl2_stretch.padding = [0,0,0,win_height/3]
             self.ids.lbl_stretch.text='Time to stretch!\nActivate using the IMU.'
@@ -1187,6 +1189,7 @@ class BreatheScreen(Screen):
             self.ids.bl2_breathe.remove_widget(self.ids.img_breathe)
             self.ids.bl2_breathe.remove_widget(self.ids.lbl_breathe)
             self.ids.bl2_breathe.add_widget(self.ids.img_breathe)
+            self.ids.img_breathe.source = 'UI/imu.png'
             self.ids.bl2_breathe.add_widget(self.ids.lbl_breathe)
             self.ids.bl2_breathe.padding = [0,0,0,win_height/3]
             self.ids.lbl_breathe.text='Time to breathe!\nActivate using the IMU.'
