@@ -1,9 +1,12 @@
 import sys
 import time
+from datetime import datetime
 from kivy.app import App
 from kivy.app import Widget
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition, SlideTransition
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
+import matplotlib.pyplot as plt
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -1352,10 +1355,16 @@ class CongratsScreen(Screen):
         self.a = App.get_running_app()
 
     def switch_screen(self, *args):
+        self.ids.bl_bar.remove_widget(self.graph)
         self.manager.current = 'wait'
 
     def on_enter(self, *args):
+        # bar = ObjectProperty(None)
         congrats(self.a.userID)
+        self.get_tasks(datetime.today().strftime('%m-%d-%Y'))
+        self.plot_bar()
+        self.graph = FigureCanvasKivyAgg(plt.gcf())
+        self.ids.bl_bar.add_widget(self.graph)
         Clock.schedule_once(self.switch_screen, 5)
 
     #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
@@ -1363,7 +1372,7 @@ class CongratsScreen(Screen):
         self.ret_entry_date_dict = self.a.user_stat.retrieveStatsDict(date)
 
         #Returns None if there is no entry or nothing was done
-        if(ret_entry_date_dict != None):
+        if(self.ret_entry_date_dict != None):
             #The number of each task completed for given date
             self.num_breathing = self.ret_entry_date_dict['Tasks'][tasks[BREATHING]]
             self.num_stretching = self.ret_entry_date_dict['Tasks'][tasks[STRETCHING]]
@@ -1373,6 +1382,24 @@ class CongratsScreen(Screen):
             self.num_breathing = 0
             self.num_stretching = 0
             self.num_talking_friends = 0
+
+    def plot_bar(self):
+        fig, ax = plt.subplots()
+
+        fig.patch.set_facecolor('#C6E9C5')
+        ax.patch.set_facecolor('#F2F5FC')
+        x = ['Guided breathing', 'Stretching', 'Talking with friends']
+        y = [self.num_breathing, self.num_stretching, self.num_talking_friends]
+
+        plt.bar(x,y, label='Bars1', color='green')
+        # img = plt.imread('UI/g-holo.png')
+        # plt.imshow(img, origin='upper', extent=[-2,4,-2,4])
+
+        plt.xlabel('Task Name')
+        plt.ylabel('Accomplished')
+        plt.title('Task Summary for ' + datetime.today().strftime('%m-%d-%Y'), fontsize=24, y=1.05)
+        # plt.legend()
+
 
 class SnoozeScreen(Screen):
     def __init__(self, **kw):
