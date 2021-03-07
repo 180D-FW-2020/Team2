@@ -778,6 +778,7 @@ class MoodScreen(Screen):
         self.ids.bl2_mood.remove_widget(self.spotify_gl)
         self.ids.bl2_mood.remove_widget(self.btn_submit3)
         self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+        #TODO: add stats stuffs here
 
         self.spinner.text = 'Genre'
         self.mood_spinner.text = 'Mood'
