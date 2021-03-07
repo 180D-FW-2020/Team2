@@ -47,13 +47,20 @@ class moodTracker:
         enter_button = browser.find_element_by_class_name("btn-green")
         enter_button.click()
 
-        scope_button = browser.find_element_by_xpath("//*[contains(text(), 'playlist-modify-private')]") # locate the dropdown elem
-        browser.implicitly_wait(30)
-        scope_button.click()
+        try:
+            scope_button = browser.find_element_by_xpath("//*[contains(text(), 'playlist-modify-private')]") # locate the dropdown elem
+            browser.implicitly_wait(30)
+            scope_button.click()
+        except:
+            print("defaulting to private scope")
 
-        request_button = browser.find_element_by_class_name("btn-primary")
-        browser.implicitly_wait(10)
-        request_button.click()
+        try:
+            request_button = browser.find_element_by_class_name("btn-primary")
+            browser.implicitly_wait(10)
+            request_button.click()
+        except:
+            print("error requesting button")
+
         
         try:
             element_present = EC.presence_of_element_located((By.ID, 'oauth-input'))
