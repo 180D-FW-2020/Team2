@@ -1154,6 +1154,10 @@ class CongratsScreen(Screen):
             self.num_talking_friends = 0
 
     def plot_bar(self):
+        fig, ax = plt.subplots()
+
+        fig.patch.set_facecolor('#C6E9C5')
+        ax.patch.set_facecolor('#F2F5FC')
         x = ['Guided breathing', 'Stretching', 'Talking with friends']
         y = [self.num_breathing, self.num_stretching, self.num_talking_friends]
 
