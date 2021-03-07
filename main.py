@@ -9,6 +9,7 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.properties import DictProperty
+from kivy.uix.spinner import Spinner
 from kivy.clock import Clock
 from kivy.core.window import Window
 from helper import *
@@ -31,6 +32,8 @@ except:
 from rpi_conn import rpi_conn
 
 from Stats.stats import *
+from Mood_Tracker.mood_tracker_spotify_gen import *
+
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -705,29 +708,126 @@ class MoodScreen(Screen):
         self.gl.add_widget(self.btn_snooze)
         self.gl.add_widget(self.btn_submit)
         self.a = App.get_running_app()
+        self.init_moodtracker()
+
+    def init_moodtracker(self):
+        self.moodTracker = moodTracker()
+        max = 10
+
+        self.moodTracker.access_token = self.moodTracker.get_access_token()
+        self.moodTracker.genre_list = self.moodTracker.get_genre_list(self.moodTracker.access_token)
+        self.spinner = Spinner(text = 'Genre', values = self.moodTracker.genre_list, size_hint_x = .2)
+        self.spinner.dropdown_cls.max_height = self.spinner.height* max + max * 4
+
+        self.mood_spinner = Spinner(text = 'Mood', values = ('Happy/Excited', 'Angry/Frustrated', 'Unmotivated', 'Disappointed', 'Sad', 'Stressed'), size_hint_x = .2)
+        self.mood_spinner.dropdown_cls.max_height = self.mood_spinner.height* max + max * 4
+
+        self.genre_label = Label(text = 'What genre do you want to listen to?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.energy_label = Label(text = 'How much ENERGY do you have today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.pos_label = Label(text = 'How POSITIVE do you feel today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.pop_label = Label(text = 'How POPULAR would you like your songs to be on a scale of 1-10', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.dance_label = Label(text = 'How much would you like to DANCE today on a scale of 1-10?',size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.mood_label = Label(text = 'Select your current mood',size_hint_x = .8, font_size=18, color=(0,0,0,1))
+       
+        self.energy_input = TextInput(multiline=False, size_hint_x = .2, font_size = 18)
+        self.pos_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
+        self.pop_input = TextInput(multiline=False,size_hint_x = .2, font_size = 18)
+        self.dance_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
+        
+        self.input_gl = GridLayout(cols=2, padding = [10,0,10,0])
+        self.input_gl.add_widget(self.genre_label)
+        self.input_gl.add_widget(self.spinner)
+        self.input_gl.add_widget(self.energy_label)
+        self.input_gl.add_widget(self.energy_input)
+        self.input_gl.add_widget(self.pos_label)
+        self.input_gl.add_widget(self.pos_input)
+        self.input_gl.add_widget(self.pop_label)
+        self.input_gl.add_widget(self.pop_input)
+        self.input_gl.add_widget(self.dance_label)
+        self.input_gl.add_widget(self.dance_input)
+        self.input_gl.add_widget(self.mood_label)
+        self.input_gl.add_widget(self.mood_spinner)
+
+        self.btn_submit2 = Button(text='Submit', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit2.bind(on_release=self.validate_input)
+        self.btn_snooze2 = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze2.bind(on_release=self.snooze)
+        self.gl2 = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl2.add_widget(self.btn_snooze2)
+        self.gl2.add_widget(self.btn_submit2)
+
+        self.spotify_gl = GridLayout(cols=2, padding = [10,10,10,10])
+        self.user_label = Label(text = 'Enter your Spotify username if you wish to make a playlist\nNote: leave blank if you don\'t want to link your Spotify',size_hint_x = .7, font_size=18, color=(0,0,0,1))
+        self.playlist_label = Label(text = 'Playlist name',size_hint_x = .7, font_size=18, color=(0,0,0,1))
+        self.user_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
+        self.playlist_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
+        self.btn_submit3 = Button(text='Submit', size_hint = (.5, .5), pos_hint= {'center_x': .5}, background_color=(.7,.7,1,1))
+        self.btn_submit3.bind(on_release=self.make_playlist)
+        self.spotify_gl.add_widget(self.user_label)
+        self.spotify_gl.add_widget(self.user_input)
+        self.spotify_gl.add_widget(self.playlist_label)
+        self.spotify_gl.add_widget(self.playlist_input)
+
 
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
         self.ids.img_mood.source = 'UI/clock.png'
+        self.song_bl.clear_widgets()
+        self.ids.bl2_mood.remove_widget(self.song_bl)
+        self.ids.bl2_mood.remove_widget(self.spotify_gl)
+        self.ids.bl2_mood.remove_widget(self.btn_submit3)
+        self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+
+        self.spinner.text = 'Genre'
+        self.mood_spinner.text = 'Mood'
+        self.energy_input.text = ''
+        self.pos_input.text = ''
+        self.pop_input.text = ''
+        self.dance_input.text = ''
+        self.user_input.text = ''
+        self.playlist_input.text = ''
 
     def snooze(self, *args):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_mood.remove_widget(self.gl)
-        #self.a.index = 'stretch'
-    #    self.a.immediate = False
-    #    self.a.cur_time += TIME_INTERVAL
         self.manager.current = 'snooze'
         print('reminder snoozed')
+
+    def make_playlist(self, *arg):
+        if self.user_input.text != '' and self.playlist_input.text != '':
+            self.moodTracker.token = self.moodTracker.get_token(self.user_input.text)
+            self.moodTracker.playlist_id = self.moodTracker.create_playlist(self.user_input.text, self.moodTracker.token, self.moodTracker.uris, self.playlist_input.text)
+            print('make playlist here')
+        Clock.schedule_once(self.switch_congrats)
+    
+    def display_songs(self, *args):
+        self.song_bl = BoxLayout(orientation = 'vertical', padding = [10,10,10,10])
+        self.song_bl.add_widget(Label(text = 'Recommended songs:',  font_size=18, color=(0,0,0,1)))
+        for i in self.moodTracker.song_dict.keys():
+            self.song_bl.add_widget(Label(text = i,  font_size=18, color=(0,0,0,1)))
+        self.ids.bl2_mood.add_widget(self.song_bl)
+        self.ids.bl2_mood.add_widget(self.spotify_gl)
+        self.ids.bl2_mood.add_widget(self.btn_submit3)
+
+    def validate_input(self, *args):
+        if int(self.energy_input.text) > 0 and int(self.energy_input.text) <= 10 and int(self.pos_input.text) > 0 and int(self.pos_input.text) <= 10 and int(self.pop_input.text) > 0 and int(self.pop_input.text) <= 10 and int(self.dance_input.text) > 0 and int(self.dance_input.text) <= 10 and self.spinner.text != 'Genre' and self.mood_spinner.text != 'Mood':
+            self.ids.bl2_mood.remove_widget(self.input_gl)
+            self.ids.bl2_mood.remove_widget(self.gl2)
+            self.moodTracker.uris, self.moodTracker.song_dict = self.moodTracker.get_song_recs(self.moodTracker.access_token, self.spinner.text, int(self.dance_input.text), int(self.energy_input.text), int(self.pop_input.text), int(self.pos_input.text))
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            Clock.schedule_once(self.display_songs)
 
     def activity(self, *args):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)
             self.ids.bl_mood.remove_widget(self.gl)
         self.ids.bl2_mood.remove_widget(self.ids.img_mood)
-        self.ids.lbl_mood.text = 'spotify activity here!'
-        Clock.schedule_once(self.switch_congrats, 5)
+        self.ids.lbl_mood.text = 'Input how you\'re feeling here to get a playlist that matches your mood!'
+        self.ids.bl2_mood.padding = [0,0,0,0]
+        self.ids.bl2_mood.add_widget(self.input_gl)
+        self.ids.bl2_mood.add_widget(self.gl2)
 
     def wait_activate(self, *args):
         activate(self.a.userID)
@@ -1272,7 +1372,6 @@ class CongratsScreen(Screen):
             self.num_breathing = 0
             self.num_stretching = 0
             self.num_talking_friends = 0
-
 
 class SnoozeScreen(Screen):
     def __init__(self, **kw):

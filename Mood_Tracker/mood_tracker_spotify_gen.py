@@ -35,7 +35,10 @@ class moodTracker:
 
     def get_token(self, user_id):
         token = ""
-        browser = webdriver.Chrome()
+        try:
+          browser = webdriver.Chrome()
+        except:
+            browser = webdriver.Chrome(executable_path=r"C:\Users\isabe\Downloads\chromedriver.exe")
         browser.get("https://developer.spotify.com/console/post-playlists/")
         
         id_field = browser.find_element_by_name("user_id")
@@ -242,5 +245,5 @@ class moodTracker:
 
         
 '''Run program by just calling run_task()'''
-moodTracker = moodTracker()
-moodTracker.run_task()
+#moodTracker = moodTracker()
+#moodTracker.run_task()
