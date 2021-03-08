@@ -15,6 +15,8 @@
         name: 'wait'
     CheckScreen:
         name: 'check'
+    MoodScreen:
+        name: 'mood'
     StretchScreen:
         name: 'stretch'
     TalkScreen:
@@ -238,7 +240,7 @@
             cols: 2
             padding: [100,0,0,100]
             Label:
-                text: "I want to work on stretching more"
+                text: "I want to work on stretching"
                 font_size: 18
                 color: 0, 0, 0, 1
             CheckBox:
@@ -257,6 +259,13 @@
                 color: 0, 0, 0, 1
             CheckBox:
                 on_active:root.ping('talk', self.active)
+                color: 0, 0, 0, 1
+            Label:
+                text: "I want to monitor my mood"
+                font_size: 18
+                color: 0, 0, 0, 1
+            CheckBox:
+                on_active:root.ping('mood', self.active)
                 color: 0, 0, 0, 1
         GridLayout:
             cols: 2
@@ -399,7 +408,6 @@
         id: boxy
         orientation: 'vertical'
         padding: [0, 300, 0, 0]
-
 <CheckScreen>:
     canvas.before:
         Rectangle:
@@ -419,6 +427,31 @@
             halign: 'center'
             font_size: 20
             color: 0, 0, 0, 1
+<MoodScreen>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'UI/g-holo.png'
+    BoxLayout:
+        orientation: 'vertical'
+        id: bl_mood
+        BoxLayout:
+            id: bl2_mood
+            orientation: 'vertical'
+            Image:
+                id: img_mood
+                source: 'UI/clock.png'
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
+            Label:
+                id: lbl_mood
+                text: 'Time to input your mood!\nActivate the exercise using the IMU.'
+                font_size: 20
+                halign: 'center'
+                color: 0, 0, 0, 1
+                pos_hint: {'center_x': .5}
+                size_hint: (.5, None)
 <StretchScreen>:
     canvas.before:
         Rectangle:
