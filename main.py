@@ -1385,6 +1385,11 @@ class CongratsScreen(Screen):
             self.num_stretching = 0
             self.num_talking_friends = 0
 
+    def get_moods_songs(self,date):
+        self.ret_entry_date_dict = self.a.user_stat.retrieveStatsDict(date)
+        self.moods_list = self.ret_entry_date_dict['Mood']['Moods']
+        self.songs_list = self.ret_entry_date_dict['Mood']['Songs']
+        
     def plot_bar(self):
         fig, ax = plt.subplots()
 
