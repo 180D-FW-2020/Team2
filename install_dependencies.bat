@@ -28,7 +28,7 @@ conda create --name WAP --force -y ^
 && conda install -y --satisfied-skip-solve -c conda-forge psutil ^
 
 && echo "installing pycocotools " ^
-&& call pip install pycocotools ^
+&& conda install -y -c conda-forge pycocotools ^
 
 && echo "installing requests " ^
 && conda install -y --satisfied-skip-solve -c conda-forge requests ^

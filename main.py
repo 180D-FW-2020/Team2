@@ -12,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.properties import DictProperty
+from kivy.uix.spinner import Spinner
 from kivy.clock import Clock
 from kivy.core.window import Window
 from helper import *
@@ -34,6 +35,8 @@ except:
 from rpi_conn import rpi_conn
 
 from Stats.stats import *
+from Mood_Tracker.mood_tracker_spotify_gen import *
+
 
 Builder.load_file('./UI/screen.kv')
 TIME_INTERVAL = 30
@@ -76,16 +79,19 @@ class VersionScreen(Screen):
     def __init__(self, **kw):
         super(VersionScreen, self).__init__(**kw)
         self.a = App.get_running_app()
+        self.selected = False
 
     def ping(self, type):
+        self.selected = True
         self.a.non_hardware = type
 
     def switch(self):
-        self.manager.transition.direction='left'
-        if self.a.non_hardware:
-            self.manager.current='start'
-        else:
-            self.manager.current='raspberry'
+        if self.selected:
+            self.manager.transition.direction='left'
+            if self.a.non_hardware:
+                self.manager.current='start'
+            else:
+                self.manager.current='raspberry'
 
     def quit(self):
         sys.exit(0)
@@ -170,7 +176,7 @@ class TimeScreen(Screen):
     def __init__(self, **kw):
         super(TimeScreen, self).__init__(**kw)
         self.a = App.get_running_app()
-        self.widgets = {'stretch': [], 'breathe': [], 'talk': []}
+        self.widgets = {'stretch': [], 'breathe': [], 'talk': [], 'mood' : []}
         for k, v in self.widgets.items():
             self.make_selection(k)
 
@@ -187,15 +193,27 @@ class TimeScreen(Screen):
 
     def switch_forward(self, *args):
         if self.a.big_dict['stretch'][0]:
+            switch = True
             for k,v in self.a.big_dict.items():
                 if v[0]:
-                    self.ids.gl.remove_widget(self.widgets[k][0])
-                    self.ids.gl.remove_widget(self.widgets[k][1])
-            self.manager.current = 'config'
-            self.manager.transition.direction='left'
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                for k,v in self.a.big_dict.items():
+                    if v[0]:
+                        self.ids.gl.remove_widget(self.widgets[k][0])
+                        self.ids.gl.remove_widget(self.widgets[k][1])
+                self.manager.current = 'config'
+                self.manager.transition.direction='left'
         else:
-            self.manager.current = 'wait'
-            self.manager.transition.direction='left'
+            switch = True
+            for k,v in self.a.big_dict.items():
+                if v[0]:
+                    if v[1] == 0:
+                        switch = False
+            if switch:
+                self.manager.current = 'wait'
+                self.manager.transition.direction='left'
 
     def quit(self):
         sys.exit(0)
@@ -207,6 +225,8 @@ class TimeScreen(Screen):
             title = 'Breathing'
         if k == 'talk':
             title = "Talking to friends"
+        if k == 'mood':
+            title = "Monitoring my mood"
 
         ck30 = CheckBox(color=(0,0,0,1), group=k)
         ck30.bind(active=partial(self.ping, k, 30))
@@ -249,6 +269,7 @@ class ConfigScreen(Screen):
         super(ConfigScreen, self).__init__(**kw)
         self.config = False
         self.img = Image(source = './UI/guidance.png')
+        self.selected = False
 
     def quit(self):
         sys.exit(0)
@@ -257,25 +278,34 @@ class ConfigScreen(Screen):
         self.manager.current = 'time'
         self.manager.transition.direction='right'
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_forward)
+
     def calibrate(self, *args):
-        config_stretch()
-        Clock.schedule_once(self.switch_forward)
+        self.t =threading.Thread(target=config_stretch)
+        self.t.start()
+        #config_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def ping(self, type):
+        self.selected = True
         self.config = type
 
     def pre_calibrate(self, *args):
-        if self.config:
-            self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
-            self.ids.small_lbl.text = 'Note: it may take a few seconds for the separate calibration window to pop up.'
-            self.ids.bl.remove_widget(self.ids.small_lbl)
-            self.ids.bl.remove_widget(self.ids.activation_gl)
-            self.ids.bl.remove_widget(self.ids.check_gl)
-            self.ids.bl.add_widget(self.img)
-            self.ids.bl.add_widget(self.ids.small_lbl)
-            Clock.schedule_once(self.calibrate)
-        else:
-            Clock.schedule_once(self.switch_forward)
+        if self.selected:
+            if self.config:
+                self.ids.big_lbl.text = 'Mimic the following poses when prompted! Make sure your entire body is in view.'
+                self.ids.small_lbl.text = 'Note: it may take a few seconds for the separate calibration window to pop up.'
+                self.ids.bl.remove_widget(self.ids.small_lbl)
+                self.ids.bl.remove_widget(self.ids.activation_gl)
+                self.ids.bl.remove_widget(self.ids.check_gl)
+                self.ids.bl.add_widget(self.img)
+                self.ids.bl.add_widget(self.ids.small_lbl)
+                Clock.schedule_once(self.calibrate)
+            else:
+                Clock.schedule_once(self.switch_forward)
 
     def switch_forward(self, *args):
         self.manager.current = 'wait'
@@ -403,12 +433,18 @@ class WaitScreen(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.update_screen_completed)
+    #    Clock.schedule_once(self.update_screen_completed)
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.update_screen_completed)
 
     def trans_send(self, *args):
         self.ids.boxy.remove_widget(self.lbl_save)
         self.ids.boxy.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
     def transcribe_msg(self, *args):
         self.ids.boxy.remove_widget(self.lbl_recording)
@@ -472,7 +508,7 @@ class WaitScreen(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -650,6 +686,8 @@ class CheckScreen(Screen):
         elif self.a.index == 'breathe':
             self.a.index = 'talk'
         elif self.a.index == 'talk':
+            self.a.index = 'mood'
+        elif self.a.index == 'mood':
             self.a.index = 'stretch'
             self.a.immediate = False
             self.a.cur_time += TIME_INTERVAL
@@ -661,6 +699,185 @@ class CheckScreen(Screen):
                 Clock.schedule_once(self.switch_wait)
         else:
             Clock.schedule_once(self.switch_wait)
+
+class MoodScreen(Screen):
+    def __init__(self, **kw):
+        super(MoodScreen, self).__init__(**kw)
+        self.btn_submit = Button(text='Activate', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit.bind(on_release=self.activity)
+        self.btn_snooze = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze.bind(on_release=self.snooze)
+        self.gl = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl.add_widget(self.btn_snooze)
+        self.gl.add_widget(self.btn_submit)
+        self.a = App.get_running_app()
+        self.init_moodtracker()
+
+    def init_moodtracker(self):
+        self.moodTracker = moodTracker()
+        max = 10
+
+        self.moodTracker.access_token = self.moodTracker.get_access_token()
+        self.moodTracker.genre_list = self.moodTracker.get_genre_list(self.moodTracker.access_token)
+        self.spinner = Spinner(text = 'Genre', values = self.moodTracker.genre_list, size_hint_x = .2)
+        self.spinner.dropdown_cls.max_height = self.spinner.height* max + max * 4
+
+        self.mood_spinner = Spinner(text = 'Mood', values = ('Happy/Excited', 'Angry/Frustrated', 'Unmotivated', 'Disappointed', 'Sad', 'Stressed'), size_hint_x = .2)
+        self.mood_spinner.dropdown_cls.max_height = self.mood_spinner.height* max + max * 4
+
+        self.genre_label = Label(text = 'What genre do you want to listen to?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.energy_label = Label(text = 'How much ENERGY do you have today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.pos_label = Label(text = 'How POSITIVE do you feel today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.pop_label = Label(text = 'How POPULAR would you like your songs to be on a scale of 1-10', size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.dance_label = Label(text = 'How much would you like to DANCE today on a scale of 1-10?',size_hint_x = .8, font_size=18, color=(0,0,0,1))
+        self.mood_label = Label(text = 'Select your current mood',size_hint_x = .8, font_size=18, color=(0,0,0,1))
+       
+        self.energy_input = TextInput(multiline=False, size_hint_x = .2, font_size = 18)
+        self.pos_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
+        self.pop_input = TextInput(multiline=False,size_hint_x = .2, font_size = 18)
+        self.dance_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
+        
+        self.input_gl = GridLayout(cols=2, padding = [10,0,10,0])
+        self.input_gl.add_widget(self.genre_label)
+        self.input_gl.add_widget(self.spinner)
+        self.input_gl.add_widget(self.energy_label)
+        self.input_gl.add_widget(self.energy_input)
+        self.input_gl.add_widget(self.pos_label)
+        self.input_gl.add_widget(self.pos_input)
+        self.input_gl.add_widget(self.pop_label)
+        self.input_gl.add_widget(self.pop_input)
+        self.input_gl.add_widget(self.dance_label)
+        self.input_gl.add_widget(self.dance_input)
+        self.input_gl.add_widget(self.mood_label)
+        self.input_gl.add_widget(self.mood_spinner)
+
+        self.btn_submit2 = Button(text='Submit', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_submit2.bind(on_release=self.validate_input)
+        self.btn_snooze2 = Button(text='Snooze', font_size=18, background_color=(.7,.7,1,1))
+        self.btn_snooze2.bind(on_release=self.snooze)
+        self.gl2 = GridLayout(cols=2, height=125, size_hint_y=None)
+        self.gl2.add_widget(self.btn_snooze2)
+        self.gl2.add_widget(self.btn_submit2)
+
+        self.spotify_gl = GridLayout(cols=2, padding = [10,10,10,10])
+        self.user_label = Label(text = 'Enter your Spotify username if you wish to make a playlist\nNote: leave blank if you don\'t want to link your Spotify',size_hint_x = .7, font_size=18, color=(0,0,0,1))
+        self.playlist_label = Label(text = 'Playlist name',size_hint_x = .7, font_size=18, color=(0,0,0,1))
+        self.user_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
+        self.playlist_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
+        self.btn_submit3 = Button(text='Submit', size_hint = (.5, .5), pos_hint= {'center_x': .5}, background_color=(.7,.7,1,1))
+        self.btn_submit3.bind(on_release=self.make_playlist)
+        self.spotify_gl.add_widget(self.user_label)
+        self.spotify_gl.add_widget(self.user_input)
+        self.spotify_gl.add_widget(self.playlist_label)
+        self.spotify_gl.add_widget(self.playlist_input)
+
+
+    def switch_congrats(self, *args):
+        self.a.completed = True
+        self.manager.current = 'wait'
+        self.ids.img_mood.source = 'UI/clock.png'
+        self.song_bl.clear_widgets()
+        self.ids.bl2_mood.remove_widget(self.song_bl)
+        self.ids.bl2_mood.remove_widget(self.spotify_gl)
+        self.ids.bl2_mood.remove_widget(self.btn_submit3)
+        self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+        #TODO: add stats stuffs here
+
+        self.spinner.text = 'Genre'
+        self.mood_spinner.text = 'Mood'
+        self.energy_input.text = ''
+        self.pos_input.text = ''
+        self.pop_input.text = ''
+        self.dance_input.text = ''
+        self.user_input.text = ''
+        self.playlist_input.text = ''
+
+    def snooze(self, *args):
+        if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
+            self.ids.bl_mood.remove_widget(self.gl)
+        self.manager.current = 'snooze'
+        print('reminder snoozed')
+
+    def make_playlist(self, *arg):
+        if self.user_input.text != '' and self.playlist_input.text != '':
+            self.moodTracker.token = self.moodTracker.get_token(self.user_input.text)
+            self.moodTracker.playlist_id = self.moodTracker.create_playlist(self.user_input.text, self.moodTracker.token, self.moodTracker.uris, self.playlist_input.text)
+            print('make playlist here')
+        Clock.schedule_once(self.switch_congrats)
+    
+    def display_songs(self, *args):
+        self.song_bl = BoxLayout(orientation = 'vertical', padding = [10,10,10,10])
+        self.song_bl.add_widget(Label(text = 'Recommended songs:',  font_size=18, color=(0,0,0,1)))
+        for i in self.moodTracker.song_dict.keys():
+            self.song_bl.add_widget(Label(text = i,  font_size=18, color=(0,0,0,1)))
+        self.ids.bl2_mood.add_widget(self.song_bl)
+        self.ids.bl2_mood.add_widget(self.spotify_gl)
+        self.ids.bl2_mood.add_widget(self.btn_submit3)
+
+    def validate_input(self, *args):
+        if int(self.energy_input.text) > 0 and int(self.energy_input.text) <= 10 and int(self.pos_input.text) > 0 and int(self.pos_input.text) <= 10 and int(self.pop_input.text) > 0 and int(self.pop_input.text) <= 10 and int(self.dance_input.text) > 0 and int(self.dance_input.text) <= 10 and self.spinner.text != 'Genre' and self.mood_spinner.text != 'Mood':
+            self.ids.bl2_mood.remove_widget(self.input_gl)
+            self.ids.bl2_mood.remove_widget(self.gl2)
+            self.moodTracker.uris, self.moodTracker.song_dict = self.moodTracker.get_song_recs(self.moodTracker.access_token, self.spinner.text, int(self.dance_input.text), int(self.energy_input.text), int(self.pop_input.text), int(self.pos_input.text))
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            Clock.schedule_once(self.display_songs)
+
+    def activity(self, *args):
+        if self.a.non_hardware:
+            Clock.unschedule(self.snooze)
+            self.ids.bl_mood.remove_widget(self.gl)
+        self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+        self.ids.lbl_mood.text = 'Input how you\'re feeling here to get a playlist that matches your mood!'
+        self.ids.bl2_mood.padding = [0,0,0,0]
+        self.ids.bl2_mood.add_widget(self.input_gl)
+        self.ids.bl2_mood.add_widget(self.gl2)
+
+    def wait_activate(self, *args):
+        activate(self.a.userID)
+        self.a.listener.set_activated(False)
+        t_now = time.time()
+        while time.time() < (t_now +2*60):
+            if self.a.listener.activated:
+                break
+            if self.a.listener.snoozed:
+                break
+
+    def check_activate(self, *args):
+        if not self.t1.isAlive():
+            Clock.unschedule(self.check_activate)
+            if self.a.listener.activated:
+                Clock.schedule_once(self.activity)
+                self.a.listener.set_activated(False)
+            else:
+                Clock.schedule_once(self.snooze)
+                self.a.listener.set_snoozed(False)
+
+    def on_pre_enter(self, *args):
+        print('entered mood screen')
+        win_width, win_height = Window.size
+        if self.a.non_hardware:
+            self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+            self.ids.bl2_mood.add_widget(self.ids.img_mood)
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+            self.ids.lbl_mood.text='Time to input your mood!\nActivate using the buttons below.'
+            try:
+                self.ids.bl2_mood.padding = [0,0,0,win_height/4]
+                self.ids.bl_mood.add_widget(self.gl)
+            except:
+                pass
+            Clock.schedule_once(self.snooze, 2*60)
+        else:
+            self.ids.bl2_mood.remove_widget(self.ids.img_mood)
+            self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.add_widget(self.ids.img_mood)
+            self.ids.bl2_mood.add_widget(self.ids.lbl_mood)
+            self.ids.bl2_mood.padding = [0,0,0,win_height/3]
+            self.ids.lbl_mood.text='Time to input your mood!\nActivate using the IMU.'
+            self.t1=threading.Thread(target=self.wait_activate, daemon=True)
+            self.t1.start()
+            Clock.schedule_interval(self.check_activate, 0.1)
 
 class TalkScreen(Screen):
     def __init__(self, **kw):
@@ -794,13 +1011,19 @@ class TalkScreen2(Screen):
         client.loop_start()
         pub.publish_file(client, txt_path)
         client.disconnect()
-        Clock.schedule_once(self.switch_congrats)
+        #Clock.schedule_once(self.switch_congrats)
 
+    def trans_send_switch(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.trans_send_switch)
+            Clock.schedule_once(self.switch_congrats)
 
     def trans_send(self, *args):
         self.ids.box.remove_widget(self.lbl_save)
         self.ids.box.add_widget(self.lbl_send)
-        Clock.schedule_once(self.send_msg)
+        self.t = threading.Thread(target = self.send_msg)
+        self.t.start()
+        Clock.schedule_interval(self.trans_send_switch, .1)
 
         #Sent message
 
@@ -867,7 +1090,7 @@ class TalkScreen2(Screen):
         self.lbl_speech = Label(text=msg,halign='center',font_size=20,color=(0,0,0,1))
         print(msg)
 
-        if str(guess["transcription"]).find("start recording") != -1:
+        if str(guess["transcription"]).find("recording") != -1:
             Clock.schedule_once(self.correct)
         else:
             Clock.schedule_once(self.not_correct)
@@ -895,9 +1118,16 @@ class StretchScreen(Screen):
         #Ends stretching
         self.a.user_stat.addTask([STRETCHING])
 
+    def check(self, *args):
+        if not self.t.isAlive():
+            Clock.unschedule(self.check)
+            Clock.schedule_once(self.switch_congrats)
+
     def activity(self, *args):
-        exercise_stretch()
-        Clock.schedule_once(self.switch_congrats)
+        self.t = threading.Thread(target = exercise_stretch)
+        self.t.start()
+        #exercise_stretch()
+        Clock.schedule_interval(self.check, .1)
 
     def snooze(self, *args):
         if self.a.non_hardware:
@@ -1185,7 +1415,7 @@ class Root(ScreenManager):
     pass
 
 class WAP(App):
-    big_dict=DictProperty({'stretch':[False, 0],'breathe':[False, 0],'talk':[False,0]})
+    big_dict=DictProperty({'stretch':[False, 0],'breathe':[False, 0],'talk':[False,0], 'mood': [False, 0]})
 
     #for iterating through dict at set intervals
     immediate = False
