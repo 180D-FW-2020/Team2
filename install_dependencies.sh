@@ -49,4 +49,5 @@ pip install git+https://github.com/ozgur/python-firebase
 pip install kivy-garden
 garden install graph
 pip install matplotlib==3.1.3
+garden install matplotlib
 conda deactivate
