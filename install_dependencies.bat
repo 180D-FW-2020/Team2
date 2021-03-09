@@ -77,4 +77,9 @@ conda create --name WAP --force -y ^
 && call pip install google-cloud-speech ^
 && echo "Installing playsound" ^
 && call pip install playsound ^
+&& echo "Installing kivy garden" ^
+&& call pip install kivy-garden ^
+&& call garden install graph ^
+&& echo "Installing matplotlib" ^
+&& call pip install matplotlib==3.1.3 ^
 && conda deactivate
