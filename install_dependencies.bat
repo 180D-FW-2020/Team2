@@ -82,4 +82,6 @@ conda create --name WAP --force -y ^
 && call garden install graph ^
 && echo "Installing matplotlib" ^
 && call pip install matplotlib==3.1.3 ^
+&& echo "Installing selenium" ^
+&& call pip install selenium ^
 && conda deactivate
