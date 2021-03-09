@@ -788,7 +788,10 @@ class MoodScreen(Screen):
     def switch_congrats(self, *args):
         self.a.completed = True
         self.manager.current = 'wait'
-        self.ids.img_mood.source = 'UI/clock.png'
+        try:
+            self.ids.img_mood.source = 'UI/clock.png'
+        except:
+            pass
         self.song_bl.clear_widgets()
         self.ids.bl2_mood.remove_widget(self.song_bl)
         self.ids.bl2_mood.remove_widget(self.spotify_gl)
@@ -1384,7 +1387,9 @@ class CongratsScreen(Screen):
         self.show_mood()
         self.ids.bl_bar.add_widget(self.graph)
         self.ids.bl_bar.add_widget(self.daily_mood)
-        # self.ids.bl_bar.canvas.add(Color(198, 233, 197, 1))
+        with self.ids.bl_bar.canvas.before:
+            Color(0.77, 0.91, 0.77, 1)
+            self.rect = Rectangle(size=self.ids.bl_bar.size, pos=self.ids.bl_bar.pos)
         Clock.schedule_once(self.switch_screen, 5)
 
     #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
@@ -1412,7 +1417,8 @@ class CongratsScreen(Screen):
     def plot_bar(self):
         fig, ax = plt.subplots()
 
-        fig.patch.set_facecolor('#C6E9C5')
+        # fig.patch.set_facecolor('#C6E9C5')
+        fig.patch.set_facecolor((0.77, 0.91, 0.77, 1))
         ax.patch.set_facecolor('#F2F5FC')
         x = ['Guided breathing', 'Stretching', 'Talking with friends']
         y = [self.num_breathing, self.num_stretching, self.num_talking_friends]
@@ -1423,27 +1429,22 @@ class CongratsScreen(Screen):
 
         plt.xlabel('Task Name')
         plt.ylabel('Accomplished')
-        plt.title('Task Summary for ' + datetime.today().strftime('%m-%d-%Y'), fontsize=24, y=1.05)
-        # plt.legend()
+        plt.title('Task Summary for ' + datetime.today().strftime('%m-%d-%Y'), fontsize=18, y=1.05)
 
     def show_mood(self):
+        win_width, win_height = Window.size
         str_mood = "Today's Mood: " + self.moods_list[0]
-        self.mood_text = Label(text=str_mood, font_size=24, color=(0,0,0,1))
+        self.mood_text = Label(text=str_mood, font_size=24, color=(0,0,0,1), size_hint_y=0.2)
         self.songs_text = Label(text = 'Recommended songs:',  font_size=18, color=(0,0,0,1))
+        self.listsong_text = BoxLayout(orientation="vertical", size_hint_y=0.7)
 
-        self.daily_mood = BoxLayout(orientation="vertical")
-        # self.daily_mood.canvas.add(Color(198, 233, 197, 1))
-        # self.daily_mood.canvas.add(Rectangle(size=self.daily_mood.size,
-        #                                     pos=self.daily_mood.pos, source= 'UI/g-holo.png'))
-        # with self.daily_mood.canvas.before:
-        #     self.daily_mood = Color(198, 233, 197, 1)
-        #     self.rect = Rectangle(size=self.daily_mood.size,
-        #                           pos=self.daily_mood.pos)
-
-        self.daily_mood.add_widget(self.mood_text)
-        self.daily_mood.add_widget(self.songs_text)
+        self.listsong_text.add_widget(self.songs_text)
         for i in self.songs_list:
-            self.daily_mood.add_widget(Label(text = i, font_size=18, color=(0,0,0,1), size_hint_y=None))
+            self.listsong_text.add_widget(Label(text = i, font_size=18, color=(0,0,0,1), height=32))
+
+        self.daily_mood = BoxLayout(orientation="vertical", padding=[win_width/20,0,win_width/20,win_height/20])
+        self.daily_mood.add_widget(self.mood_text)
+        self.daily_mood.add_widget(self.listsong_text)
 
 
 
