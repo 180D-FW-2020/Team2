@@ -1371,6 +1371,7 @@ class CongratsScreen(Screen):
 
     def switch_screen(self, *args):
         self.ids.bl_bar.remove_widget(self.graph)
+        self.ids.bl_bar.remove_widget(self.daily_mood)
         self.manager.current = 'wait'
 
     def on_enter(self, *args):
@@ -1379,7 +1380,9 @@ class CongratsScreen(Screen):
         self.get_tasks(datetime.today().strftime('%m-%d-%Y'))
         self.plot_bar()
         self.graph = FigureCanvasKivyAgg(plt.gcf())
+        self.show_mood()
         self.ids.bl_bar.add_widget(self.graph)
+        self.ids.bl_bar.add_widget(self.daily_mood)
         Clock.schedule_once(self.switch_screen, 5)
 
     #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
@@ -1414,6 +1417,13 @@ class CongratsScreen(Screen):
         plt.ylabel('Accomplished')
         plt.title('Task Summary for ' + datetime.today().strftime('%m-%d-%Y'), fontsize=24, y=1.05)
         # plt.legend()
+
+    def show_mood(self):
+        str_mood = "Today's Mood: " + self.mood_spinner.text
+        self.mood_text = Label(text=str_mood, color=(0,0,0,1))
+
+        self.daily_mood = BoxLayout(orientation="vertical")
+        self.daily_mood.add_widget(self.mood_text)
 
 
 class SnoozeScreen(Screen):
