@@ -714,30 +714,45 @@ class MoodScreen(Screen):
         self.init_moodtracker()
 
     def init_moodtracker(self):
+        win_width, win_height = Window.size
         self.moodTracker = moodTracker()
-        max = 10
+        max = 3
 
         self.moodTracker.access_token = self.moodTracker.get_access_token()
         self.moodTracker.genre_list = self.moodTracker.get_genre_list(self.moodTracker.access_token)
-        self.spinner = Spinner(text = 'Genre', values = self.moodTracker.genre_list, size_hint_x = .2)
+        self.spinner = Spinner(text = 'Genre', values = self.moodTracker.genre_list, font_size=18, size_hint_x = .3, size_hint_y=0.5)
         self.spinner.dropdown_cls.max_height = self.spinner.height* max + max * 4
+        self.spinner.dropdown_cls.bar_color = [0, 0, 0, 1]
+        self.spinner.dropdown_cls.bar_inactive_color = [0, 0, 0, 1]
+        self.spinner.dropdown_cls.effect_cls = 'ScrollEffect'
+        self.spinner.dropdown_cls.bar_width = 10
+        self.spinner.option_cls.font_size = 18
+        # self.spinner.option_cls.background_normal = ''
+        # self.spinner.option_cls.background_color = [0,0,1,1]
 
-        self.mood_spinner = Spinner(text = 'Mood', values = ('Happy/Excited', 'Angry/Frustrated', 'Unmotivated', 'Disappointed', 'Sad', 'Stressed'), size_hint_x = .2)
+        self.mood_spinner = Spinner(text = 'Mood', values = ('Happy/Excited', 'Angry/Frustrated', 'Unmotivated', 'Disappointed', 'Sad', 'Stressed'), font_size=18, size_hint_x = .3, size_hint_y=0.5)
         self.mood_spinner.dropdown_cls.max_height = self.mood_spinner.height* max + max * 4
+        self.mood_spinner.dropdown_cls.bar_color = [0, 0, 0, 1]
+        self.mood_spinner.dropdown_cls.bar_inactive_color = [0, 0, 0, 1]
+        self.mood_spinner.dropdown_cls.effect_cls = 'ScrollEffect'
+        self.mood_spinner.dropdown_cls.bar_width = 10
+        self.mood_spinner.option_cls.font_size = 18
 
-        self.genre_label = Label(text = 'What genre do you want to listen to?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
-        self.energy_label = Label(text = 'How much ENERGY do you have today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
-        self.pos_label = Label(text = 'How POSITIVE do you feel today on a scale of 1-10?', size_hint_x = .8, font_size=18, color=(0,0,0,1))
-        self.pop_label = Label(text = 'How POPULAR would you like your songs to be on a scale of 1-10', size_hint_x = .8, font_size=18, color=(0,0,0,1))
-        self.dance_label = Label(text = 'How much would you like to DANCE today on a scale of 1-10?',size_hint_x = .8, font_size=18, color=(0,0,0,1))
-        self.mood_label = Label(text = 'Select your current mood',size_hint_x = .8, font_size=18, color=(0,0,0,1))
-       
-        self.energy_input = TextInput(multiline=False, size_hint_x = .2, font_size = 18)
-        self.pos_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
-        self.pop_input = TextInput(multiline=False,size_hint_x = .2, font_size = 18)
-        self.dance_input = TextInput(multiline=False, size_hint_x = .2,font_size = 18)
-        
-        self.input_gl = GridLayout(cols=2, padding = [10,0,10,0])
+        self.genre_label = Label(text = 'What genre do you want to listen to?', size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+        self.energy_label = Label(text = 'How much ENERGY do you have today on a scale of 1-10?', size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+        self.pos_label = Label(text = 'How POSITIVE do you feel today on a scale of 1-10?', size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+        self.pop_label = Label(text = 'How POPULAR would you like your songs to be on a scale of 1-10', size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+        self.dance_label = Label(text = 'How much would you like to DANCE today on a scale of 1-10?',size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+        self.mood_label = Label(text = 'Select your current mood',size_hint_x = .7, size_hint_y=0.5, font_size=18, color=(0,0,0,1))
+
+        self.energy_input = TextInput(multiline=False, size_hint_x = .2, size_hint_y=0.5, font_size = 18)
+        self.pos_input = TextInput(multiline=False, size_hint_x = .2, size_hint_y=0.5, font_size = 18)
+        self.pop_input = TextInput(multiline=False, size_hint_x = .2, size_hint_y=0.5, font_size = 18)
+        self.dance_input = TextInput(multiline=False, size_hint_x = .2, size_hint_y=0.5, font_size = 18)
+
+        self.input_gl = GridLayout(cols=2, padding = [10, 0, 16, 16], spacing = 16)
+        self.input_gl.add_widget(self.mood_label)
+        self.input_gl.add_widget(self.mood_spinner)
         self.input_gl.add_widget(self.genre_label)
         self.input_gl.add_widget(self.spinner)
         self.input_gl.add_widget(self.energy_label)
@@ -748,8 +763,6 @@ class MoodScreen(Screen):
         self.input_gl.add_widget(self.pop_input)
         self.input_gl.add_widget(self.dance_label)
         self.input_gl.add_widget(self.dance_input)
-        self.input_gl.add_widget(self.mood_label)
-        self.input_gl.add_widget(self.mood_spinner)
 
         self.btn_submit2 = Button(text='Submit', font_size=18, background_color=(.7,.7,1,1))
         self.btn_submit2.bind(on_release=self.validate_input)
@@ -759,12 +772,12 @@ class MoodScreen(Screen):
         self.gl2.add_widget(self.btn_snooze2)
         self.gl2.add_widget(self.btn_submit2)
 
-        self.spotify_gl = GridLayout(cols=2, padding = [10,10,10,10])
-        self.user_label = Label(text = 'Enter your Spotify username if you wish to make a playlist\nNote: leave blank if you don\'t want to link your Spotify',size_hint_x = .7, font_size=18, color=(0,0,0,1))
-        self.playlist_label = Label(text = 'Playlist name',size_hint_x = .7, font_size=18, color=(0,0,0,1))
-        self.user_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
-        self.playlist_input = TextInput(multiline=False, size_hint_x = .3, font_size = 18)
-        self.btn_submit3 = Button(text='Submit', size_hint = (.5, .5), pos_hint= {'center_x': .5}, background_color=(.7,.7,1,1))
+        self.spotify_gl = GridLayout(cols=2, padding = [0,25,16,16], spacing = 16)
+        self.user_label = Label(text = 'Enter your Spotify username if you wish to make a playlist\nNote: leave blank if you don\'t want to link your Spotify',size_hint_x = .7, size_hint_y = None, font_size=18, color=(0,0,0,1))
+        self.playlist_label = Label(text = 'Playlist name',size_hint_x = .7, size_hint_y = None, font_size=18, color=(0,0,0,1))
+        self.user_input = TextInput(multiline=False, size_hint_x = .3, size_hint_y = None, font_size = 18)
+        self.playlist_input = TextInput(multiline=False, size_hint_x = .3, size_hint_y = None, font_size = 18)
+        self.btn_submit3 = Button(text='Submit', font_size = 18, size_hint = (1, None), pos_hint= {'center_x': .5}, background_color=(.7,.7,1,1))
         self.btn_submit3.bind(on_release=self.make_playlist)
         self.spotify_gl.add_widget(self.user_label)
         self.spotify_gl.add_widget(self.user_input)
@@ -805,7 +818,7 @@ class MoodScreen(Screen):
             self.moodTracker.playlist_id = self.moodTracker.create_playlist(self.user_input.text, self.moodTracker.token, self.moodTracker.uris, self.playlist_input.text)
             print('make playlist here')
         Clock.schedule_once(self.switch_congrats)
-    
+
     def display_songs(self, *args):
         self.song_bl = BoxLayout(orientation = 'vertical', padding = [10,10,10,10])
         self.song_bl.add_widget(Label(text = 'Recommended songs:',  font_size=18, color=(0,0,0,1)))
