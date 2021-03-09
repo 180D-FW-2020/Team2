@@ -836,6 +836,8 @@ class MoodScreen(Screen):
             self.ids.bl2_mood.remove_widget(self.ids.lbl_mood)
             Clock.schedule_once(self.display_songs)
 
+            self.a.user_stat.addMood([self.mood_spinner.text], self.moodTracker.song_dict)
+
     def activity(self, *args):
         if self.a.non_hardware:
             Clock.unschedule(self.snooze)

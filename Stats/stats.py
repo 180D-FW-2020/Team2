@@ -37,7 +37,7 @@ class userStats:
             },
             'Mood' : {
 
-                'Moods' : ['mood1'], #list of moods all lowercase
+                'Moods' : ['Did not input mood'], #list of moods all lowercase
                 'Songs' : ['song by artist']
             } 
         }
@@ -82,9 +82,12 @@ class userStats:
         
         if song_dict != []:
             song_list = []
-            for song_key, value in song_dict.items():
-                song_list.append(song_key + ',' + value)
+            for song in song_dict.keys():
+                song_list.append(song)
             data['Mood']['Songs'] = song_list
+            # for song_key, value in song_dict.items():
+            #     song_list.append(song_key + ',' + value)
+            # data['Mood']['Songs'] = song_list
 
             # data['Mood']['Songs'] = song_dict
             # for song_key,value in song_dict.items():
