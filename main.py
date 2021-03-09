@@ -20,7 +20,7 @@ from functools import partial
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
-from kivy.graphics import Color, Ellipse
+from kivy.graphics import Color, Ellipse, Rectangle
 from kivy.uix.image import Image
 from test_msg_sub import Listener
 import threading
@@ -1378,11 +1378,13 @@ class CongratsScreen(Screen):
         # bar = ObjectProperty(None)
         congrats(self.a.userID)
         self.get_tasks(datetime.today().strftime('%m-%d-%Y'))
+        self.get_moods_songs(datetime.today().strftime('%m-%d-%Y'))
         self.plot_bar()
         self.graph = FigureCanvasKivyAgg(plt.gcf())
         self.show_mood()
         self.ids.bl_bar.add_widget(self.graph)
         self.ids.bl_bar.add_widget(self.daily_mood)
+        # self.ids.bl_bar.canvas.add(Color(198, 233, 197, 1))
         Clock.schedule_once(self.switch_screen, 5)
 
     #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
@@ -1404,8 +1406,9 @@ class CongratsScreen(Screen):
     def get_moods_songs(self,date):
         self.ret_entry_date_dict = self.a.user_stat.retrieveStatsDict(date)
         self.moods_list = self.ret_entry_date_dict['Mood']['Moods']
+        print(self.moods_list)
         self.songs_list = self.ret_entry_date_dict['Mood']['Songs']
-        
+
     def plot_bar(self):
         fig, ax = plt.subplots()
 
@@ -1424,11 +1427,24 @@ class CongratsScreen(Screen):
         # plt.legend()
 
     def show_mood(self):
-        str_mood = "Today's Mood: " + self.mood_spinner.text
-        self.mood_text = Label(text=str_mood, color=(0,0,0,1))
+        str_mood = "Today's Mood: " + self.moods_list[0]
+        self.mood_text = Label(text=str_mood, font_size=24, color=(0,0,0,1))
+        self.songs_text = Label(text = 'Recommended songs:',  font_size=18, color=(0,0,0,1))
 
         self.daily_mood = BoxLayout(orientation="vertical")
+        # self.daily_mood.canvas.add(Color(198, 233, 197, 1))
+        # self.daily_mood.canvas.add(Rectangle(size=self.daily_mood.size,
+        #                                     pos=self.daily_mood.pos, source= 'UI/g-holo.png'))
+        # with self.daily_mood.canvas.before:
+        #     self.daily_mood = Color(198, 233, 197, 1)
+        #     self.rect = Rectangle(size=self.daily_mood.size,
+        #                           pos=self.daily_mood.pos)
+
         self.daily_mood.add_widget(self.mood_text)
+        self.daily_mood.add_widget(self.songs_text)
+        for i in self.songs_list:
+            self.daily_mood.add_widget(Label(text = i, font_size=18, color=(0,0,0,1), size_hint_y=None))
+
 
 
 class SnoozeScreen(Screen):
