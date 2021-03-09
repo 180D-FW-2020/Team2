@@ -1390,7 +1390,7 @@ class CongratsScreen(Screen):
         with self.ids.bl_bar.canvas.before:
             Color(0.77, 0.91, 0.77, 1)
             self.rect = Rectangle(size=self.ids.bl_bar.size, pos=self.ids.bl_bar.pos)
-        Clock.schedule_once(self.switch_screen, 5)
+        Clock.schedule_once(self.switch_screen, 10)
 
     #Retrieve stats for specific day in format string 'mm-dd-yyyy'. Ex: get_tasks('03-04-2021')
     def get_tasks(self,date):
