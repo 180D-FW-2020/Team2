@@ -57,7 +57,7 @@ python3 berryIMU_classifier.py
 Using the controller:
 ```
 Vertical Shake: Activate reminders
-Horizontal Shake: Send a congrats message (to be implemented)
+Left Rotation: Snooze reminders
 ```
 
 
