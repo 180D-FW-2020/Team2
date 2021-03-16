@@ -1,2 +1,2 @@
-Subfolder contains reference image for background (holo-01.png) and the kv file (the kivy equivalent of a .css file). All styling goes here. \
-Plans to make a custom graphic, instead of using a reference image leftover from another project (see www.qwerhacks.com), is in the works for next quarter.
+Subfolder contains reference images for the application background and additional images shown on the screen, as well as the kv file (the kivy equivalent of a .css file). 
+All styling goes here. All designs are custom made by Michelle Lam.
