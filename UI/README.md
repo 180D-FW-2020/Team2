@@ -15,6 +15,5 @@ Daily task stats were displayed using the following packages:
 $ pip install kivy-garden
 $ garden install graph
 $ pip install matplotlib==3.1.3
-$ pip install selenium
 $ garden install matplotlib
 ```
